@@ -20,9 +20,9 @@ Plataforma de empleabilidad para estudiantes y egresados de la Universidad Nacio
 
 ## 📁 Estructura del proyecto
 
-\`\`\`
+```
 apps/
 ├── frontend/     # Aplicación React
 ├── backend/      # API REST
 └── cms/          # Strapi CMS
-\`\`\`
+```
