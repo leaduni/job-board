@@ -26,3 +26,88 @@ apps/
 ├── backend/      # API REST
 └── cms/          # Strapi CMS
 ```
+
+### 💻 Estructura del Frontend
+
+src/
+ ├─ assets/
+ │   ├─ images/
+ │   └─ styles/
+
+ ├─ components/
+ │   ├─ ui/              → Botones, inputs, modales, tablas reutilizables
+ │   ├─ shared/          → Navbar, Sidebar, Footer, UserMenu
+
+ ├─ layouts/
+ │   ├─ PublicLayout.vue
+ │   ├─ StudentLayout.vue
+ │   ├─ CompanyLayout.vue
+
+ ├─ features/
+ │   ├─ ofertas/         → Vacantes (MVP crítico)
+ │   │   ├─ views/
+ │   │   ├─ components/
+ │   │   ├─ services/
+ │   │   ├─ store/
+ │   │   ├─ composables/
+ │   │   └─ index.js
+ │   │
+ │   ├─ empresas/        → Panel empresa (ver vacantes, postulantes)
+ │   │   ├─ views/
+ │   │   ├─ components/
+ │   │   ├─ services/
+ │   │   ├─ store/
+ │   │   ├─ composables/
+ │   │   └─ index.js
+ │   │
+ │   ├─ estudiantes/     → Perfil del estudiante
+ │   │   ├─ views/
+ │   │   ├─ components/
+ │   │   ├─ services/
+ │   │   ├─ store/
+ │   │   └─ composables/
+ │   │
+ │   ├─ capacitate/      → Cursos, sugerencias (Strapi)
+ │       ├─ views/
+ │       ├─ services/
+ │       ├─ components/
+ │       ├─ store/
+ │       ├─ composables/
+ │       └─ index.js
+
+ ├─ stores/
+ │   ├─ auth.js          → Login, roles, tokens
+ │   ├─ user.js          → Datos globales del usuario
+
+ ├─ services/
+ │   ├─ coreApi.js       → Spring Boot
+ │   ├─ cmsApi.js        → Strapi
+
+ ├─ router/
+ │   ├─ index.js
+ │   ├─ routes/
+ │   │   ├─ ofertas.routes.js
+ │   │   ├─ empresas.routes.js
+ │   │   ├─ estudiantes.routes.js
+ │   │   ├─ capacitate.routes.js
+ │   │   └─ auth.routes.js
+ │   └─ guards.js        → protección de rutas por rol
+
+ ├─ composables/
+ │   ├─ useFetch.js
+ │   ├─ usePagination.js
+ │   ├─ useModal.js
+
+ ├─ config/
+ │   ├─ roles.js
+ │   ├─ constants.js
+ │   ├─ enums.js         → (modalidad, jornada, experiencia, contrato)
+ │   ├─ endpoints.js
+
+ ├─ utils/
+ │   ├─ formatters.js
+ │   ├─ validators.js
+ │   └─ helpers.js
+
+ ├─ App.vue
+ ├─ main.js
