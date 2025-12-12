@@ -42,7 +42,6 @@ RUN pnpm build
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-ENV PORT=3000
 
 # Minimal runtime deps
 RUN corepack enable && corepack prepare pnpm@latest --activate
@@ -57,8 +56,9 @@ COPY --from=builder /app/.next ./.next
 # Optional: public assets. Remove if directory doesn't exist.
 # COPY --from=builder /app/public ./public
 COPY --from=builder /app/src ./src
+COPY --from=builder /app/tsconfig.json ./tsconfig.json
 
-# Expose port
+# Expose default port; platform may override via $PORT
 EXPOSE 3000
 
 # Default start command (Next production server)
