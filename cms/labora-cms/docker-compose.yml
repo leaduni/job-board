@@ -26,22 +26,26 @@ services:
   #   volumes:
   #     - data:/data/db
   #   logging:
-  #     driver: none
+  version: '3.9'
 
-  # Uncomment the following to use postgres
-  postgres:
-    restart: always
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: labora_cms
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+  services:
+    cms:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      ports:
+        - '3000:3000'
+      environment:
+        # Railway u otro proveedor inyectará estas variables
+        PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+        DATABASE_URL: ${DATABASE_URL}
+        NODE_ENV: production
+      restart: unless-stopped
+      # Opcional: healthcheck simple
+      healthcheck:
+        test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health" ]
+        interval: 30s
+        timeout: 10s
+        retries: 5
 
-volumes:
-  data:
-  pgdata:
-  node_modules:
+  # No se define servicio de Postgres aquí porque usarás tu BD gestionada (Railway).
