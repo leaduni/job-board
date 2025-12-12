@@ -1,51 +1,23 @@
-version: '3'
+version: '3.9'
 
 services:
-  payload:
-    image: node:18-alpine
+  cms:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - '3000:3000'
-    volumes:
-      - .:/home/node/app
-      - node_modules:/home/node/app/node_modules
-    working_dir: /home/node/app/
-    command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm dev"
-    depends_on:
-      - postgres
-    env_file:
-      - .env
+    environment:
+      # Railway u otro proveedor inyectará estas variables
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+      DATABASE_URL: ${DATABASE_URL}
+      NODE_ENV: production
+    restart: unless-stopped
+    # Opcional: healthcheck simple
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
-  # Ensure your DATABASE_URI uses 'mongo' as the hostname ie. mongodb://mongo/my-db-name
-  # (Optional) If you need MongoDB for other services, uncomment below.
-  # mongo:
-  #   image: mongo:latest
-  #   ports:
-  #     - '27017:27017'
-  #   command:
-  #     - --storageEngine=wiredTiger
-  #   volumes:
-  #     - data:/data/db
-  #   logging:
-  version: '3.9'
-
-  services:
-    cms:
-      build:
-        context: .
-        dockerfile: Dockerfile
-      ports:
-        - '3000:3000'
-      environment:
-        # Railway u otro proveedor inyectará estas variables
-        PAYLOAD_SECRET: ${PAYLOAD_SECRET}
-        DATABASE_URL: ${DATABASE_URL}
-        NODE_ENV: production
-      restart: unless-stopped
-      # Opcional: healthcheck simple
-      healthcheck:
-        test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health" ]
-        interval: 30s
-        timeout: 10s
-        retries: 5
-
-  # No se define servicio de Postgres aquí porque usarás tu BD gestionada (Railway).
+# No se define servicio de Postgres aquí porque usarás tu BD gestionada (Railway).
