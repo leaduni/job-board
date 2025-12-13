@@ -39,11 +39,6 @@ export const StaticContent: CollectionConfig = {
                 { label: 'Noticia', value: 'noticia' },
             ],
         },
-        {
-            name: 'proyecto',
-            type: 'relationship',
-            relationTo: 'projects',
-            required: true,
-        },
+
     ],
 };

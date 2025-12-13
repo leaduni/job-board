@@ -70,16 +70,6 @@ export const Courses: CollectionConfig = {
     },
 
     {
-      name: 'proyecto',
-      type: 'relationship',
-      relationTo: 'projects',
-      required: true,
-      label: 'Proyecto',
-      admin: {
-        description: 'Proyecto al que pertenece este curso (ej: Bolsa Laboral)',
-      },
-    },
-    {
       name: 'destacado',
       type: 'checkbox',
       label: '¿Destacar en homepage?',

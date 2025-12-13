@@ -72,6 +72,7 @@ export interface Config {
     courses: Course;
     'static-content': StaticContent;
     projects: Project;
+    companies: Company;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -84,6 +85,7 @@ export interface Config {
     courses: CoursesSelect<false> | CoursesSelect<true>;
     'static-content': StaticContentSelect<false> | StaticContentSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
+    companies: CompaniesSelect<false> | CompaniesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -180,30 +182,7 @@ export interface Course {
   nivel: 'basico' | 'intermedio' | 'avanzado';
   duracionHoras?: number | null;
   imagen?: (number | null) | Media;
-  /**
-   * Proyecto al que pertenece este curso (ej: Bolsa Laboral)
-   */
-  proyecto: number | Project;
   destacado?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "projects".
- */
-export interface Project {
-  id: number;
-  nombre: string;
-  slug: string;
-  dominio?: string | null;
-  activo?: boolean | null;
-  skills?:
-    | {
-        skill: string;
-        id?: string | null;
-      }[]
-    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -231,7 +210,168 @@ export interface StaticContent {
     [k: string]: unknown;
   };
   tipo: 'pagina' | 'faq' | 'noticia';
-  proyecto: number | Project;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Ofertas laborales publicadas
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects".
+ */
+export interface Project {
+  id: number;
+  titulo: string;
+  /**
+   * Selecciona la empresa que publica esta oferta
+   */
+  company: number | Company;
+  /**
+   * Describe las funciones y responsabilidades principales
+   */
+  descripcion: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Requisitos académicos y técnicos necesarios
+   */
+  requisitos: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Para sugerir cursos CAPACÍTATE relacionados
+   */
+  skills_requeridas?: string | null;
+  nivel_experiencia: 'sin_experiencia' | 'menos_1_anio' | '1_3_anios' | 'mas_3_anios';
+  carreras_afines?: string | null;
+  modalidad: 'presencial' | 'remoto' | 'hibrido';
+  /**
+   * Solo si la modalidad NO es remoto
+   */
+  ubicacion?: {
+    departamento?: string | null;
+    distrito?: string | null;
+    direccion?: string | null;
+  };
+  tipo_contrato: 'practicas_pre' | 'practicas_pro' | 'tiempo_completo' | 'medio_tiempo' | 'por_horas' | 'freelance';
+  horario?: string | null;
+  compensacion?: {
+    salario_min?: number | null;
+    salario_max?: number | null;
+    /**
+     * Si está desmarcado, se mostrará "A convenir"
+     */
+    mostrar_salario?: boolean | null;
+  };
+  beneficios?: string | null;
+  /**
+   * Si está vacío, se usará el email de la empresa
+   */
+  email_contacto?: string | null;
+  instrucciones_postulacion?: string | null;
+  /**
+   * Solo las ofertas "Activas" se muestran públicamente
+   */
+  estado: 'borrador' | 'activa' | 'pausada' | 'cerrada';
+  fecha_publicacion?: string | null;
+  /**
+   * Hasta cuándo se aceptan postulaciones
+   */
+  fecha_cierre?: string | null;
+  /**
+   * Las ofertas destacadas aparecen primero
+   */
+  destacada?: boolean | null;
+  /**
+   * Se mostrará una badge de "Urgente"
+   */
+  urgente?: boolean | null;
+  /**
+   * Se genera automáticamente del título
+   */
+  slug: string;
+  /**
+   * Se actualiza automáticamente
+   */
+  vistas?: number | null;
+  /**
+   * Se actualiza desde el backend
+   */
+  postulaciones_count?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Empresas que publican ofertas laborales
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "companies".
+ */
+export interface Company {
+  id: number;
+  nombre_comercial: string;
+  razon_social?: string | null;
+  ruc?: string | null;
+  sector:
+    | 'tecnologia'
+    | 'construccion'
+    | 'manufactura'
+    | 'servicios'
+    | 'educacion'
+    | 'salud'
+    | 'retail'
+    | 'finanzas'
+    | 'consultoria'
+    | 'otro';
+  descripcion?: string | null;
+  sitio_web?: string | null;
+  /**
+   * Logo que aparecerá en las ofertas
+   */
+  logo?: (number | null) | Media;
+  /**
+   * Las empresas con convenio aparecen destacadas
+   */
+  tiene_convenio?: boolean | null;
+  /**
+   * Email principal para recibir postulaciones
+   */
+  email_contacto: string;
+  telefono_contacto?: string | null;
+  persona_contacto?: string | null;
+  direccion?: string | null;
+  /**
+   * Desactivar si ya no publica ofertas
+   */
+  activo?: boolean | null;
+  /**
+   * Se genera automáticamente del nombre
+   */
+  slug: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -278,6 +418,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'projects';
         value: number | Project;
+      } | null)
+    | ({
+        relationTo: 'companies';
+        value: number | Company;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -375,7 +519,6 @@ export interface CoursesSelect<T extends boolean = true> {
   nivel?: T;
   duracionHoras?: T;
   imagen?: T;
-  proyecto?: T;
   destacado?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -389,7 +532,6 @@ export interface StaticContentSelect<T extends boolean = true> {
   slug?: T;
   contenido?: T;
   tipo?: T;
-  proyecto?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -398,16 +540,63 @@ export interface StaticContentSelect<T extends boolean = true> {
  * via the `definition` "projects_select".
  */
 export interface ProjectsSelect<T extends boolean = true> {
-  nombre?: T;
-  slug?: T;
-  dominio?: T;
-  activo?: T;
-  skills?:
+  titulo?: T;
+  company?: T;
+  descripcion?: T;
+  requisitos?: T;
+  skills_requeridas?: T;
+  nivel_experiencia?: T;
+  carreras_afines?: T;
+  modalidad?: T;
+  ubicacion?:
     | T
     | {
-        skill?: T;
-        id?: T;
+        departamento?: T;
+        distrito?: T;
+        direccion?: T;
       };
+  tipo_contrato?: T;
+  horario?: T;
+  compensacion?:
+    | T
+    | {
+        salario_min?: T;
+        salario_max?: T;
+        mostrar_salario?: T;
+      };
+  beneficios?: T;
+  email_contacto?: T;
+  instrucciones_postulacion?: T;
+  estado?: T;
+  fecha_publicacion?: T;
+  fecha_cierre?: T;
+  destacada?: T;
+  urgente?: T;
+  slug?: T;
+  vistas?: T;
+  postulaciones_count?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "companies_select".
+ */
+export interface CompaniesSelect<T extends boolean = true> {
+  nombre_comercial?: T;
+  razon_social?: T;
+  ruc?: T;
+  sector?: T;
+  descripcion?: T;
+  sitio_web?: T;
+  logo?: T;
+  tiene_convenio?: T;
+  email_contacto?: T;
+  telefono_contacto?: T;
+  persona_contacto?: T;
+  direccion?: T;
+  activo?: T;
+  slug?: T;
   updatedAt?: T;
   createdAt?: T;
 }
