@@ -1,0 +1,11 @@
+node_modules
+.next
+pnpm-debug.log*
+Dockerfile*
+.git
+.gitignore
+.env
+**/temp.txt
+backend/
+frontend/
+README.md

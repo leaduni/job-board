@@ -1,0 +1,23 @@
+version: '3.9'
+
+services:
+  cms:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    environment:
+      # Railway u otro proveedor inyectará estas variables
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+      DATABASE_URL: ${DATABASE_URL}
+      NODE_ENV: production
+    restart: unless-stopped
+    # Opcional: healthcheck simple
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+# No se define servicio de Postgres aquí porque usarás tu BD gestionada (Railway).
