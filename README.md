@@ -29,6 +29,7 @@ apps/
 
 ### 💻 Estructura del Frontend
 
+```
 src/
  ├─ assets/
  │   ├─ images/
@@ -111,3 +112,4 @@ src/
 
  ├─ App.vue
  ├─ main.js
+```
