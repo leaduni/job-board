@@ -1,95 +1,129 @@
 <template>
-  <div class="p-6" v-if="oferta">
-    <h1 class="text-2xl font-bold mb-2">
-      {{ oferta.titulo }}
-    </h1>
+  <section class="page-section offer-detail-layout">
+    <div class="container">
 
-    <p class="text-gray-600 mb-4">
-      {{ oferta.company?.nombre_comercial }}
-    </p>
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb">
+        <router-link to="/ofertas">Bolsa Laboral</router-link>
+        <span class="dot">›</span>
+        <span>Detalle de Oferta</span>
+      </nav>
 
-    <p class="mb-2">
-      <strong>Modalidad:</strong> {{ oferta.modalidad }}
-    </p>
+      <!-- Loading -->
+      <p v-if="loading" class="loading">
+        Cargando oferta...
+      </p>
 
-    <p class="mb-2">
-      <strong>Nivel:</strong> {{ oferta.nivel_experiencia }}
-    </p>
+      <!-- Content -->
+      <template v-else-if="oferta">
 
-    <p class="mb-4">
-      <strong>Estado:</strong> {{ oferta.estado }}
-    </p>
+        <!-- Header -->
+        <OfferHeader :oferta="oferta">
+          <!-- Acciones futuras (guardar / compartir) -->
+          <template #actions>
+            <!-- reservado -->
+          </template>
+        </OfferHeader>
 
-    <hr class="my-4" />
+        <!-- Main grid -->
+        <div class="offer-grid">
 
-    <h2 class="font-semibold mb-2">Descripción</h2>
+          <!-- Columna principal -->
+          <OfferMainContent :oferta="oferta" />
 
-    <hr class="my-6" />
+          <!-- Sidebar -->
+          <OfferApplySidebar
+            :oferta="oferta"
+            :yaPostulado="yaPostulado"
+            :postulando="postulando"
+            :mensaje="mensaje"
+            @postular="postular"
+            @guardar="guardarOferta"
+            @compartir="compartirOferta"
+          >
+            <!-- Summary debajo del CTA -->
+            <OfferSummaryCard :oferta="oferta" />
+          </OfferApplySidebar>
 
-    <div>
-    
-    <button
-    @click="postular"
-    :disabled="postulando || yaPostulado"
-    >
-    {{ yaPostulado ? 'Ya postulado' : postulando ? 'Postulando...' : 'Postular a esta oferta' }}
-    </button>
+        </div>
+      </template>
 
-    <p v-if="mensaje">{{ mensaje }}</p>
+      <!-- Error / empty -->
+      <p v-else class="text-muted">
+        No se pudo cargar la oferta.
+      </p>
 
     </div>
-
-
-    <pre class="text-sm whitespace-pre-wrap">
-{{ descripcionTexto }}
-    </pre>
-  </div>
-
-  <p v-else class="p-6">Cargando oferta...</p>
+  </section>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
-import { obtenerOfertaPorId } from '../services/ofertas.service';
-import { postularOferta } from '../../postulaciones/services/postulaciones.service';
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 
-const route = useRoute();
-const oferta = ref(null);
-const descripcionTexto = ref('');
+// Servicios
+import { obtenerOfertaPorId } from '../services/ofertas.service'
+import { postularOferta } from '../../postulaciones/services/postulaciones.service'
 
-const yaPostulado = ref(false);
-const postulando = ref(false);
-const mensaje = ref('');
+// Componentes
+import OfferHeader from '../components/detail/OfferHeader.vue'
+import OfferMainContent from '../components/detail/OfferMainContent.vue'
+import OfferApplySidebar from '../components/detail/OfferApplySidebar.vue'
+import OfferSummaryCard from '../components/detail/OfferSummaryCard.vue'
 
+// Estado
+const route = useRoute()
+const oferta = ref(null)
+const loading = ref(true)
+
+const yaPostulado = ref(false)
+const postulando = ref(false)
+const mensaje = ref('')
+
+// Lifecycle
 onMounted(async () => {
-  const id = route.params.id;
-  const data = await obtenerOfertaPorId(id);
-
-  oferta.value = data;
-
-  // Extraer texto del editor del CMS (Payload)
-  descripcionTexto.value =
-    data?.descripcion?.root?.children?.[0]?.children?.[0]?.text || '';
-
-  yaPostulado.value = await verificarPostulacion(id);
-});
-
-async function postular() {
   try {
-    postulando.value = true;
-    mensaje.value = '';
+    const id = route.params.id
+    const data = await obtenerOfertaPorId(id)
 
-    await postularOferta(oferta.value);
+    oferta.value = data
 
-    yaPostulado.value = true;
-    mensaje.value = 'Postulación enviada correctamente';
+    // TODO: cuando exista endpoint real
+    yaPostulado.value = false
   } catch (error) {
-    console.error(error);
-    mensaje.value = 'Error al postular. Intenta nuevamente';
+    console.error('Error cargando oferta:', error)
   } finally {
-    postulando.value = false;
+    loading.value = false
+  }
+})
+
+// Acciones
+async function postular() {
+  if (!oferta.value) return
+
+  try {
+    postulando.value = true
+    mensaje.value = ''
+
+    await postularOferta(oferta.value)
+
+    yaPostulado.value = true
+    mensaje.value = 'Postulación enviada correctamente'
+  } catch (error) {
+    console.error(error)
+    mensaje.value = 'Error al postular. Intenta nuevamente'
+  } finally {
+    postulando.value = false
   }
 }
 
+function guardarOferta() {
+  console.log('Guardar oferta', oferta.value?.id)
+  // futuro
+}
+
+function compartirOferta() {
+  console.log('Compartir oferta', oferta.value?.id)
+  // futuro
+}
 </script>

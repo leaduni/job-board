@@ -1,7 +1,7 @@
 export default [
   {
-    path: '/mis-postulaciones',
-    name: 'mis-postulaciones',
+    path: '/postulaciones',
+    name: 'postulaciones',
     component: () =>
       import('@/features/postulaciones/views/PostulacionesView.vue'),
   },
