@@ -562,3 +562,153 @@ body {
 .dot { color: rgba(255,255,255,0.16); margin: 0 6px; }
 
 /* ensure pills and badges already defined in your CSS are used here */
+
+/* =============================== */
+/* ===== LOGIN MODAL (GLASS) ===== */
+/* =============================== */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(6, 4, 20, 0.75); /* oscuro limpio */
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* Card principal (igual a "Contáctanos") */
+.modal-container {
+  width: 100%;
+  max-width: 520px;
+  padding: 42px 44px;
+
+  background: linear-gradient(
+    180deg,
+    rgba(23, 16, 44, 0.94),
+    rgba(12, 8, 30, 0.97)
+  );
+
+  border-radius: 28px;
+
+  /* borde más fuerte (lo que pediste) */
+  border: 2.4px solid rgba(var(--accent-border-rgb), 0.28);
+
+  box-shadow:
+    0 40px 120px rgba(0, 0, 0, 0.75);
+
+  color: var(--text);
+}
+
+
+/* Título */
+.modal-title {
+  font-family: var(--font-heading);
+  font-size: 34px;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 10px;
+
+  /* degradado fucsia elegante */
+  background: linear-gradient(
+    90deg,
+    var(--accent-pink),
+    #ff7abf
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+
+/* Subtítulo */
+.modal-subtitle {
+  text-align: center;
+  font-size: 15px;
+  color: #ffffff; /* BLANCO */
+  margin-bottom: 28px;
+}
+
+
+/* Inputs (idénticos a Contactanos) */
+.modal-container input,
+.modal-container select,
+.modal-container textarea {
+  width: 100%;
+  padding: 16px 18px;
+  border-radius: 14px;
+
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0.02)
+  );
+
+  border: 1.4px solid rgba(255, 255, 255, 0.12);
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+  transition: border-color .16s ease, box-shadow .16s ease;
+}
+
+.modal-container input::placeholder {
+  color: rgba(255,255,255,0.45);
+}
+
+.modal-container input:focus {
+  border-color: rgba(var(--accent-border-rgb), 0.6);
+  box-shadow:
+    0 0 0 2px rgba(var(--accent-border-rgb), 0.18),
+    0 10px 40px rgba(var(--accent-border-rgb), 0.14);
+}
+
+/* Labels */
+.modal-container label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #ffffff; /* BLANCO */
+  font-weight: 500;
+}
+
+/* Espaciado entre bloques del formulario del modal */
+.modal-container .form-group {
+  margin-bottom: 22px;
+}
+
+/* Texto auxiliar */
+.modal-helper {
+  font-size: 12px;
+  color: rgba(255,255,255,0.6);
+  margin-top: 6px;
+}
+
+/* Error */
+.modal-error {
+  background: rgba(182, 38, 103, 0.18);
+  border: 1px solid rgba(182, 38, 103, 0.45);
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 13px;
+  margin-bottom: 18px;
+  color: #ffd6e8;
+}
+
+/* Acciones */
+.modal-actions {
+  display: flex;
+  gap: 14px;
+  margin-top: 32px;
+}
+
+/* Botón cancelar */
+.modal-actions .btn-secondary,
+.modal-actions .btn-primary {
+  flex: 2;
+  border-radius: 999px;
+  padding: 14px;
+  font-size: 15px;
+}

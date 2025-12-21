@@ -52,8 +52,14 @@
         </button>
 
         <div class="profile" title="Ver perfil">
-          <div class="profile-name">Sofía Rivera</div>
-          <div class="profile-role">Ingeniería de Sistemas</div>
+          <template v-if="isAuthenticated">
+            <div class="profile-name">{{ displayName }}</div>
+            <div class="profile-role">{{ carrera }}</div>
+          </template>
+
+          <template v-else>
+            <div class="profile-name">Iniciar sesión</div>
+          </template>
         </div>
 
         <div class="avatar" aria-hidden="true">
@@ -65,5 +71,22 @@
 </template>
 
 <script setup>
-/* No necesita lógica adicional, Vue Router aplicará la clase "nav-link-active" */
+import { computed } from 'vue'
+import { useAuth } from '@/composables/useAuth'
+
+const { isAuthenticated, user } = useAuth()
+
+const displayName = computed(() => {
+  if (!user.value) return ''
+
+  const nombre = user.value.nombres?.split(' ')[0] || ''
+  const apellido = user.value.apellidos?.split(' ')[0] || ''
+
+  return `${nombre} ${apellido}`.trim()
+})
+
+const carrera = computed(() => {
+  return user.value?.carrera || ''
+})
+
 </script>
