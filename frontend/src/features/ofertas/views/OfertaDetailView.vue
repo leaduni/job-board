@@ -54,12 +54,25 @@
       </p>
 
     </div>
+
+    <LoginModal
+      :open="showLoginModal"
+      @close="showLoginModal = false"
+      @success="showLoginModal = false"
+    />
+
   </section>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useAuth } from '@/composables/useAuth'
+import LoginModal from '@/components/auth/LoginModal.vue'
+
+// Auth (simulado)
+const { isAuthenticated, user } = useAuth()
+const showLoginModal = ref(false)
 
 // Servicios
 import { obtenerOfertaPorId } from '../services/ofertas.service'
@@ -97,10 +110,26 @@ onMounted(async () => {
   }
 })
 
-// Acciones
+function guardarOferta() {
+  console.log('Guardar oferta', oferta.value?.id)
+  // futuro
+}
+
+function compartirOferta() {
+  console.log('Compartir oferta', oferta.value?.id)
+  // futuro
+}
+
 async function postular() {
   if (!oferta.value) return
 
+  // 🔒 1. Validar autenticación
+  if (!isAuthenticated.value) {
+    showLoginModal.value = true
+    return
+  }
+
+  // 🧩 2. Postulación real
   try {
     postulando.value = true
     mensaje.value = ''
@@ -117,13 +146,4 @@ async function postular() {
   }
 }
 
-function guardarOferta() {
-  console.log('Guardar oferta', oferta.value?.id)
-  // futuro
-}
-
-function compartirOferta() {
-  console.log('Compartir oferta', oferta.value?.id)
-  // futuro
-}
 </script>
