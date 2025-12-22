@@ -1,16 +1,13 @@
 <template>
-  <article :class="['oferta-card', { 'oferta-featured': oferta.destacado }]">
-    <!-- Header -->
+  <article class="oferta-card">
+    <!-- Header: título y empresa a la izquierda, badge de estado a la derecha -->
     <div class="card-header">
-      <div class="card-info">
-        <div class="card-avatar" v-if="oferta.logo">
-          <img :src="oferta.logo" alt="" />
-        </div>
+      <div class="card-left">
         <h3 class="card-title">{{ oferta.titulo }}</h3>
         <p class="card-company">{{ oferta.company?.nombre_comercial }}</p>
       </div>
 
-      <!-- Estado -->
+      <!-- Estado: alineado a la derecha del header -->
       <div class="card-right">
         <span v-if="oferta.estado" class="estado-badge" :class="estadoClasses">
           {{ oferta.estado }}
