@@ -11,10 +11,12 @@ const routes = [
     children: [
       ...homeRoutes,
       ...ofertasRoutes,
-      ...perfilRoutes,
+      // perfilRoutes is now a top-level route
       ...postulacionesRoutes
     ],
   },
+  // Spreading perfilRoutes here to make it top-level
+  ...perfilRoutes,
 ]
 
 const router = createRouter({

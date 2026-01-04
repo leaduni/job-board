@@ -20,28 +20,29 @@ defineProps({
 </script>
 
 <template>
-    <div class="stats-grid">
-        <div class="stat-card stat-total">
-            <span class="stat-label">Total</span>
-            <span class="stat-value">2</span>
-        </div>
-
-        <div class="stat-card stat-proceso">
-            <span class="stat-label">En proceso</span>
-            <span class="stat-value">0</span>
-        </div>
-
-        <div class="stat-card stat-enviadas">
-            <span class="stat-label">Enviadas</span>
-            <span class="stat-value">2</span>
-        </div>
-
-        <div class="stat-card stat-cerradas">
-            <span class="stat-label">Cerradas</span>
-            <span class="stat-value">0</span>
-        </div>
+  <div class="postulaciones-stats">
+    <div class="stat-card stat-total">
+      <span class="stat-label">Total</span>
+      <span class="stat-value">{{ total }}</span>
     </div>
+
+    <div class="stat-card stat-proceso">
+      <span class="stat-label">En proceso</span>
+      <span class="stat-value">{{ enProceso }}</span>
+    </div>
+
+    <div class="stat-card stat-enviadas">
+      <span class="stat-label">Enviadas</span>
+      <span class="stat-value">{{ enviadas }}</span>
+    </div>
+
+    <div class="stat-card stat-cerradas">
+      <span class="stat-label">Cerradas</span>
+      <span class="stat-value">{{ cerradas }}</span>
+    </div>
+  </div>
 </template>
+
 
 <style scoped>
 /* Estilos mínimos solo para estructura visual básica */

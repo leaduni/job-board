@@ -1,0 +1,321 @@
+<script setup>
+import { ref, reactive, computed, nextTick } from 'vue';
+
+// --- STATE MANAGEMENT ---
+
+const profileData = reactive({
+  nombres: 'Alexandra',
+  apellidos: 'Torres',
+  telefono: '987654321',
+  fecha_nacimiento: '1998-05-20',
+  departamento: 'Lima',
+  distrito: 'Miraflores',
+  carrera: 'Ingeniería de Software con IA',
+  ciclo_actual: 8,
+  anio_egreso: null,
+  promedio_ponderado: 18.55,
+  sobre_mi: 'Desarrolladora de software apasionada por la inteligencia artificial y el desarrollo de aplicaciones web. Buscando oportunidades para aplicar mis habilidades en proyectos desafiantes y crecer profesionalmente en un entorno innovador.',
+  habilidades_tecnicas: ['Vue.js', 'React', 'Node.js', 'Python', 'FastAPI'],
+  habilidades_blandas: ['Comunicación Efectiva', 'Trabajo en Equipo', 'Resolución de Problemas'],
+  linkedin_url: 'https://linkedin.com/in/alexandratorres',
+  github_url: 'https://github.com/atorres',
+  portfolio_url: 'https://portfolio.dev/atorres',
+  cv_filename: 'cv_alexandra_torres_2026.pdf',
+});
+
+// State for granular editing of cards
+const editingCards = reactive({
+  personal: false,
+  academic: false,
+  about: false,
+  links: false, // New state for the links card
+});
+
+// State for inline skill adding
+const addingSkill = reactive({
+  technical: false,
+  soft: false,
+  value: '',
+});
+const newSkillInput = ref(null);
+
+let originalProfileData = {};
+
+// --- LOGIC ---
+
+function toggleCardEditMode(cardKey, saveChanges = false) {
+  if (editingCards[cardKey]) { // If currently editing
+    if (saveChanges) {
+      // Logic to save data would go here (e.g., API call)
+      console.log('Saving changes for', cardKey, profileData);
+    } else {
+      // Revert changes
+      Object.assign(profileData, originalProfileData);
+    }
+    editingCards[cardKey] = false;
+  } else { // If not editing
+    // Store a snapshot of the current state before editing
+    originalProfileData = JSON.parse(JSON.stringify(profileData));
+    editingCards[cardKey] = true;
+  }
+}
+
+
+async function showAddSkillInput(type) {
+  if(type === 'technical') {
+    addingSkill.technical = true;
+  } else {
+    addingSkill.soft = true;
+  }
+  await nextTick();
+  newSkillInput.value.focus();
+}
+
+function commitNewSkill(type) {
+  const skill = addingSkill.value.trim();
+  const skillList = type === 'technical' ? profileData.habilidades_tecnicas : profileData.habilidades_blandas;
+  if (skill && !skillList.includes(skill)) {
+    skillList.push(skill);
+  }
+  cancelAddSkill();
+}
+
+function cancelAddSkill() {
+  addingSkill.technical = false;
+  addingSkill.soft = false;
+  addingSkill.value = '';
+}
+
+function removeSkill(type, index) {
+  const skillList = type === 'technical' ? 'habilidades_tecnicas' : 'habilidades_blandas';
+  profileData[skillList].splice(index, 1);
+}
+
+const fullName = computed(() => `${profileData.nombres} ${profileData.apellidos}`);
+</script>
+
+<template>
+  <div class="min-h-screen bg-[var(--lead-900,#0a0a14)] text-gray-200 font-sans pt-32">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+      
+      <header class="flex flex-col sm:flex-row items-center gap-6 mb-12">
+        <img class="h-24 w-24 rounded-full object-cover border-2 border-white/20" src="/src/assets/avatar-placeholder.jpg" alt="Avatar">
+        <div>
+            <h1 class="text-4xl font-bold bg-gradient-to-r from-[#a0218b] to-[#b62667] bg-clip-text text-transparent">
+                {{ fullName }}
+            </h1>
+            <p class="text-lg text-white/80">{{ profileData.carrera }}</p>
+        </div>
+      </header>
+
+      <main class="grid grid-cols-1 md:grid-cols-12 gap-6">
+        
+        <div class="bento-card md:col-span-5">
+            <div class="card-header">
+                <h3 class="card-title">Información Personal</h3>
+                <button @click="toggleCardEditMode('personal')" class="edit-button" title="Editar">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24"><path d="M13.94 5L19 10.06 9.06 20H4v-5.06zM16.5 2.5c.41 0 .79.16 1.06.44l1.44 1.44c.59.59.59 1.54 0 2.12l-1.83 1.83-5.06-5.06L14.38 2.94c.27-.28.65-.44 1.06-.44M4 14v2h2l7.5-7.5-2-2L4 14z"></path></svg>
+                </button>
+            </div>
+            <div class="card-content">
+                <ul class="info-list">
+                    <li><span>Nombres</span><strong v-if="!editingCards.personal">{{ profileData.nombres }}</strong><input v-else v-model="profileData.nombres" class="edit-input"/></li>
+                    <li><span>Apellidos</span><strong v-if="!editingCards.personal">{{ profileData.apellidos }}</strong><input v-else v-model="profileData.apellidos" class="edit-input"/></li>
+                    <li><span>Teléfono</span><strong v-if="!editingCards.personal">{{ profileData.telefono }}</strong><input v-else v-model="profileData.telefono" class="edit-input"/></li>
+                    <li><span>Nacimiento</span><strong v-if="!editingCards.personal">{{ profileData.fecha_nacimiento }}</strong><input v-else v-model="profileData.fecha_nacimiento" type="date" class="edit-input"/></li>
+                    <li><span>Ubicación</span><strong v-if="!editingCards.personal">{{ profileData.distrito }}, {{ profileData.departamento }}</strong><input v-else v-model="profileData.distrito" class="edit-input"/></li>
+                </ul>
+                <div v-if="editingCards.personal" class="flex gap-3 mt-4">
+                    <button @click="toggleCardEditMode('personal', true)" class="save-button">Guardar</button>
+                    <button @click="toggleCardEditMode('personal', false)" class="cancel-button">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bento-card md:col-span-7">
+            <div class="card-header">
+                <h3 class="card-title">Información Académica</h3>
+                <button @click="toggleCardEditMode('academic')" class="edit-button" title="Editar">
+                     <svg class="h-5 w-5" viewBox="0 0 24 24"><path d="M13.94 5L19 10.06 9.06 20H4v-5.06zM16.5 2.5c.41 0 .79.16 1.06.44l1.44 1.44c.59.59.59 1.54 0 2.12l-1.83 1.83-5.06-5.06L14.38 2.94c.27-.28.65-.44 1.06-.44M4 14v2h2l7.5-7.5-2-2L4 14z"></path></svg>
+                </button>
+            </div>
+             <div class="card-content">
+                <ul class="info-list">
+                    <li><span>Carrera</span><strong v-if="!editingCards.academic">{{ profileData.carrera }}</strong><input v-else v-model="profileData.carrera" class="edit-input"/></li>
+                    <li><span>Ciclo Actual</span><strong v-if="!editingCards.academic">{{ profileData.ciclo_actual }}</strong><input v-else v-model="profileData.ciclo_actual" type="number" class="edit-input"/></li>
+                    <li><span>Año Egreso</span><strong v-if="!editingCards.academic">{{ profileData.anio_egreso || 'N/A' }}</strong><input v-else v-model="profileData.anio_egreso" type="number" class="edit-input"/></li>
+                    <li><span>Promedio</span><strong v-if="!editingCards.academic">{{ profileData.promedio_ponderado.toFixed(2) }}</strong><input v-else v-model="profileData.promedio_ponderado" type="number" step="0.01" class="edit-input"/></li>
+                </ul>
+                <div v-if="editingCards.academic" class="flex gap-3 mt-4">
+                    <button @click="toggleCardEditMode('academic', true)" class="save-button">Guardar</button>
+                    <button @click="toggleCardEditMode('academic', false)" class="cancel-button">Cancelar</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bento-card md:col-span-12">
+            <div class="card-header">
+                <h3 class="card-title">Sobre Mí</h3>
+                <button @click="toggleCardEditMode('about')" class="edit-button" title="Editar">
+                     <svg class="h-5 w-5" viewBox="0 0 24 24"><path d="M13.94 5L19 10.06 9.06 20H4v-5.06zM16.5 2.5c.41 0 .79.16 1.06.44l1.44 1.44c.59.59.59 1.54 0 2.12l-1.83 1.83-5.06-5.06L14.38 2.94c.27-.28.65-.44 1.06-.44M4 14v2h2l7.5-7.5-2-2L4 14z"></path></svg>
+                </button>
+            </div>
+             <div class="card-content">
+                <p v-if="!editingCards.about" class="text-white/70 leading-relaxed">{{ profileData.sobre_mi }}</p>
+                <textarea v-else v-model="profileData.sobre_mi" class="edit-input-area" rows="4"></textarea>
+                <div v-if="editingCards.about" class="flex gap-3 mt-4">
+                    <button @click="toggleCardEditMode('about', true)" class="save-button">Guardar</button>
+                    <button @click="toggleCardEditMode('about', false)" class="cancel-button">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bento-card md:col-span-12">
+            <h3 class="card-title">Skills & Tech Stack</h3>
+            <div class="card-content space-y-6">
+                <div>
+                    <h4 class="font-semibold text-white/90 mb-3">Técnicas</h4>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <span v-for="(skill, index) in profileData.habilidades_tecnicas" :key="`tech-${skill}`" class="skill-pill">
+                            {{ skill }} <button @click="removeSkill('technical', index)" class="skill-remove-btn">&times;</button>
+                        </span>
+                        <button v-if="!addingSkill.technical" @click="showAddSkillInput('technical')" class="add-skill-btn">+ Agregar</button>
+                        <input v-else ref="newSkillInput" v-model="addingSkill.value" @keyup.enter="commitNewSkill('technical')" @blur="cancelAddSkill" type="text" class="inline-edit-input" placeholder="Añadir..."/>
+                    </div>
+                </div>
+                 <div>
+                    <h4 class="font-semibold text-white/90 mb-3">Blandas</h4>
+                    <div class="flex flex-wrap items-center gap-3">
+                         <span v-for="(skill, index) in profileData.habilidades_blandas" :key="`soft-${skill}`" class="skill-pill">
+                            {{ skill }} <button @click="removeSkill('soft', index)" class="skill-remove-btn">&times;</button>
+                        </span>
+                        <button v-if="!addingSkill.soft" @click="showAddSkillInput('soft')" class="add-skill-btn">+ Agregar</button>
+                        <input v-else ref="newSkillInput" v-model="addingSkill.value" @keyup.enter="commitNewSkill('soft')" @blur="cancelAddSkill" type="text" class="inline-edit-input" placeholder="Añadir..."/>
+                    </div>
+                </div>
+                <div class="pt-4 flex justify-end">
+                    <button class="save-button">Guardar cambios</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="md:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bento-card">
+                <h3 class="card-title">Documentación</h3>
+                <div class="card-content">
+                    <a href="#" class="flex items-center gap-4 p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                        <svg class="h-10 w-10 text-[#cb2b46] flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+                        <div>
+                            <p class="font-semibold text-white truncate">{{ profileData.cv_filename }}</p>
+                            <p class="text-xs text-white/60">Descargar CV</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="bento-card">
+                 <div class="card-header">
+                    <h3 class="card-title">Enlaces & Contacto</h3>
+                    <button @click="toggleCardEditMode('links')" class="edit-button" title="Editar">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24"><path d="M13.94 5L19 10.06 9.06 20H4v-5.06zM16.5 2.5c.41 0 .79.16 1.06.44l1.44 1.44c.59.59.59 1.54 0 2.12l-1.83 1.83-5.06-5.06L14.38 2.94c.27-.28.65-.44 1.06-.44M4 14v2h2l7.5-7.5-2-2L4 14z"></path></svg>
+                    </button>
+                </div>
+                <div class="card-content space-y-4">
+                     <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 text-white/50" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path fill="currentColor" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z"/></svg>
+                        <a v-if="!editingCards.links" :href="profileData.linkedin_url" target="_blank" class="link-display">{{ profileData.linkedin_url }}</a>
+                        <input v-else v-model="profileData.linkedin_url" class="edit-input-link" />
+                    </div>
+                     <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 text-white/50" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                        <a v-if="!editingCards.links" :href="profileData.github_url" target="_blank" class="link-display">{{ profileData.github_url }}</a>
+                        <input v-else v-model="profileData.github_url" class="edit-input-link" />
+                    </div>
+                    <div class="flex items-center gap-3">
+                         <svg class="w-5 h-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                        <a v-if="!editingCards.links" :href="profileData.portfolio_url" target="_blank" class="link-display">{{ profileData.portfolio_url }}</a>
+                        <input v-else v-model="profileData.portfolio_url" class="edit-input-link" />
+                    </div>
+                     <div v-if="editingCards.links" class="flex gap-3 mt-4">
+                        <button @click="toggleCardEditMode('links', true)" class="save-button">Guardar</button>
+                        <button @click="toggleCardEditMode('links', false)" class="cancel-button">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+:root {
+  --nav-height: 8rem; /* Corrected to match pt-32 (8rem * 16px = 128px) */
+  --font-heading: 'Inter', sans-serif;
+  --accent-pink: #ff86ff;
+  --lead-900: #0a0a14;
+  --card-bg: #16162a;
+}
+.bento-card { 
+  @apply bg-[var(--card-bg)] bg-opacity-80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 transition-all duration-300; 
+}
+.bento-card:hover, .bento-card:focus-within { 
+  @apply border-[#b62667] border-[3px]; 
+}
+.card-header { 
+  @apply flex justify-between items-start mb-4; 
+}
+.card-title { 
+  @apply font-[var(--font-heading)] text-xl font-bold text-[#b62667]; 
+}
+.card-content { 
+  @apply mt-2; 
+}
+.edit-button { 
+  @apply text-[#cb2b46] hover:text-white transition-colors duration-200; 
+}
+.edit-button svg { 
+  fill: currentColor; 
+}
+.info-list { 
+  @apply space-y-3; 
+}
+.info-list li { 
+  @apply flex justify-between items-center gap-4; 
+}
+.info-list span { 
+  @apply text-sm text-white/60; 
+}
+.info-list strong { 
+  @apply text-base font-semibold text-white/90 text-right; 
+}
+.edit-input { 
+  @apply text-base text-right bg-white/5 py-1 px-2 rounded-md w-1/2 focus:w-full transition-all duration-300 border border-transparent focus:outline-none focus:ring-1 focus:ring-[#b62667];
+}
+.edit-input-link {
+  @apply text-base text-left bg-white/5 py-1 px-2 rounded-md w-full transition-all duration-300 border border-transparent focus:outline-none focus:ring-1 focus:ring-[#b62667] text-white/80;
+}
+.link-display {
+  @apply text-white/70 hover:text-white transition-colors truncate;
+}
+.edit-input-area { 
+  @apply w-full bg-white/5 border border-white/10 rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-[#b62667] text-white/80;
+}
+.save-button { 
+  @apply bg-gradient-to-r from-[#a0218b] to-[#b62667] text-white font-bold py-2 px-4 rounded-lg text-sm transition-transform hover:scale-105; 
+}
+.cancel-button { 
+  @apply bg-white/10 border border-white/20 hover:bg-white/20 text-white font-semibold py-2 px-4 rounded-lg text-sm; 
+}
+.skill-pill { 
+  @apply flex items-center bg-white/10 text-white/90 text-sm font-medium pl-4 pr-2 py-1.5 rounded-full; 
+}
+.skill-remove-btn { 
+  @apply ml-2 text-red-500/70 hover:text-red-400 text-lg font-bold leading-none transition-colors; 
+}
+.add-skill-btn { 
+  @apply text-sm font-medium text-white/60 hover:text-white bg-white/5 px-3 py-1.5 rounded-full transition-colors;
+}
+.inline-edit-input { 
+  @apply bg-white/10 rounded-full px-4 py-1.5 text-sm w-32 focus:w-40 transition-all duration-300 outline-none ring-1 ring-transparent focus:ring-[#b62667]; 
+}
+</style>
