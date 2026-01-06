@@ -1,5 +1,30 @@
 <script setup>
-import { ref, reactive, computed, nextTick } from 'vue';
+import { ref, reactive, computed, nextTick, onMounted } from 'vue';
+
+// --- NOTIFICATION STATE & LOGIC ---
+const notification = reactive({
+  show: false,
+  message: '',
+});
+
+const NOTIFICATION_MESSAGES = {
+  register: '¡Cuenta creada exitosamente! Bienvenid@ a Bolsa Laboral - LEAD UNI',
+  login: '¡Bienvenid@ de nuevo! Las ofertas te esperan',
+};
+
+onMounted(() => {
+  const action = localStorage.getItem('auth_action');
+  if (action && NOTIFICATION_MESSAGES[action]) {
+    notification.message = NOTIFICATION_MESSAGES[action];
+    notification.show = true;
+    localStorage.removeItem('auth_action');
+    
+    setTimeout(() => {
+      notification.show = false;
+    }, 4000);
+  }
+});
+
 
 // --- STATE MANAGEMENT ---
 
@@ -244,10 +269,35 @@ const fullName = computed(() => `${profileData.nombres} ${profileData.apellidos}
         </div>
       </main>
     </div>
+
+    <!-- Notification Toast -->
+    <div v-if="notification.show"
+      class="fixed top-28 right-10 z-50 flex items-center gap-4 px-6 py-4 rounded-lg bg-[#121225] border-2 border-[#b62667] shadow-lg shadow-[#b62667]/50 animate-fade-in-down">
+      <div class="flex-shrink-0">
+        <svg class="h-6 w-6 text-[#b62667]" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <p class="text-white font-bold">{{ notification.message }}</p>
+    </div>
   </div>
 </template>
 
 <style scoped>
+@keyframes fade-in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in-down {
+  animation: fade-in-down 0.5s ease-out forwards;
+}
+
 :root {
   --nav-height: 8rem; /* Corrected to match pt-32 (8rem * 16px = 128px) */
   --font-heading: 'Inter', sans-serif;
