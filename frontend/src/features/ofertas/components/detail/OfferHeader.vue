@@ -1,41 +1,41 @@
 <template>
-  <section class="offer-header-card" v-if="oferta">
-    <div class="offer-header-left">
+  <section class="flex items-center justify-between gap-[18px] p-[22px] rounded-[12px] bg-gradient-to-t from-[rgba(18,13,38,0.92)] to-[rgba(23,16,44,0.88)] border-2 border-[#b62667] shadow-[0_20px_60px_rgba(6,6,28,0.6)] mb-[28px]" v-if="oferta">
+    <div class="flex gap-[18px] items-center flex-1 min-w-0">
       <!-- Logo -->
-      <div class="offer-logo">
+      <div class="w-[84px] h-[84px] rounded-[12px] overflow-hidden flex items-center justify-center bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.03)]">
         <!-- Si luego tienes logo real, cambias esto por <img :src="..." /> -->
         <img
           v-if="logoUrl"
           :src="logoUrl"
           alt="Logo empresa"
         />
-        <div v-else class="offer-logo-fallback">
+        <div v-else class="text-lg font-bold">
           {{ inicialEmpresa }}
         </div>
       </div>
 
       <!-- Título + empresa + meta -->
-      <div class="offer-title-area">
-        <h1 class="offer-title">{{ oferta.titulo }}</h1>
+      <div class="min-w-0">
+        <h1 class="font-['League_Spartan'] text-[28px] mb-[8px] text-[var(--text)] leading-[1.03]">{{ oferta.titulo }}</h1>
 
-        <div class="offer-company">
-          <span class="company-name">{{ oferta.company?.nombre_comercial || 'Empresa' }}</span>
-          <span class="dot">•</span>
-          <span class="muted">{{ publicadoTexto }}</span>
+        <div class="text-[var(--muted-2)] text-[14px] flex gap-[8px] items-center mb-[8px]">
+          <span class="font-bold text-[var(--accent-pink-2)]">{{ oferta.company?.nombre_comercial || 'Empresa' }}</span>
+          <span class="text-[rgba(255,255,255,0.16)] mx-[6px]">•</span>
+          <span class="text-[var(--muted-2)]">{{ publicadoTexto }}</span>
         </div>
 
         <!-- Tags / pills -->
-        <div class="offer-tags">
-          <span class="pill" v-if="oferta.tipo_contrato">{{ contratoTexto }}</span>
-          <span class="pill" v-if="oferta.modalidad">{{ oferta.modalidad }}</span>
-          <span class="pill" v-if="oferta.estado" :class="estadoClasses">{{ estadoTexto }}</span>
-          <span class="pill" v-if="oferta.nivel_experiencia">{{ experienciaTexto }}</span>
+        <div class="flex gap-[10px] items-center flex-wrap">
+          <span class="inline-flex items-center justify-center py-[6px] px-[10px] rounded-full bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.03)] text-[var(--muted-2)] text-[12px] leading-none mr-[8px] whitespace-nowrap transition-all duration-100 ease-in-out hover:bg-[rgba(255,255,255,0.04)] hover:-translate-y-px" v-if="oferta.tipo_contrato">{{ contratoTexto }}</span>
+          <span class="inline-flex items-center justify-center py-[6px] px-[10px] rounded-full bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.03)] text-[var(--muted-2)] text-[12px] leading-none mr-[8px] whitespace-nowrap transition-all duration-100 ease-in-out hover:bg-[rgba(255,255,255,0.04)] hover:-translate-y-px" v-if="oferta.modalidad">{{ oferta.modalidad }}</span>
+          <span class="inline-flex items-center justify-center py-[6px] px-[10px] rounded-full bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.03)] text-[var(--muted-2)] text-[12px] leading-none mr-[8px] whitespace-nowrap transition-all duration-100 ease-in-out hover:bg-[rgba(255,255,255,0.04)] hover:-translate-y-px" v-if="oferta.estado" :class="estadoClasses">{{ estadoTexto }}</span>
+          <span class="inline-flex items-center justify-center py-[6px] px-[10px] rounded-full bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.03)] text-[var(--muted-2)] text-[12px] leading-none mr-[8px] whitespace-nowrap transition-all duration-100 ease-in-out hover:bg-[rgba(255,255,255,0.04)] hover:-translate-y-px" v-if="oferta.nivel_experiencia">{{ experienciaTexto }}</span>
         </div>
       </div>
     </div>
 
     <!-- Right slot (opcional): botones guardar/compartir, etc. -->
-    <div class="offer-header-right">
+    <div class="flex gap-[8px] items-center">
       <slot name="actions" />
     </div>
   </section>
@@ -82,11 +82,11 @@ const estadoTexto = computed(() => {
 const estadoClasses = computed(() => {
   switch (props.oferta?.estado) {
     case 'activa':
-      return 'estado-activa';
+      return 'bg-[rgba(var(--state-bg-deep),_0.18)] text-[var(--state-green)] border border-[rgba(22,199,132,0.16)] py-[6px] px-[10px] rounded-[10px] font-bold text-[12px] inline-block shadow-[inset_0_1px_0_rgba(255,255,255,0.02),_0_8px_18px_rgba(3,45,36,0.45)]';
     case 'cerrada':
-      return 'estado-cerrada';
+      return 'bg-gradient-to-r from-[#6b7280] to-[#4b5563] text-[#111827]';
     default:
-      return 'estado-default';
+      return 'bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] text-white';
   }
 });
 
@@ -101,17 +101,18 @@ const contratoTexto = computed(() => {
     medio_tiempo: 'Medio Tiempo',
     freelance: 'Freelance',
   };
-  return map[v] || v;
+  return map[v] || v.replace(/_/g, ' ');
 });
 
 const experienciaTexto = computed(() => {
   const v = props.oferta?.nivel_experiencia;
   if (!v) return '';
   const map = {
-    '0_1_anio': 'Nivel Junior',
+    'sin_experiencia': 'Sin experiencia',
+    'menos_1_anio': 'Menos de 1 año',
     '1_3_anios': '1 - 3 años',
-    '3_5_anios': '3 - 5 años',
+    'mas_3_anios': 'Más de 3 años',
   };
-  return map[v] || v;
+  return map[v] || v.replace(/_/g, ' '); // Fallback to replacing underscores if not in map
 });
 </script>

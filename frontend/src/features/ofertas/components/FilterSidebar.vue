@@ -1,84 +1,113 @@
 <template>
-  <aside class="filters-aside">
-    <div class="filters-header">
-      <h2 class="filters-title">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+  <aside class="w-72 bg-[#121225] border-2 border-[#b62667] rounded-2xl p-6 shadow-lg">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-white font-bold text-lg flex items-center gap-2">
+        <svg class="w-5 h-5 text-[#b62667]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
         </svg>
         Filtros
       </h2>
-      <button class="link-clear">Limpiar todo</button>
+      <button @click="clearAllFilters" class="text-sm text-[#b62667] underline hover:no-underline focus:outline-none">Limpiar todo</button>
     </div>
 
-    <section class="filters-section">
-      <h3 class="section-title">Modalidad</h3>
-      <ul class="list">
-        <li v-for="(c, i) in categorias" :key="i" class="list-item">
-          <label class="checkwrap">
-            <input type="checkbox" checked />
-            <span class="custom-check" aria-hidden="true"></span>
-            <span class="label-text">{{ c }}</span>
+    <!-- Modalidad -->
+    <section class="py-4 border-b border-gray-800">
+      <h3 class="text-white font-bold text-sm tracking-wider mb-3 font-['League_Spartan',_sans-serif]">MODALIDAD</h3>
+      <ul class="space-y-2">
+        <li v-for="(modalidad, i) in modalidades" :key="i" class="flex items-center justify-between gap-x-4">
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <input type="checkbox" :value="modalidad" v-model="selectedModalidades"
+              class="appearance-none w-5 h-5 bg-gray-700/50 rounded-md checked:accent-[#b62667] checked:bg-[#b62667] checked:border-transparent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-[#b62667]" />
+            <span class="text-gray-300 group-hover:text-white transition-colors text-xs">{{ modalidad }}</span>
           </label>
-          <span class="count">12</span>
+          <span class="text-slate-500 ml-auto text-sm">12</span>
         </li>
       </ul>
     </section>
 
-    <section class="filters-section">
-      <h3 class="section-title">Nivel de Experiencia</h3>
-      <ul class="list">
-        <li v-for="(u, i) in ubicaciones" :key="i" class="list-item">
-          <label class="checkwrap">
-            <input type="checkbox" checked />
-            <span class="custom-check" aria-hidden="true"></span>
-            <span class="label-text">{{ u }}</span>
+    <!-- Tipo de Contrato -->
+    <section class="py-4 border-b border-gray-800">
+      <h3 class="text-white font-bold text-sm tracking-wider mb-3 font-['League_Spartan',_sans-serif]">TIPO DE CONTRATO</h3>
+      <ul class="space-y-2">
+        <li v-for="(tipo, i) in tiposContrato" :key="i" class="flex items-center justify-between gap-x-4">
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <input type="checkbox" :value="tipo" v-model="selectedTiposContrato"
+              class="appearance-none w-5 h-5 bg-gray-700/50 rounded-md checked:accent-[#b62667] checked:bg-[#b62667] checked:border-transparent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-[#b62667]" />
+            <span class="text-gray-300 group-hover:text-white transition-colors text-xs">{{ tipo }}</span>
           </label>
-          <span class="count">8</span>
+          <span class="text-slate-500 ml-auto text-sm">8</span>
+        </li>
+      </ul>
+    </section>
+    
+    <!-- Nivel de Experiencia -->
+    <section class="py-4">
+      <h3 class="text-white font-bold text-sm tracking-wider mb-3 font-['League_Spartan',_sans-serif]">NIVEL DE EXPERIENCIA</h3>
+      <ul class="space-y-2">
+        <li v-for="(nivel, i) in nivelesExperiencia" :key="i" class="flex items-center justify-between gap-x-4">
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <input type="checkbox" :value="nivel" v-model="selectedNivelesExperiencia"
+              class="appearance-none w-5 h-5 bg-gray-700/50 rounded-md checked:accent-[#b62667] checked:bg-[#b62667] checked:border-transparent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-[#b62667]" />
+            <span class="text-gray-300 group-hover:text-white transition-colors text-xs">{{ nivel }}</span>
+          </label>
+          <span class="text-slate-500 ml-auto text-sm">5</span>
         </li>
       </ul>
     </section>
 
-    <section class="filters-section">
-      <h3 class="section-title">Tipo de Jornada</h3>
-      <ul class="list">
-        <li v-for="(t, i) in tiposContrato" :key="i" class="list-item">
-          <label class="checkwrap">
-            <input type="checkbox" checked />
-            <span class="custom-check" aria-hidden="true"></span>
-            <span class="label-text">{{ t }}</span>
-          </label>
-        </li>
-      </ul>
-    </section>
-
-    <div class="cta-box">
-      <h4>¡Sube tu CV!</h4>
-      <p>Las empresas buscan perfiles como el tuyo.</p>
-      <button class="cta-btn">Actualizar Perfil</button>
+    <!-- CTA Box -->
+    <div class="mt-6 p-5 rounded-xl bg-gradient-to-br from-pink-900/20 to-purple-900/10 border border-[#b62667] text-center">
+      <h4 class="font-bold text-white mb-1 text-base">¡Sube tu CV!</h4>
+      <p class="text-sm text-gray-400 mb-4">Las empresas buscan perfiles como el tuyo.</p>
+      <button class="w-full bg-gradient-to-r from-[#a0218b] to-[#b62667] text-white font-bold py-2.5 px-4 rounded-lg hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-[#b62667]">
+        Actualizar Perfil
+      </button>
     </div>
   </aside>
 </template>
 
 <script setup>
-const categorias = [
-  'Tecnología',
-  'Diseño',
-  'Marketing',
-  'Ventas'
-]
+import { ref, watch } from 'vue';
 
-const ubicaciones = [
-  'Lima',
+const modalidades = [
+  'Presencial',
   'Remoto',
-  'Arequipa',
-  'Trujillo'
-]
+  'Híbrido',
+];
 
 const tiposContrato = [
-  'Tiempo completo',
-  'Medio tiempo',
-  'Prácticas',
-  'Freelance'
-]
+  'Prácticas Pre-profesionales',
+  'Prácticas Profesionales',
+  'Tiempo Completo',
+  'Medio Tiempo',
+  'Freelance',
+];
+
+const nivelesExperiencia = [
+  'Sin experiencia',
+  'Menos de 1 año',
+  '1-3 años',
+  'Más de 3 años',
+];
+
+const selectedModalidades = ref([]);
+const selectedTiposContrato = ref([]);
+const selectedNivelesExperiencia = ref([]);
+
+const emit = defineEmits(['filter-change']);
+
+const clearAllFilters = () => {
+  selectedModalidades.value = [];
+  selectedTiposContrato.value = [];
+  selectedNivelesExperiencia.value = [];
+};
+
+watch([selectedModalidades, selectedTiposContrato, selectedNivelesExperiencia], () => {
+  emit('filter-change', {
+    modalidades: selectedModalidades.value,
+    tiposContrato: selectedTiposContrato.value,
+    nivelesExperiencia: selectedNivelesExperiencia.value,
+  });
+}, { deep: true });
 </script>

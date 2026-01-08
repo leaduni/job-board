@@ -1,24 +1,24 @@
 <!-- OfferSummaryCard.vue -->
 <template>
-  <aside class="offer-summary-card">
-    <h4 class="summary-title">Resumen de la oferta</h4>
+  <aside class="p-[18px] px-[20px] rounded-[12px] bg-gradient-to-t from-[rgba(24,8,40,0.55)] to-[rgba(10,8,35,0.65)] border-2 border-[#b62667]">
+    <h4 class="font-['League_Spartan'] text-[16px] tracking-[0.3px] text-[rgba(255,255,255,0.45)] mb-[14px]">Resumen de la oferta</h4>
 
-    <ul class="summary-list">
-      <li>
-        <span>Salario mensual</span>
-        <strong>No especificado</strong>
+    <ul>
+      <li class="flex justify-between items-center py-[6px]">
+        <span class="text-[13px] text-[rgba(255,255,255,0.45)]">Salario mensual</span>
+        <strong class="text-[13px] text-[rgba(255,255,255,0.95)] font-semibold">{{ salarioTexto }}</strong>
       </li>
-      <li>
-        <span>Experiencia</span>
-        <strong>{{ oferta.nivel_experiencia }}</strong>
+      <li class="flex justify-between items-center py-[6px]">
+        <span class="text-[13px] text-[rgba(255,255,255,0.45)]">Experiencia</span>
+        <strong class="text-[13px] text-[rgba(255,255,255,0.95)] font-semibold">{{ experienciaTexto }}</strong>
       </li>
-      <li>
-        <span>Ubicación</span>
-        <strong>Remoto / No especificado</strong>
+      <li class="flex justify-between items-center py-[6px]">
+        <span class="text-[13px] text-[rgba(255,255,255,0.45)]">Ubicación</span>
+        <strong class="text-[13px] text-[rgba(255,255,255,0.95)] font-semibold">{{ ubicacionTexto }}</strong>
       </li>
-      <li>
-        <span>Vacantes</span>
-        <strong>No especificado</strong>
+      <li class="flex justify-between items-center py-[6px]">
+        <span class="text-[13px] text-[rgba(255,255,255,0.45)]">Vacantes</span>
+        <strong class="text-[13px] text-[rgba(255,255,255,0.95)] font-semibold">{{ vacantesTexto }}</strong>
       </li>
     </ul>
   </aside>
@@ -44,7 +44,21 @@ const salarioTexto = computed(() => {
 });
 
 const experienciaTexto = computed(() => {
-  return props.oferta?.nivel_experiencia || 'No especificado';
+  const valor = props.oferta?.nivel_experiencia;
+  if (!valor) return 'No especificado';
+
+  // Diccionario de traducción para consistencia total
+  const map = {
+    'sin_experiencia': 'Sin experiencia',
+    'menos_1_anio': 'Menos de 1 año',
+    '1_3_anios': '1 - 3 años',
+    '3_5_anios': '3 - 5 años',
+    'mas_3_anios': 'Más de 3 años',
+    'mas_5_anios': 'Más de 5 años'
+  };
+
+  // Si el valor no está en el mapa, limpiamos los guiones bajos por seguridad
+  return map[valor] || valor.replace(/_/g, ' ');
 });
 
 const ubicacionTexto = computed(() => {
