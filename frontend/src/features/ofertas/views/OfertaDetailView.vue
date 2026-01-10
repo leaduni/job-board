@@ -1,16 +1,16 @@
 <template>
-  <section class="page-section offer-detail-layout">
-    <div class="container">
+  <section class="min-h-screen pt-[calc(var(--nav-height)+24px)] pb-[56px]">
+    <div class="max-w-[var(--container-max)] mx-auto py-[40px] px-[32px] lg:py-[28px] lg:px-[20px]">
 
       <!-- Breadcrumb -->
-      <nav class="breadcrumb">
-        <router-link to="/ofertas">Bolsa Laboral</router-link>
-        <span class="dot">›</span>
+      <nav class="text-[var(--muted-2)] mb-[18px] flex gap-[8px] items-center text-[14px]">
+        <router-link to="/ofertas" class="text-[var(--muted-2)] no-underline">Bolsa Laboral</router-link>
+        <span class="text-[rgba(255,255,255,0.16)] mx-[6px]">›</span>
         <span>Detalle de Oferta</span>
       </nav>
 
       <!-- Loading -->
-      <p v-if="loading" class="loading">
+      <p v-if="loading" class="py-[32px] px-0 text-[var(--muted-2)]">
         Cargando oferta...
       </p>
 
@@ -26,7 +26,7 @@
         </OfferHeader>
 
         <!-- Main grid -->
-        <div class="offer-grid">
+        <div class="grid grid-cols-[1fr_360px] gap-[28px] items-start max-[1100px]:grid-cols-1">
 
           <!-- Columna principal -->
           <OfferMainContent :oferta="oferta" />
@@ -49,7 +49,7 @@
       </template>
 
       <!-- Error / empty -->
-      <p v-else class="text-muted">
+      <p v-else class="text-[var(--muted-2)] text-[13px]">
         No se pudo cargar la oferta.
       </p>
 
