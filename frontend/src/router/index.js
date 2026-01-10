@@ -4,6 +4,7 @@ import ofertasRoutes from './routes/ofertas.routes'
 import perfilRoutes from './routes/perfil.routes'
 import postulacionesRoutes from './routes/postulaciones.routes'
 import authRoutes from './routes/auth.routes'
+import capacitateRoutes from './routes/capacitate.routes'
 
 const routes = [
   {
@@ -13,7 +14,8 @@ const routes = [
       ...homeRoutes,
       ...ofertasRoutes,
       // perfilRoutes is now a top-level route
-      ...postulacionesRoutes
+      ...postulacionesRoutes,
+      ...capacitateRoutes
     ],
   },
   // Spreading perfilRoutes here to make it top-level

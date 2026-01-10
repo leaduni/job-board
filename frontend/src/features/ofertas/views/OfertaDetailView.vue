@@ -29,7 +29,10 @@
         <div class="grid grid-cols-[1fr_360px] gap-[28px] items-start max-[1100px]:grid-cols-1">
 
           <!-- Columna principal -->
-          <OfferMainContent :oferta="oferta" />
+          <div class="flex flex-col gap-[28px]">
+            <OfferMainContent :oferta="oferta" />
+            <SkillGapBridge />
+          </div>
 
           <!-- Sidebar -->
           <OfferApplySidebar
@@ -83,6 +86,7 @@ import OfferHeader from '../components/detail/OfferHeader.vue'
 import OfferMainContent from '../components/detail/OfferMainContent.vue'
 import OfferApplySidebar from '../components/detail/OfferApplySidebar.vue'
 import OfferSummaryCard from '../components/detail/OfferSummaryCard.vue'
+import SkillGapBridge from '../../capacitate/components/SkillGapBridge.vue'
 
 // Estado
 const route = useRoute()

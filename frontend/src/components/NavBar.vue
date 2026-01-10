@@ -32,6 +32,15 @@
 
           <li role="none">
             <router-link
+              to="/capacitate"
+              class="nav-link"
+              active-class="nav-link-active"
+              role="menuitem"
+            >Capacítate</router-link>
+          </li>
+
+          <li role="none">
+            <router-link
               to="/postulaciones"
               class="nav-link"
               active-class="nav-link-active"
