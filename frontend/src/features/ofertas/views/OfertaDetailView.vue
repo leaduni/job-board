@@ -2,7 +2,6 @@
   <section class="min-h-screen pt-[calc(var(--nav-height)+24px)] pb-[56px]">
     <div class="max-w-[var(--container-max)] mx-auto py-[40px] px-[32px] lg:py-[28px] lg:px-[20px]">
 
-      <!-- Breadcrumb -->
       <nav class="text-[var(--muted-2)] mb-[18px] flex gap-[8px] items-center text-[14px]">
         <router-link to="/ofertas" class="text-[var(--muted-2)] no-underline">Bolsa Laboral</router-link>
         <span class="text-[rgba(255,255,255,0.16)] mx-[6px]">›</span>
@@ -58,10 +57,11 @@
 
     </div>
 
-    <LoginModal
-      :open="showLoginModal"
-      @close="showLoginModal = false"
-      @success="showLoginModal = false"
+    <RedirectionModal
+      v-if="showRedirectionModal"
+      :company-name="oferta.company?.nombre_comercial || 'la empresa'"
+      @close="showRedirectionModal = false"
+      @confirm="handleRedirectionConfirm"
     />
 
   </section>
@@ -70,12 +70,9 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { useAuth } from '@/composables/useAuth'
-import LoginModal from '@/components/auth/LoginModal.vue'
+import RedirectionModal from '@/components/modals/RedirectionModal.vue'
 
-// Auth (simulado)
-const { isAuthenticated, user } = useAuth()
-const showLoginModal = ref(false)
+const showRedirectionModal = ref(false)
 
 // Servicios
 import { obtenerOfertaPorId } from '../services/ofertas.service'
@@ -124,30 +121,19 @@ function compartirOferta() {
   // futuro
 }
 
+function handleRedirectionConfirm() {
+  // La lógica de console.log está en el modal.
+  // Aquí solo cerramos y podemos añadir notificaciones en el futuro.
+  showRedirectionModal.value = false
+  // alert('Función en desarrollo')
+}
+
+
 async function postular() {
   if (!oferta.value) return
 
-  // 🔒 1. Validar autenticación
-  if (!isAuthenticated.value) {
-    showLoginModal.value = true
-    return
-  }
-
-  // 🧩 2. Postulación real
-  try {
-    postulando.value = true
-    mensaje.value = ''
-
-    await postularOferta(oferta.value)
-
-    yaPostulado.value = true
-    mensaje.value = 'Postulación enviada correctamente'
-  } catch (error) {
-    console.error(error)
-    mensaje.value = 'Error al postular. Intenta nuevamente'
-  } finally {
-    postulando.value = false
-  }
+  // ✨ Mostrar modal de redirección para flujo externo
+  showRedirectionModal.value = true
 }
 
 </script>

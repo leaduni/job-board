@@ -113,49 +113,44 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="page-section">
-    <div class="container">
-
+  <section class="min-h-screen pt-[96px]">
+    <div class="mx-auto max-w-[1240px] px-8 py-10">
       <!-- Header -->
-      <header class="page-header">
-        <h1 class="page-title">Mis Postulaciones</h1>
-        <p class="page-subtitle">
-          Seguimiento de tus oportunidades
-        </p>
+      <header class="mb-10">
+        <h1 class="font-heading text-[32px] m-0 mb-2">Mis Postulaciones</h1>
+        <p class="m-0 text-white/45">Seguimiento de tus oportunidades</p>
       </header>
 
       <!-- Layout columns -->
-      <div class="layout">
-
+      <div class="flex items-start gap-7">
         <!-- Contenido principal -->
-        <main class="main-content">
-
+        <main class="min-w-0 flex-1">
           <!-- No autenticado -->
-          <div v-if="!isAuthenticated" class="text-muted">
+          <div v-if="!isAuthenticated" class="text-[13px] text-white/45">
             Inicia sesión para ver tus postulaciones.
           </div>
 
           <!-- Cargando -->
-          <div v-else-if="loading" class="loading text-muted">
+          <div v-else-if="loading" class="py-8 text-[13px] text-white/45">
             Cargando postulaciones...
           </div>
 
           <!-- Error -->
-          <div v-else-if="error" class="text-error">
+          <div v-else-if="error" class="text-red-500">
             {{ error }}
           </div>
 
           <!-- Contenido -->
           <div v-else>
-
             <!-- Results header -->
-            <div class="results-header">
-              <h2 class="results-title">
+            <div class="mt-3 mb-5 flex items-center justify-between gap-3">
+              <h2 class="font-heading m-0 text-xl">
                 {{ stats.total }} Postulaciones
               </h2>
-              <div class="results-meta">
-                <span class="results-range">
-                  Mostrando {{ postulacionesFiltradas.length }} de {{ stats.total }}
+              <div class="text-white/45">
+                <span>
+                  Mostrando {{ postulacionesFiltradas.length }} de
+                  {{ stats.total }}
                 </span>
               </div>
             </div>
@@ -169,21 +164,16 @@ onMounted(() => {
             />
 
             <!-- Filtros -->
-            <PostulacionesFilters
-              v-model="filtroEstado"
-            />
+            <PostulacionesFilters v-model="filtroEstado" />
 
             <!-- Lista -->
             <PostulacionesList
               :items="postulacionesFiltradas"
               :ofertasMap="ofertasMap"
             />
-
           </div>
         </main>
       </div>
-
     </div>
   </section>
 </template>
-
