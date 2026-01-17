@@ -20,59 +20,25 @@ const fechaPostulacion = computed(() => {
 </script>
 
 <template>
-  <article class="postulacion-item">
+  <article class="flex items-center justify-between rounded-lg bg-white/5 p-4">
     <!-- Lado izquierdo: info principal -->
-    <div class="item-main">
-        <h3 class="item-title">
+    <div class="flex-grow">
+        <h3 class="m-0 text-base font-semibold">
             {{ oferta?.titulo || `Oferta #${postulacion.oferta_id}` }}
         </h3>
 
-        <p class="item-subtitle">
+        <p class="my-1 text-sm opacity-85">
             {{ oferta?.company?.nombre_comercial || `Empresa #${postulacion.empresa_id}` }}
         </p>
 
-      <p class="item-meta">
+      <p class="m-0 text-xs opacity-70">
         Postulado el {{ fechaPostulacion }}
       </p>
     </div>
 
     <!-- Lado derecho: estado -->
-    <div class="item-status">
+    <div class="ml-4">
       <StatusBadge :status="postulacion.estado" />
     </div>
   </article>
 </template>
-
-<style scoped>
-/* Estilos mínimos solo para estructura */
-.postulacion-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.item-title {
-  font-size: 1rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.item-subtitle {
-  font-size: 0.875rem;
-  opacity: 0.85;
-  margin: 0.25rem 0;
-}
-
-.item-meta {
-  font-size: 0.75rem;
-  opacity: 0.7;
-  margin: 0;
-}
-
-.item-status {
-  margin-left: 1rem;
-}
-</style>
