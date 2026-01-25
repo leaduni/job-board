@@ -66,7 +66,6 @@ const showRedirectionModal = ref(false)
 
 // Servicios
 import { obtenerOfertaPorId } from '../services/ofertas.service'
-import { postularOferta } from '../../postulaciones/services/postulaciones.service'
 
 // Componentes
 import OfferHeader from '../components/detail/OfferHeader.vue'

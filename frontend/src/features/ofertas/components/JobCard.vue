@@ -1,5 +1,5 @@
 <template>
-  <article class="w-full bg-[rgba(9,9,42,0.6)] border-2 border-[#b62667] rounded-[12px] p-[20px] flex flex-col justify-between h-full shadow-[0_8px_26px_rgba(0,0,0,0.6)] text-white/95 transition-transform transition-shadow duration-150 ease-in-out min-h-0 hover:-translate-y-[8px] hover:border-[#b62667] hover:shadow-[0_40px_100px_rgba(6,6,28,0.76),_0_12px_40px_rgba(0,0,0,0.7)]">
+  <article class="w-full bg-[rgba(9,9,42,0.6)] border-2 border-[#b62667] rounded-[12px] p-[20px] flex flex-col justify-between h-full shadow-[0_8px_26px_rgba(0,0,0,0.6)] text-white/95 transition-transform duration-150 ease-in-out min-h-0 hover:-translate-y-[8px] hover:border-[#b62667] hover:shadow-[0_40px_100px_rgba(6,6,28,0.76),_0_12px_40px_rgba(0,0,0,0.7)]">
     <div class="flex flex-col gap-[12px]">
       <!-- Header: título y empresa a la izquierda, badge de estado a la derecha -->
       <div class="flex items-start justify-between gap-[12px] mb-[8px]">
@@ -19,10 +19,10 @@
       <!-- Meta info -->
       <div class="flex gap-[12px] items-center flex-wrap my-[8px] text-white/45 text-[13px]">
         <div class="inline-flex items-center gap-[6px]">
-          <span class="inline-flex items-center justify-center px-[12px] py-[6px] rounded-full bg-white/2 border border-[#b62667]/3 text-white/45 text-[12px] leading-[1] mr-[8px] whitespace-nowrap transition-colors duration-150 ease-out transition-transform duration-100 ease-out hover:bg-white/4 hover:-translate-y-[1px]">{{ getDisplayLabel(oferta.modalidad) }}</span>
+          <span class="inline-flex items-center justify-center px-[12px] py-[6px] rounded-full bg-white/2 border border-[#b62667]/3 text-white/45 text-[12px] leading-[1] mr-[8px] whitespace-nowrap transition-colors duration-150 ease-out hover:bg-white/4 hover:-translate-y-[1px]">{{ getDisplayLabel(oferta.modalidad) }}</span>
         </div>
         <div class="inline-flex items-center gap-[6px]">
-          <span class="inline-flex items-center justify-center px-[12px] py-[6px] rounded-full bg-white/2 border border-[#b62667]/3 text-white/45 text-[12px] leading-[1] mr-[8px] whitespace-nowrap transition-colors duration-150 ease-out transition-transform duration-100 ease-out hover:bg-white/4 hover:-translate-y-[1px]">{{ getDisplayLabel(oferta.nivel_experiencia) }}</span>
+          <span class="inline-flex items-center justify-center px-[12px] py-[6px] rounded-full bg-white/2 border border-[#b62667]/3 text-white/45 text-[12px] leading-[1] mr-[8px] whitespace-nowrap transition-colors duration-150 ease-out hover:bg-white/4 hover:-translate-y-[1px]">{{ getDisplayLabel(oferta.nivel_experiencia) }}</span>
         </div>
       </div>
 

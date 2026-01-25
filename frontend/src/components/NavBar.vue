@@ -215,10 +215,4 @@ const carrera = computed(() => {
 /* Font Awesome - Make sure it's included in your project */
 @import '@fortawesome/fontawesome-free/css/all.min.css';
 
-/* We can use router-link's active-class for desktop, but for mobile,
-   exact-active-class is better to avoid matching parent routes.
-   The bg-[#b62667] is a custom fuchsia color. */
-.router-link-exact-active {
-  /* You can add extra styles for active mobile links here if needed */
-}
 </style>

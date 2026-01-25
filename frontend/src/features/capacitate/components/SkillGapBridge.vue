@@ -55,7 +55,3 @@ const suggestedCourses = ref([
   }
 ]);
 </script>
-
-<style scoped>
-/* Scoped styles can be added here if needed */
-</style>

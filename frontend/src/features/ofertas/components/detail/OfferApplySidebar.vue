@@ -5,7 +5,7 @@
 
       <button
         class="w-full py-[10px] px-[12px] rounded-[10px] bg-gradient-to-r from-[#a0218b] to-[#b62667] text-white font-bold cursor-pointer shadow-[0_6px_18px_rgba(182,38,103,0.18)] hover:-translate-y-[1px] hover:shadow-[0_10px_24px_rgba(182,38,103,0.2)] mb-[14px]"
-        :disabled="yaPostulado || postulando"
+        :disabled="disabled"
         @click="$emit('postular')"
       >
         {{ yaPostulado ? 'Ya postulado' : postulando ? 'Postulando...' : 'Postular a esta oferta' }}
@@ -37,22 +37,4 @@ const props = defineProps({
 const emit = defineEmits(['postular', 'guardar', 'compartir']);
 
 const disabled = computed(() => props.postulando || props.yaPostulado);
-
-const textoBoton = computed(() => {
-  if (props.yaPostulado) return 'Ya postulado';
-  if (props.postulando) return 'Postulando...';
-  return 'Postular a esta oferta';
-});
-
-function onPostular() {
-  emit('postular');
-}
-
-function onGuardar() {
-  emit('guardar');
-}
-
-function onCompartir() {
-  emit('compartir');
-}
 </script>
