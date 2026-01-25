@@ -1,6 +1,6 @@
 <template>
-  <aside class="w-72 bg-[#121225] border-2 border-[#b62667] rounded-2xl p-6 shadow-lg">
-    <div class="flex items-center justify-between mb-5">
+  <div :class="!isMobile ? 'w-72 bg-[#121225] border-2 border-[#b62667] rounded-2xl p-6 shadow-lg' : 'p-6'">
+    <div v-if="!isMobile" class="flex items-center justify-between mb-5">
       <h2 class="text-white font-bold text-lg flex items-center gap-2">
         <svg class="w-5 h-5 text-[#b62667]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -57,18 +57,27 @@
     </section>
 
     <!-- CTA Box -->
-    <div class="mt-6 p-5 rounded-xl bg-gradient-to-br from-pink-900/20 to-purple-900/10 border border-[#b62667] text-center">
+    <div v-if="!isMobile" class="mt-6 p-5 rounded-xl bg-gradient-to-br from-pink-900/20 to-purple-900/10 border border-[#b62667] text-center">
       <h4 class="font-bold text-white mb-1 text-base">¡Sube tu CV!</h4>
       <p class="text-sm text-gray-400 mb-4">Las empresas buscan perfiles como el tuyo.</p>
       <button class="w-full bg-gradient-to-r from-[#a0218b] to-[#b62667] text-white font-bold py-2.5 px-4 rounded-lg hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-[#b62667]">
         Actualizar Perfil
       </button>
     </div>
-  </aside>
+  </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, defineExpose } from 'vue';
+
+defineProps({
+  isMobile: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const emit = defineEmits(['filter-change']);
 
 const modalidades = [
   'Presencial',
@@ -95,13 +104,15 @@ const selectedModalidades = ref([]);
 const selectedTiposContrato = ref([]);
 const selectedNivelesExperiencia = ref([]);
 
-const emit = defineEmits(['filter-change']);
-
 const clearAllFilters = () => {
   selectedModalidades.value = [];
   selectedTiposContrato.value = [];
   selectedNivelesExperiencia.value = [];
 };
+
+defineExpose({
+  clearAllFilters
+});
 
 watch([selectedModalidades, selectedTiposContrato, selectedNivelesExperiencia], () => {
   emit('filter-change', {

@@ -1,6 +1,6 @@
 <template>
   <div class="border-2 border-[#b62667] bg-[#121225] rounded-[12px] p-[24px]">
-    <h3 class="text-white/90 text-lg font-semibold mb-4">Análisis de compatibilidad</h3>
+    <h2 class="font-heading text-2xl mb-[12px] text-[rgba(255,255,255,0.95)]">Análisis de compatibilidad</h2>
     <ul class="space-y-2 mb-6">
       <li v-for="skill in mockSkills" :key="skill.name" class="flex items-center">
         <span :class="[skill.has ? 'text-green-500' : 'text-yellow-500']" class="mr-2">
