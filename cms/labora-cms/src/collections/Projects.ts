@@ -225,6 +225,14 @@ export const Offers: CollectionConfig = {
                 placeholder: 'Por favor incluir portfolio con 3 proyectos mínimo',
             },
         },
+        {
+            name: 'link_postulacion',
+            type: 'text',
+            label: 'Link para postular',
+            admin: {
+                placeholder: 'https://ejemplo.com/postular',
+            },
+        },
 
         // ============================================
         // SECCIÓN: ESTADO Y FECHAS
@@ -311,9 +319,9 @@ export const Offers: CollectionConfig = {
                                 .normalize('NFD')
                                 .replace(/[\u0300-\u036f]/g, '')
                                 .replace(/[^a-z0-9]+/g, '-')
-                                .replace(/(^-|-$)/g, '');
+                                .replace(/(^-|-$)/g, '')
                         }
-                        return data?.slug;
+                        return data?.slug
                     },
                 ],
             },
@@ -339,4 +347,4 @@ export const Offers: CollectionConfig = {
             },
         },
     ],
-};
+}

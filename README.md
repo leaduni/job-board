@@ -81,8 +81,8 @@ src/
  │   ├─ user.js          → Datos globales del usuario
 
  ├─ services/
- │   ├─ coreApi.js       → Spring Boot
- │   ├─ cmsApi.js        → Strapi
+ │   ├─ coreApi.js       → Express JS
+ │   ├─ cmsApi.js        → Payload 
 
  ├─ router/
  │   ├─ index.js
