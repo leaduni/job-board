@@ -175,7 +175,7 @@ export interface Media {
 export interface Course {
   id: number;
   titulo: string;
-  descripcion: string;
+  descripcion?: string | null;
   proveedor: string;
   url: string;
   esGratuito?: boolean | null;

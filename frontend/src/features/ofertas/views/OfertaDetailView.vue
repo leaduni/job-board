@@ -94,13 +94,22 @@ const yaPostulado = ref(false)
 const postulando = ref(false)
 const mensaje = ref('')
 
+const externalUrl = ref('') // URL para redirección
+
 // Lifecycle
 onMounted(async () => {
   try {
     const id = route.params.id
+    console.log('Buscando oferta con ID:', id) // LOG 1
     const data = await obtenerOfertaPorId(id)
+    console.log('Oferta recibida (raw):', data) // LOG 2
 
-    oferta.value = data
+    if (data) {
+      oferta.value = data
+      console.log('Oferta asignada a ref:', oferta.value) // LOG 3
+    } else {
+      console.error('La API retornó null o undefined')
+    }
 
     // TODO: cuando exista endpoint real
     yaPostulado.value = false
@@ -122,18 +131,33 @@ function compartirOferta() {
 }
 
 function handleRedirectionConfirm() {
-  // La lógica de console.log está en el modal.
-  // Aquí solo cerramos y podemos añadir notificaciones en el futuro.
+  if (externalUrl.value) {
+    window.open(externalUrl.value, '_blank')
+  }
   showRedirectionModal.value = false
-  // alert('Función en desarrollo')
 }
 
 
 async function postular() {
   if (!oferta.value) return
+  
+  // 1. Caso Link Externo (link_postulacion en raíz)
+  if (oferta.value.link_postulacion) {
+    externalUrl.value = oferta.value.link_postulacion
+    showRedirectionModal.value = true
+    return
+  }
 
-  // ✨ Mostrar modal de redirección para flujo externo
-  showRedirectionModal.value = true
+  // 2. Caso Email (email_contacto en raíz)
+  if (oferta.value.email_contacto) {
+    window.location.href = `mailto:${oferta.value.email_contacto}?subject=Postulación: ${oferta.value.titulo}`
+    return
+  }
+  
+  // 3. Caso Interno (Placeholder o futuro)
+  console.log('Postulación interna no implementada aún')
+  mensaje.value = 'La postulación interna estará disponible pronto.'
 }
+
 
 </script>

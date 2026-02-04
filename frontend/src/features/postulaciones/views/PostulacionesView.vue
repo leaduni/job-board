@@ -1,49 +1,49 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useAuth } from '@/composables/useAuth'
-import axios from 'axios'
+import { ref, computed, onMounted } from "vue";
+import { useAuth } from "@/composables/useAuth";
+import axios from "axios";
 
 // componentes (los iremos creando después)
-import PostulacionesStats from '../components/PostulacionesStats.vue'
-import PostulacionesFilters from '../components/PostulacionesFilters.vue'
-import PostulacionesList from '../components/PostulacionesList.vue'
+import PostulacionesStats from "../components/PostulacionesStats.vue";
+import PostulacionesFilters from "../components/PostulacionesFilters.vue";
+import PostulacionesList from "../components/PostulacionesList.vue";
 
 // --- auth ---
-const { user, isAuthenticated } = useAuth()
+const { user, isAuthenticated } = useAuth();
 
 // --- estado ---
-const loading = ref(false)
-const error = ref(null)
-const postulaciones = ref([])
+const loading = ref(false);
+const error = ref(null);
+const postulaciones = ref([]);
 
 // filtro activo: 'all' | 'enviada' | 'en_proceso' | 'cerrada'
-const filtroEstado = ref('all')
+const filtroEstado = ref("all");
 
 // --- fetch ---
 async function cargarPostulaciones() {
-  loading.value = true
-  error.value = null
+  loading.value = true;
+  error.value = null;
 
   try {
     const { data } = await axios.get(
-      'https://api-leaduni.up.railway.app/api/postulaciones'
-    )
+      "https://api-leaduni.up.railway.app/api/postulaciones",
+    );
 
-    postulaciones.value = data
+    postulaciones.value = data;
 
     const idsUnicos = [
       ...new Set(
         data
-          .filter(p => p.perfil_id === user.value.id)
-          .map(p => p.oferta_id)
+          .filter((p) => p.perfil_id === user.value.id)
+          .map((p) => p.oferta_id),
       ),
-    ]
+    ];
 
-    await Promise.all(idsUnicos.map(cargarOferta))
+    await Promise.all(idsUnicos.map(cargarOferta));
   } catch (err) {
-    error.value = 'No se pudieron cargar las postulaciones'
+    error.value = "No se pudieron cargar las postulaciones";
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
@@ -51,65 +51,63 @@ async function cargarPostulaciones() {
 
 // postulaciones del perfil autenticado
 const postulacionesUsuario = computed(() => {
-  if (!isAuthenticated.value || !user.value) return []
-  return postulaciones.value.filter(
-    (p) => p.perfil_id === user.value.id
-  )
-})
+  if (!isAuthenticated.value || !user.value) return [];
+  return postulaciones.value.filter((p) => p.perfil_id === user.value.id);
+});
 
 // filtradas por estado
 const postulacionesFiltradas = computed(() => {
-  if (filtroEstado.value === 'all') {
-    return postulacionesUsuario.value
+  if (filtroEstado.value === "all") {
+    return postulacionesUsuario.value;
   }
   return postulacionesUsuario.value.filter(
-    (p) => p.estado === filtroEstado.value
-  )
-})
+    (p) => p.estado === filtroEstado.value,
+  );
+});
 
 // stats
 const stats = computed(() => {
-  const total = postulacionesUsuario.value.length
+  const total = postulacionesUsuario.value.length;
 
   const enviadas = postulacionesUsuario.value.filter(
-    (p) => p.estado === 'enviada'
-  ).length
+    (p) => p.estado === "enviada",
+  ).length;
 
   const enProceso = postulacionesUsuario.value.filter(
-    (p) => p.estado === 'en_proceso'
-  ).length
+    (p) => p.estado === "en_proceso",
+  ).length;
 
   const cerradas = postulacionesUsuario.value.filter(
-    (p) => p.estado === 'cerrada'
-  ).length
+    (p) => p.estado === "cerrada",
+  ).length;
 
   return {
     total,
     enviadas,
     enProceso,
     cerradas,
-  }
-})
+  };
+});
 
-const ofertasMap = ref({})
+const ofertasMap = ref({});
 
 async function cargarOferta(ofertaId) {
-  if (ofertasMap.value[ofertaId]) return
+  if (ofertasMap.value[ofertaId]) return;
 
   const { data } = await axios.get(
-  `/cms/api/projects/${ofertaId}`
-)
+    `https://api-leaduni.up.railway.app/api/projects/${ofertaId}`,
+  );
+  console.log("⭐ OFERTA CAPTURADA: " + data);
 
-  ofertasMap.value[ofertaId] = data
+  ofertasMap.value[ofertaId] = data;
 }
-
 
 // --- lifecycle ---
 onMounted(() => {
   if (isAuthenticated.value) {
-    cargarPostulaciones()
+    cargarPostulaciones();
   }
-})
+});
 </script>
 
 <template>

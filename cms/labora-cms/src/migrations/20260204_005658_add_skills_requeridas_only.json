@@ -379,7 +379,7 @@
           "name": "descripcion",
           "type": "varchar",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "proveedor": {
           "name": "proveedor",
@@ -1937,6 +1937,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "259f6542-9a3d-4b73-afb1-31472fafb3c7",
+  "id": "155b09a5-abb6-41bf-8574-69dc1bd10c2a",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

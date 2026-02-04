@@ -4,36 +4,36 @@
     <div class="bg-transparent mb-[20px]">
       <h2 class="font-heading text-2xl mb-[12px] text-[rgba(255,255,255,0.95)]">Acerca del Puesto</h2>
 
-      <p class="text-[rgba(255,255,255,0.45)] leading-[1.65] mb-[18px]">
-        {{ descripcionTexto || 'Sin descripción disponible.' }}
-      </p>
+      <div class="text-[rgba(255,255,255,0.45)] leading-[1.65] mb-[18px] whitespace-pre-line">
+        {{ descripcionTexto }}
+      </div>
     </div>
 
-    <!-- 2 columnas: Responsabilidades / Requisitos -->
-    <div class="bg-transparent mb-[20px] grid grid-cols-2 gap-[22px] mt-[12px]">
-      <!-- Responsabilidades (placeholder por ahora) -->
-      <div>
-        <h3 class="text-[16px] text-lead-500 mb-[10px] font-bold">Responsabilidades</h3>
-
-        <ul class="m-0 pl-[18px] text-[rgba(255,255,255,0.45)] list-disc" v-if="responsabilidades.length">
-          <li v-for="(item, idx) in responsabilidades" :key="idx">{{ item }}</li>
-        </ul>
-
-        <p v-else class="text-[rgba(255,255,255,0.45)]">
-          (Pendiente de contenido / backend)
-        </p>
-      </div>
-
+    <!-- 2 columnas: Requisitos y otros detalles -->
+    <div class="bg-transparent mb-[20px] grid grid-cols-1 md:grid-cols-2 gap-[22px] mt-[12px]">
       <!-- Requisitos -->
       <div>
         <h3 class="text-[16px] text-lead-500 mb-[10px] font-bold">Requisitos</h3>
 
-        <ul class="m-0 pl-[18px] text-[rgba(255,255,255,0.45)] list-disc" v-if="requisitosList.length">
-          <li v-for="(item, idx) in requisitosList" :key="idx">{{ item }}</li>
-        </ul>
+        <div class="text-[rgba(255,255,255,0.45)] whitespace-pre-line" v-if="requisitosTexto">
+          {{ requisitosTexto }}
+        </div>
+        
+        <p v-else class="text-[rgba(255,255,255,0.45)]">
+          No especificados
+        </p>
+      </div>
+
+      <!-- Carreras Objetivo (Nuevo) -->
+      <div>
+        <h3 class="text-[16px] text-lead-500 mb-[10px] font-bold">Carreras Afines</h3>
+
+        <div class="text-[rgba(255,255,255,0.45)]" v-if="carrerasTexto">
+          {{ carrerasTexto }}
+        </div>
 
         <p v-else class="text-[rgba(255,255,255,0.45)]">
-          Sin requisitos registrados.
+          Todas las carreras
         </p>
       </div>
     </div>
@@ -47,36 +47,37 @@ const props = defineProps({
   oferta: { type: Object, required: true },
 });
 
-// Extrae texto simple (tu misma lógica actual)
+// Función auxiliar para extraer texto de Rich Text (Payload CMS)
+function extractTextFromRichText(richText) {
+  if (!richText || !richText.root || !richText.root.children) return '';
+  
+  return richText.root.children.map(node => {
+    if (node.children) {
+      return node.children.map(child => child.text || '').join('');
+    }
+    return '';
+  }).join('\n\n');
+}
+
+// Extrae texto de la descripción
 const descripcionTexto = computed(() => {
-  return (
-    props.oferta?.descripcion?.root?.children?.[0]?.children?.[0]?.text ||
-    ''
-  );
+  if (typeof props.oferta?.descripcion === 'string') {
+    return props.oferta.descripcion;
+  }
+  return extractTextFromRichText(props.oferta?.descripcion) || 'Sin descripción disponible.';
 });
 
-// Requisitos: ahora viene como rich text similar
+// Requisitos raw
 const requisitosTexto = computed(() => {
-  return (
-    props.oferta?.requisitos?.root?.children?.[0]?.children?.[0]?.text ||
-    ''
-  );
+  if (typeof props.oferta?.requisitos === 'string') {
+    return props.oferta.requisitos;
+  }
+  return extractTextFromRichText(props.oferta?.requisitos);
 });
 
-// Convertimos requisitos a lista (simple por ahora)
-// Si luego viene con saltos de línea o items, esto ya te sirve.
-const requisitosList = computed(() => {
-  const txt = requisitosTexto.value.trim();
-  if (!txt) return [];
-  // separa por saltos o puntos y coma (ajustable)
-  return txt
-    .split(/\n|•|- /g)
-    .map(s => s.trim())
-    .filter(Boolean);
+// Carreras (en API viene como string simple "carreras_afines")
+const carrerasTexto = computed(() => {
+  return props.oferta?.carreras_afines || '';
 });
 
-// Placeholder: luego conectar a CMS/Backend
-const responsabilidades = computed(() => {
-  return [];
-});
 </script>

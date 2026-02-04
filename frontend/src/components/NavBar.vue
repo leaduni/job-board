@@ -7,23 +7,14 @@
     <div
       class="mx-auto flex w-full max-w-[1240px] items-center justify-between gap-5 px-5"
     >
-      <div class="flex items-center">
+      <router-link to="/" class="flex items-center">
         <div class="flex items-center gap-3">
           <div
-            class="flex h-11 w-11 items-center justify-center rounded-[10px] shadow-[0_6px_22px_rgba(0,0,0,0.5)]"
+            class="flex h-11 w-11 items-center justify-center rounded-[10px]"
             aria-hidden="true"
           >
             <!-- icono -->
-            <svg
-              width="36"
-              height="36"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <rect width="24" height="24" rx="6" fill="#a0218b" />
-              <path d="M6 9h12v6H6z" fill="#fff" opacity="0.06" />
-            </svg>
+            <img src="/icono-lead.png" alt="Icono LEAD UNI" />
           </div>
           <div>
             <div
@@ -34,7 +25,7 @@
             <div class="text-xs leading-none text-white/45">Bolsa Laboral</div>
           </div>
         </div>
-      </div>
+      </router-link>
 
       <div class="hidden flex-1 items-center justify-center gap-7 lg:flex">
         <ul
@@ -134,22 +125,21 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useAuth } from '@/composables/useAuth'
+import { computed } from "vue";
+import { useAuth } from "@/composables/useAuth";
 
-const { isAuthenticated, user } = useAuth()
+const { isAuthenticated, user } = useAuth();
 
 const displayName = computed(() => {
-  if (!user.value) return ''
+  if (!user.value) return "";
 
-  const nombre = user.value.nombres?.split(' ')[0] || ''
-  const apellido = user.value.apellidos?.split(' ')[0] || ''
+  const nombre = user.value.nombres?.split(" ")[0] || "";
+  const apellido = user.value.apellidos?.split(" ")[0] || "";
 
-  return `${nombre} ${apellido}`.trim()
-})
+  return `${nombre} ${apellido}`.trim();
+});
 
 const carrera = computed(() => {
-  return user.value?.carrera || ''
-})
-
+  return user.value?.carrera || "";
+});
 </script>
