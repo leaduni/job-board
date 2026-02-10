@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useAuth } from "@/composables/useAuth";
-import { coreApi } from "@/services/coreApi"; // Usar coreApi
+import { coreApi } from "@/services/coreApi";
 
 // componentes
 import PostulacionesStats from "../components/PostulacionesStats.vue";
@@ -28,11 +28,12 @@ async function cargarPostulaciones() {
 
   try {
     const { data } = await coreApi.get("/api/postulaciones", {
-      params: { perfil_id: user.value.id },
+      params: { perfil_id: user.value.id }
     });
 
     // El backend ya devuelve { ..., titulo, nombre_comercial }
     postulaciones.value = data || [];
+
   } catch (err) {
     console.error(err);
     error.value = "No se pudieron cargar las postulaciones";
@@ -81,65 +82,6 @@ const stats = computed(() => {
     cerradas,
   };
 });
-
-// --- lifecycle ---
-onMounted(() => {
-  if (isAuthenticated.value) {
-    cargarPostulaciones();
-  }
-});
-
-postulaciones.value = data || [];
-
-// Obtener detalles de las ofertas
-// Nota: El backend ya filtra, así que 'data' son solo las del usuario
-const idsOfertas = [...new Set(postulaciones.value.map((p) => p.oferta_id))];
-
-await Promise.all(idsOfertas.map(cargarOferta));
-
-// --- derivados ---
-
-// postulaciones del perfil autenticado
-
-// filtradas por estado
-
-// stats
-
-const ofertasMap = ref({});
-
-async function cargarOferta(ofertaId) {
-  if (ofertasMap.value[ofertaId]) return;
-
-  try {
-    // Usar el servicio de ofertas existente o coreApi si es al CMS
-    // Asumiendo que /api/projects/:id es del CMS y coreApi apunta al backend core...
-    // Espera, el endpoint de ofertas es del CMS.
-    // Si 'coreApi' apunta al backend (localhost:3001) y las ofertas están en CMS (railway),
-    // necesitamos usar el cliente correcto.
-
-    // Revisando tu código anterior:
-    // axios.get(`https://api-leaduni.up.railway.app/api/projects/${ofertaId}`)
-    // Eso parece ser el CMS.
-
-    // Voy a mantener axios directo para las ofertas si son del CMS externo,
-    // o importar cmsApi si ya lo tienes configurado.
-    // Usaré axios directo por seguridad para no romper importaciones circulares,
-    // pero idealmente usaría cmsApi.getProjectById(ofertaId).
-
-    // Mejor aún: import { obtenerOfertaPorId } from '@/features/ofertas/services/ofertas.service'
-
-    // Pero para mantener la consistencia con el código original que usaba axios directo a esa URL:
-    // (Nota: coreApi apunta a VITE_CORE_API_URL, verifica si es la misma)
-
-    // Asumiré que VITE_CMS_API_URL es la correcta para proyectos.
-    const response = await axios.get(
-      `${import.meta.env.VITE_CMS_API_URL}/api/projects/${ofertaId}`,
-    );
-    ofertasMap.value[ofertaId] = response.data;
-  } catch (e) {
-    console.error("Error cargando oferta", ofertaId);
-  }
-}
 
 // --- lifecycle ---
 onMounted(() => {
