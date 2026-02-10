@@ -100,43 +100,10 @@ await Promise.all(idsOfertas.map(cargarOferta));
 // --- derivados ---
 
 // postulaciones del perfil autenticado
-const postulacionesUsuario = computed(() => {
-  return postulaciones.value;
-});
 
 // filtradas por estado
-const postulacionesFiltradas = computed(() => {
-  if (filtroEstado.value === "all") {
-    return postulacionesUsuario.value;
-  }
-  return postulacionesUsuario.value.filter(
-    (p) => p.estado === filtroEstado.value,
-  );
-});
 
 // stats
-const stats = computed(() => {
-  const total = postulacionesUsuario.value.length;
-
-  const enviadas = postulacionesUsuario.value.filter(
-    (p) => p.estado === "enviada",
-  ).length;
-
-  const enProceso = postulacionesUsuario.value.filter(
-    (p) => p.estado === "en_proceso",
-  ).length;
-
-  const cerradas = postulacionesUsuario.value.filter(
-    (p) => p.estado === "cerrada",
-  ).length;
-
-  return {
-    total,
-    enviadas,
-    enProceso,
-    cerradas,
-  };
-});
 
 const ofertasMap = ref({});
 
