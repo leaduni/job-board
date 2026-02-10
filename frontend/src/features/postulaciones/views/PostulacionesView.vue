@@ -21,16 +21,75 @@ const filtroEstado = ref("all");
 
 // --- fetch ---
 async function cargarPostulaciones() {
-  if (!user.value?.id) return; // Seguridad extra
+  if (!user.value?.id) return;
 
   loading.value = true;
   error.value = null;
 
   try {
-    // Pasar perfil_id como query param
     const { data } = await coreApi.get("/api/postulaciones", {
       params: { perfil_id: user.value.id }
     });
+
+    // El backend ya devuelve { ..., titulo, nombre_comercial }
+    postulaciones.value = data || [];
+
+  } catch (err) {
+    console.error(err);
+    error.value = "No se pudieron cargar las postulaciones";
+  } finally {
+    loading.value = false;
+  }
+}
+
+// --- derivados ---
+
+// postulaciones del perfil autenticado
+const postulacionesUsuario = computed(() => {
+  return postulaciones.value;
+});
+
+// filtradas por estado
+const postulacionesFiltradas = computed(() => {
+  if (filtroEstado.value === "all") {
+    return postulacionesUsuario.value;
+  }
+  return postulacionesUsuario.value.filter(
+    (p) => p.estado === filtroEstado.value,
+  );
+});
+
+// stats
+const stats = computed(() => {
+  const total = postulacionesUsuario.value.length;
+
+  const enviadas = postulacionesUsuario.value.filter(
+    (p) => p.estado === "enviada",
+  ).length;
+
+  const enProceso = postulacionesUsuario.value.filter(
+    (p) => p.estado === "en_proceso",
+  ).length;
+
+  const cerradas = postulacionesUsuario.value.filter(
+    (p) => p.estado === "cerrada",
+  ).length;
+
+  return {
+    total,
+    enviadas,
+    enProceso,
+    cerradas,
+  };
+});
+
+// --- lifecycle ---
+onMounted(() => {
+  if (isAuthenticated.value) {
+    cargarPostulaciones();
+  }
+});
+
 
     postulaciones.value = data || [];
 
@@ -223,7 +282,6 @@ onMounted(() => {
           <!-- List Component -->
           <PostulacionesList
             :items="postulacionesFiltradas"
-            :ofertasMap="ofertasMap"
           />
         </main>
 

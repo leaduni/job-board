@@ -5,11 +5,7 @@ defineProps({
   items: {
     type: Array,
     required: true,
-  },
-  ofertasMap: {
-    type: Object,
-    required: true,
-  },
+  }
 })
 
 </script>
@@ -30,8 +26,8 @@ defineProps({
             v-for="p in items"
             :key="p.id"
             :postulacion="p"
-            :oferta="ofertasMap[p.oferta_id]"
         />
     </div>
   </section>
 </template>
+

@@ -5,7 +5,6 @@ import { coreApi } from '@/services/coreApi'
 
 const props = defineProps({
   postulacion: Object,
-  oferta: Object,
 })
 
 const isUpdating = ref(false)
@@ -33,8 +32,6 @@ async function cancelarPostulacion() {
     const { data } = await coreApi.patch(`/api/postulaciones/${props.postulacion.id}/estado`, {
       estado: 'cerrada'
     })
-    // Actualizar estado localmente (mutar prop es anti-patrón, pero para reflejo inmediato ok si es objeto)
-    // Lo ideal es emitir evento al padre para recargar, pero mutaremos por simplicidad reactiva
     props.postulacion.estado = data.estado
   } catch (error) {
     console.error('Error actualizando estado:', error)
@@ -51,12 +48,12 @@ async function cancelarPostulacion() {
     <div class="flex-grow">
         <h3 class="m-0 text-lg font-bold text-white mb-1">
             <router-link :to="`/ofertas/${postulacion.oferta_id}`" class="hover:text-[#b62667] transition-colors">
-              {{ oferta?.titulo || `Oferta #${postulacion.oferta_id}` }}
+              {{ postulacion.titulo || `Oferta #${postulacion.oferta_id}` }}
             </router-link>
         </h3>
 
         <p class="text-sm text-white/60 mb-2 font-medium">
-            {{ oferta?.company?.nombre_comercial || `Empresa #${postulacion.empresa_id}` }}
+            {{ postulacion.nombre_comercial || `Empresa #${postulacion.empresa_id}` }}
         </p>
 
       <p class="text-xs text-white/40">
