@@ -1,6 +1,6 @@
 <template>
   <div
-    class="relative bg-[#09092a] min-h-[calc(100vh-72px)] flex items-center justify-center p-4 py-12 font-sans overflow-hidden"
+    class="relative bg-[#09092a] min-h-[calc(100vh-72px)] flex items-center justify-center p-4 py-12 font-sans overflow-hidden pt-32"
   >
     <!-- Background Decor -->
     <div

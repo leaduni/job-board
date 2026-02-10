@@ -1,5 +1,5 @@
 <template>
-  <div class="relative bg-[#09092a] min-h-[calc(100vh-72px)] flex items-center justify-center p-4 font-sans overflow-hidden">
+  <div class="relative bg-[#09092a] min-h-[calc(100vh-72px)] flex items-center justify-center p-4 font-sans overflow-hidden pt-32">
     
     <!-- Background Decor -->
     <div class="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-[#a0218b] opacity-10 blur-[120px] pointer-events-none"></div>
