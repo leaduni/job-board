@@ -20,33 +20,33 @@ defineProps({
 </script>
 
 <template>
-  <div class="grid grid-cols-4 gap-[18px] mt-6 mb-7">
+  <div class="grid grid-cols-2 gap-4 mt-6 mb-7">
     <div
-      class="rounded-2xl border-[1.5px] border-[rgba(255,255,255,0.18)] bg-gradient-to-b from-[rgba(23,16,44,0.85)] to-[rgba(18,13,38,0.9)] px-[22px] py-5 text-white shadow-[0_14px_40px_rgba(0,0,0,0.6)]"
+      class="rounded-xl border border-white/10 bg-[#121225] p-4 text-white shadow-lg"
     >
-      <span class="mb-1.5 block text-[13px] font-semibold">Total</span>
-      <span class="block font-heading text-[28px] font-extrabold">{{ total }}</span>
+      <span class="mb-1 block text-xs font-semibold text-white/60 uppercase tracking-wider">Total</span>
+      <span class="block font-['League_Spartan'] text-3xl font-bold">{{ total }}</span>
     </div>
 
     <div
-      class="rounded-2xl border-[1.5px] border-[rgba(255,193,7,0.45)] bg-gradient-to-b from-[rgba(23,16,44,0.85)] to-[rgba(18,13,38,0.9)] px-[22px] py-5 text-[#facc15] shadow-[0_14px_40px_rgba(0,0,0,0.6)]"
+      class="rounded-xl border border-yellow-500/20 bg-[#121225] p-4 text-yellow-400 shadow-lg"
     >
-      <span class="mb-1.5 block text-[13px] font-semibold">En proceso</span>
-      <span class="block font-heading text-[28px] font-extrabold">{{ enProceso }}</span>
+      <span class="mb-1 block text-xs font-semibold text-yellow-400/60 uppercase tracking-wider">En proceso</span>
+      <span class="block font-['League_Spartan'] text-3xl font-bold">{{ enProceso }}</span>
     </div>
 
     <div
-      class="rounded-2xl border-[1.5px] border-[rgba(22,199,132,0.45)] bg-gradient-to-b from-[rgba(23,16,44,0.85)] to-[rgba(18,13,38,0.9)] px-[22px] py-5 text-[#16c784] shadow-[0_14px_40px_rgba(0,0,0,0.6)]"
+      class="rounded-xl border border-emerald-500/20 bg-[#121225] p-4 text-emerald-400 shadow-lg"
     >
-      <span class="mb-1.5 block text-[13px] font-semibold">Enviadas</span>
-      <span class="block font-heading text-[28px] font-extrabold">{{ enviadas }}</span>
+      <span class="mb-1 block text-xs font-semibold text-emerald-400/60 uppercase tracking-wider">Enviadas</span>
+      <span class="block font-['League_Spartan'] text-3xl font-bold">{{ enviadas }}</span>
     </div>
 
     <div
-      class="rounded-2xl border-[1.5px] border-[rgba(239,68,68,0.45)] bg-gradient-to-b from-[rgba(23,16,44,0.85)] to-[rgba(18,13,38,0.9)] px-[22px] py-5 text-[#f87171] shadow-[0_14px_40px_rgba(0,0,0,0.6)]"
+      class="rounded-xl border border-red-500/20 bg-[#121225] p-4 text-red-400 shadow-lg"
     >
-      <span class="mb-1.5 block text-[13px] font-semibold">Cerradas</span>
-      <span class="block font-heading text-[28px] font-extrabold">{{ cerradas }}</span>
+      <span class="mb-1 block text-xs font-semibold text-red-400/60 uppercase tracking-wider">Cerradas</span>
+      <span class="block font-['League_Spartan'] text-3xl font-bold">{{ cerradas }}</span>
     </div>
   </div>
 </template>

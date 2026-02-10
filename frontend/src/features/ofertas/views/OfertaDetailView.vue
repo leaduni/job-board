@@ -132,10 +132,28 @@ function compartirOferta() {
   alert("Enlace copiado al portapapeles");
 }
 
-function handleRedirectionConfirm() {
-  if (externalUrl.value) {
-    window.open(externalUrl.value, "_blank");
+async function handleRedirectionConfirm() {
+  // Registrar postulación externa antes de redirigir
+  if (isAuthenticated.value && oferta.value) {
+    try {
+      await coreApi.post('/api/postulaciones', {
+        oferta_id: oferta.value.id,
+        empresa_id: oferta.value.company?.id,
+        perfil_id: user.value.id,
+        estado: 'enviada' // Registramos como enviada al hacer click
+      })
+      yaPostulado.value = true
+    } catch (e) {
+      console.error('Error registrando postulación externa:', e)
+    }
   }
+
+  if (externalUrl.value) {
+    window.open(externalUrl.value, '_blank')
+  }
+  showRedirectionModal.value = false
+}
+
   showRedirectionModal.value = false;
 }
 

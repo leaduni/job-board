@@ -1,11 +1,14 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import StatusBadge from './StatusBadge.vue'
+import { coreApi } from '@/services/coreApi'
 
 const props = defineProps({
   postulacion: Object,
   oferta: Object,
 })
+
+const isUpdating = ref(false)
 
 // Fecha formateada simple
 const fechaPostulacion = computed(() => {
@@ -17,28 +20,63 @@ const fechaPostulacion = computed(() => {
     year: 'numeric',
   })
 })
+
+const canCancel = computed(() => {
+  return !['cerrada', 'rechazada'].includes(props.postulacion.estado)
+})
+
+async function cancelarPostulacion() {
+  if (!confirm('¿Estás seguro de que deseas retirar esta postulación?')) return
+  
+  isUpdating.value = true
+  try {
+    const { data } = await coreApi.patch(`/api/postulaciones/${props.postulacion.id}/estado`, {
+      estado: 'cerrada'
+    })
+    // Actualizar estado localmente (mutar prop es anti-patrón, pero para reflejo inmediato ok si es objeto)
+    // Lo ideal es emitir evento al padre para recargar, pero mutaremos por simplicidad reactiva
+    props.postulacion.estado = data.estado
+  } catch (error) {
+    console.error('Error actualizando estado:', error)
+    alert('No se pudo actualizar el estado')
+  } finally {
+    isUpdating.value = false
+  }
+}
 </script>
 
 <template>
-  <article class="flex items-center justify-between rounded-lg bg-white/5 p-4">
+  <article class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-lg bg-[#16162a] border border-white/5 p-5 transition-colors hover:border-[#b62667]/30">
     <!-- Lado izquierdo: info principal -->
     <div class="flex-grow">
-        <h3 class="m-0 text-base font-semibold">
-            {{ oferta?.titulo || `Oferta #${postulacion.oferta_id}` }}
+        <h3 class="m-0 text-lg font-bold text-white mb-1">
+            <router-link :to="`/ofertas/${postulacion.oferta_id}`" class="hover:text-[#b62667] transition-colors">
+              {{ oferta?.titulo || `Oferta #${postulacion.oferta_id}` }}
+            </router-link>
         </h3>
 
-        <p class="my-1 text-sm opacity-85">
+        <p class="text-sm text-white/60 mb-2 font-medium">
             {{ oferta?.company?.nombre_comercial || `Empresa #${postulacion.empresa_id}` }}
         </p>
 
-      <p class="m-0 text-xs opacity-70">
+      <p class="text-xs text-white/40">
         Postulado el {{ fechaPostulacion }}
       </p>
     </div>
 
-    <!-- Lado derecho: estado -->
-    <div class="ml-4">
+    <!-- Lado derecho: estado y acciones -->
+    <div class="flex items-center gap-4 self-end sm:self-auto">
       <StatusBadge :status="postulacion.estado" />
+      
+      <button 
+        v-if="canCancel"
+        @click="cancelarPostulacion"
+        :disabled="isUpdating"
+        class="text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 px-3 py-1.5 rounded-md transition-all border border-transparent hover:border-red-500/20"
+        title="Retirar postulación"
+      >
+        {{ isUpdating ? '...' : 'Retirar' }}
+      </button>
     </div>
   </article>
 </template>
