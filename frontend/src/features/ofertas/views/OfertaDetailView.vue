@@ -69,14 +69,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import RedirectionModal from '@/components/modals/RedirectionModal.vue'
-
-const showRedirectionModal = ref(false)
 
 // Servicios
 import { obtenerOfertaPorId } from '../services/ofertas.service'
-import { postularOferta } from '../../postulaciones/services/postulaciones.service'
+import { coreApi } from '@/services/coreApi'
+import { useAuth } from '@/composables/useAuth'
 
 // Componentes
 import OfferHeader from '../components/detail/OfferHeader.vue'
@@ -87,6 +86,10 @@ import SkillGapBridge from '../../capacitate/components/SkillGapBridge.vue'
 
 // Estado
 const route = useRoute()
+const router = useRouter()
+const { user, isAuthenticated } = useAuth()
+
+const showRedirectionModal = ref(false)
 const oferta = ref(null)
 const loading = ref(true)
 
@@ -100,18 +103,15 @@ const externalUrl = ref('') // URL para redirección
 onMounted(async () => {
   try {
     const id = route.params.id
-    console.log('Buscando oferta con ID:', id) // LOG 1
     const data = await obtenerOfertaPorId(id)
-    console.log('Oferta recibida (raw):', data) // LOG 2
 
     if (data) {
       oferta.value = data
-      console.log('Oferta asignada a ref:', oferta.value) // LOG 3
     } else {
       console.error('La API retornó null o undefined')
     }
 
-    // TODO: cuando exista endpoint real
+    // TODO: Verificar si ya postuló (requeriría endpoint adicional)
     yaPostulado.value = false
   } catch (error) {
     console.error('Error cargando oferta:', error)
@@ -126,8 +126,8 @@ function guardarOferta() {
 }
 
 function compartirOferta() {
-  console.log('Compartir oferta', oferta.value?.id)
-  // futuro
+  navigator.clipboard.writeText(window.location.href)
+  alert('Enlace copiado al portapapeles')
 }
 
 function handleRedirectionConfirm() {
@@ -140,24 +140,51 @@ function handleRedirectionConfirm() {
 
 async function postular() {
   if (!oferta.value) return
+
+  // 1. Validar Autenticación
+  if (!isAuthenticated.value) {
+    router.push('/auth/login')
+    return
+  }
   
-  // 1. Caso Link Externo (link_postulacion en raíz)
+  // 2. Revisar tipo de postulación
+  
+  // Caso Link Externo
   if (oferta.value.link_postulacion) {
     externalUrl.value = oferta.value.link_postulacion
     showRedirectionModal.value = true
     return
   }
 
-  // 2. Caso Email (email_contacto en raíz)
+  // Caso Email
   if (oferta.value.email_contacto) {
     window.location.href = `mailto:${oferta.value.email_contacto}?subject=Postulación: ${oferta.value.titulo}`
     return
   }
   
-  // 3. Caso Interno (Placeholder o futuro)
-  console.log('Postulación interna no implementada aún')
-  mensaje.value = 'La postulación interna estará disponible pronto.'
-}
+  // 3. Caso Interno (API Postulaciones)
+  postulando.value = true
+  mensaje.value = ''
 
+  try {
+    const payload = {
+      oferta_id: oferta.value.id,
+      empresa_id: oferta.value.company?.id,
+      perfil_id: user.value.id, // ID del usuario autenticado
+      estado: 'enviada'
+    }
+
+    await coreApi.post('/api/postulaciones', payload)
+
+    yaPostulado.value = true
+    mensaje.value = '¡Postulación enviada con éxito!'
+    
+  } catch (error) {
+    console.error('Error al postular:', error)
+    mensaje.value = 'Ocurrió un error al enviar tu postulación. Intenta nuevamente.'
+  } finally {
+    postulando.value = false
+  }
+}
 
 </script>

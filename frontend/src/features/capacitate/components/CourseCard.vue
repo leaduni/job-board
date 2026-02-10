@@ -9,10 +9,24 @@ const props = defineProps({
 });
 
 const imageUrl = computed(() => {
+  // 1. Prioridad: Logos locales de marcas conocidas
+  if (props.course.proveedor) {
+    const p = props.course.proveedor.toLowerCase().trim();
+    
+    if (p.includes('platzi')) return '/platzi.png';
+    if (p.includes('edteam') || p.includes('ed team')) return '/edteam.png';
+    if (p.includes('google')) return '/google.png';
+    if (p.includes('fazt')) return '/Fazt.jpg';
+    if (p.includes('lead uni') || p.includes('lead')) return '/icono-lead.png';
+  }
+
+  // 2. Imagen de la API (si existe)
   if (props.course.imagen?.url) {
     return `${import.meta.env.VITE_CMS_API_URL}${props.course.imagen.url}`;
   }
-  return 'https://via.placeholder.com/400x225?text=Curso';
+
+  // 3. Fallback genérico local
+  return '/generico.jpg';
 });
 
 const badgeClass = computed(() => {

@@ -67,33 +67,6 @@
       </div>
 
       <div class="flex items-center gap-3.5">
-        <button
-          class="relative inline-flex cursor-pointer items-center justify-center rounded-lg border-none bg-transparent p-2 text-white/45 hover:bg-white/[.02]"
-          title="Notificaciones"
-          aria-label="Notificaciones"
-        >
-          <!-- bell SVG -->
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.6"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path
-              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5"
-            ></path>
-            <path d="M13.73 21a2 2 0 01-3.46 0"></path>
-          </svg>
-          <span
-            class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-[#ff5a9e] shadow-[0_0_6px_rgba(255,90,158,0.18)]"
-            aria-hidden="true"
-          ></span>
-        </button>
-
         <div class="mr-1.5 text-right text-white/45" title="Ver perfil">
           <template v-if="isAuthenticated">
             <div class="text-[13px] font-bold text-white/95">

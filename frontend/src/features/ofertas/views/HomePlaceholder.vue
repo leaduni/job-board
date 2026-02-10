@@ -38,9 +38,7 @@
         <div
           class="max-w-3xl mx-auto bg-white p-2 rounded-2xl shadow-2xl flex flex-col md:flex-row gap-2"
         >
-          <div
-            class="flex-1 relative flex items-center px-4 border-b md:border-b-0 md:border-r border-gray-100"
-          >
+          <div class="flex-1 relative flex items-center px-4">
             <svg
               class="w-5 h-5 text-gray-400 mr-3"
               fill="none"
@@ -57,32 +55,6 @@
             <input
               type="text"
               placeholder="Cargo, empresa o palabra clave"
-              class="w-full py-3 bg-transparent outline-none text-gray-700 placeholder-gray-400"
-            />
-          </div>
-          <div class="flex-1 relative flex items-center px-4">
-            <svg
-              class="w-5 h-5 text-gray-400 mr-3"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-              ></path>
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-              ></path>
-            </svg>
-            <input
-              type="text"
-              placeholder="Ciudad o Modalidad"
               class="w-full py-3 bg-transparent outline-none text-gray-700 placeholder-gray-400"
             />
           </div>
@@ -110,44 +82,6 @@
       </div>
     </header>
 
-    <!-- Stats Section -->
-    <section class="bg-white py-12 border-b border-gray-100">
-      <div class="mx-auto max-w-7xl px-6 lg:px-8">
-        <dl
-          class="grid grid-cols-1 gap-x-8 gap-y-16 text-center lg:grid-cols-3"
-        >
-          <div class="flex flex-col gap-y-2">
-            <dt class="text-base leading-7 text-gray-600">
-              Empresas asociadas
-            </dt>
-            <dd
-              class="order-first text-3xl font-bold tracking-tight text-[#2a1630] sm:text-5xl"
-            >
-              120+
-            </dd>
-          </div>
-          <div class="flex flex-col gap-y-2">
-            <dt class="text-base leading-7 text-gray-600">Ofertas activas</dt>
-            <dd
-              class="order-first text-3xl font-bold tracking-tight text-[#2a1630] sm:text-5xl"
-            >
-              450+
-            </dd>
-          </div>
-          <div class="flex flex-col gap-y-2">
-            <dt class="text-base leading-7 text-gray-600">
-              Candidatos contratados
-            </dt>
-            <dd
-              class="order-first text-3xl font-bold tracking-tight text-[#2a1630] sm:text-5xl"
-            >
-              2.1k
-            </dd>
-          </div>
-        </dl>
-      </div>
-    </section>
-
     <!-- Categorias -->
     <section class="py-20 bg-gray-50">
       <div class="mx-auto max-w-7xl px-6 lg:px-8">
@@ -155,10 +89,10 @@
           <h2
             class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"
           >
-            Explora por Categoría
+            Explora por Tipo de Contrato
           </h2>
           <p class="mt-2 text-lg leading-8 text-gray-600">
-            Encuentra oportunidades en tu área de especialización.
+            Encuentra la oportunidad que se adapta a tu disponibilidad.
           </p>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -190,7 +124,7 @@
             >
               {{ cat.name }}
             </h3>
-            <p class="text-sm text-gray-500 mt-1">{{ cat.count }} ofertas</p>
+            <p class="text-sm text-gray-500 mt-1">Explorar</p>
           </div>
         </div>
       </div>
@@ -231,38 +165,51 @@
           </router-link>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div v-if="loading" class="flex justify-center py-20">
+          <div
+            class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#b62667]"
+          ></div>
+        </div>
+
+        <div
+          v-else
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+        >
           <div
             v-for="job in featuredJobs"
             :key="job.id"
-            class="flex flex-col bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 p-6"
+            class="flex flex-col bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 p-6 group cursor-pointer"
+            @click="$router.push(`/ofertas/${job.id}`)"
           >
             <div class="flex items-start justify-between mb-4">
               <div
-                class="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-xl"
+                class="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-xl uppercase"
               >
-                {{ job.company[0] }}
+                {{ job.company?.nombre_comercial?.[0] || "E" }}
               </div>
               <span
-                class="inline-flex items-center rounded-full bg-purple-50 px-2.5 py-0.5 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10"
+                class="inline-flex items-center rounded-full bg-purple-50 px-2.5 py-0.5 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10 capitalize"
               >
-                {{ job.type }}
+                {{ job.modalidad }}
               </span>
             </div>
-            <h3 class="text-lg font-bold text-gray-900 mb-1">
-              {{ job.title }}
+            <h3
+              class="text-lg font-bold text-gray-900 mb-1 line-clamp-2 min-h-[56px]"
+              :title="job.titulo"
+            >
+              {{ job.titulo }}
             </h3>
-            <p class="text-sm text-gray-500 mb-4">
-              {{ job.company }} • {{ job.location }}
+            <p class="text-sm text-gray-500 mb-4 truncate">
+              {{ job.company?.nombre_comercial || "Empresa Confidencial" }}
             </p>
 
             <div
               class="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between"
             >
-              <span class="text-sm font-medium text-gray-900">{{
-                job.salary
+              <span class="text-sm font-medium text-gray-900 capitalize">{{
+                job.tipo_contrato?.replace(/_/g, " ")
               }}</span>
-              <span class="text-xs text-gray-400">{{ job.postedAt }}</span>
+              <span class="text-xs text-gray-400">Reciente</span>
             </div>
           </div>
         </div>
@@ -364,7 +311,7 @@
           <a href="#" class="hover:text-white transition-colors">Contacto</a>
         </div>
         <div class="mt-4 md:mt-0 text-sm">
-          &copy; 2024 LEAD UNI. Todos los derechos reservados.
+          &copy; 2026 LEAD UNI. Todos los derechos reservados.
         </div>
       </div>
     </footer>
@@ -373,62 +320,54 @@
 
 <script setup>
 import NavBar from "@/components/NavBar.vue";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import { listarOfertas } from "@/features/ofertas/services/ofertas.service";
+
+const loading = ref(true);
+const featuredJobs = ref([]);
 
 const categories = [
   {
-    name: "Tecnología",
-    count: 120,
-    color: "bg-blue-500",
-    path: "M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5", // Code bracket-ish
-  },
-  {
-    name: "Finanzas",
+    name: "Prácticas",
     count: 85,
-    color: "bg-green-500",
-    path: "M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z", // Currency-ish
+    color: "bg-blue-500",
+    path: "M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25", // Book/Academic
   },
   {
-    name: "Marketing",
-    count: 64,
+    name: "Tiempo Completo",
+    count: 120,
     color: "bg-purple-500",
-    path: "M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46", // Megaphone
+    path: "M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z", // Clock
   },
   {
-    name: "Administración",
-    count: 92,
+    name: "Medio Tiempo",
+    count: 64,
+    color: "bg-green-500",
+    path: "M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z", // Half moon
+  },
+  {
+    name: "Freelance",
+    count: 42,
     color: "bg-orange-500",
-    path: "M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5M12 6.75h1.5M15 6.75h1.5M9 10.5h1.5M12 10.5h1.5M15 10.5h1.5M9 14.25h1.5M12 14.25h1.5M15 14.25h1.5M9 18h1.5M12 18h1.5M15 18h1.5", // Building
+    path: "M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25", // Laptop
   },
 ];
 
-const featuredJobs = [
-  {
-    id: 1,
-    title: "Frontend Developer Vue.js",
-    company: "TechSolutions Inc.",
-    location: "Remoto",
-    type: "Full-time",
-    salary: "$2500 - $3500",
-    postedAt: "Hace 2 días",
-  },
-  {
-    id: 2,
-    title: "Analista de Datos Jr.",
-    company: "DataCorp",
-    location: "Ciudad Capital",
-    type: "Híbrido",
-    salary: "$1800 - $2200",
-    postedAt: "Hace 5 horas",
-  },
-  {
-    id: 3,
-    title: "UX/UI Designer",
-    company: "Creative Studio",
-    location: "Remoto",
-    type: "Freelance",
-    salary: "Por proyecto",
-    postedAt: "Hace 1 día",
-  },
-];
+onMounted(async () => {
+  try {
+    // Obtener las 3 ofertas más recientes
+    const data = await listarOfertas({
+      limit: 3,
+      sort: "-createdAt",
+    });
+
+    // Mapear respuesta si viene paginada o directa
+    const docs = data.docs || (Array.isArray(data) ? data : []);
+    featuredJobs.value = docs.slice(0, 3);
+  } catch (error) {
+    console.error("Error cargando ofertas destacadas", error);
+  } finally {
+    loading.value = false;
+  }
+});
 </script>

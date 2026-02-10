@@ -3,6 +3,7 @@ import { ref, reactive, computed, nextTick, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuth } from '@/composables/useAuth';
 import { coreApi } from '@/services/coreApi';
+import { uploadCV } from '@/services/upload.service';
 
 const router = useRouter();
 const { logout } = useAuth();
@@ -15,25 +16,24 @@ const notification = reactive({
 
 // --- STATE MANAGEMENT ---
 const loading = ref(true);
+const uploadingCv = ref(false);
 const error = ref(null);
+const fileInput = ref(null);
 
 const profileData = reactive({
   nombres: '',
   apellidos: '',
   telefono: '',
   fecha_nacimiento: '',
-  departamento: '', // Extraer de 'location'
-  distrito: '',     // Extraer de 'location'
-  carrera: 'Ingeniería de Software (Mock)', // TODO: Resolver major_id
-  ciclo_actual: 0,
+  departamento: '', 
+  distrito: '',     
+  carrera: 'Ingeniería de Software (Mock)', 
   anio_egreso: null,
-  promedio_ponderado: 0,
   sobre_mi: '',
-  habilidades_tecnicas: [],
-  habilidades_blandas: [],
   linkedin_url: '',
   github_url: '',
   portfolio_url: '',
+  cv_url: '', 
   cv_filename: 'No hay CV cargado',
 });
 
@@ -43,7 +43,6 @@ async function fetchProfile() {
   try {
     const { data } = await coreApi.get('/api/me');
     
-    // data = { user: {...}, candidate: {...} }
     const candidate = data.candidate || {};
     const user = data.user || {};
 
@@ -52,26 +51,25 @@ async function fetchProfile() {
     profileData.apellidos = candidate.last_name || '';
     profileData.telefono = candidate.phone || '';
     
-    // Formatear fecha para input type="date" (YYYY-MM-DD)
     if (candidate.birth_date) {
       profileData.fecha_nacimiento = candidate.birth_date.split('T')[0];
     }
     
-    // Location parse
     if (candidate.location) {
       const parts = candidate.location.split(',');
       profileData.distrito = parts[0]?.trim() || '';
-      // Si solo hay una parte, asignarla a distrito, si hay dos, la segunda es depto
       profileData.departamento = parts.length > 1 ? parts[1]?.trim() : '';
     }
 
     profileData.anio_egreso = candidate.end_year;
-    // profileData.carrera = ... (necesitamos un catálogo de majors para mostrar el nombre)
-    
     profileData.sobre_mi = candidate.bio || '';
     profileData.linkedin_url = candidate.linkedin_url || '';
     profileData.github_url = candidate.github_url || '';
     profileData.portfolio_url = candidate.portfolio_url || '';
+    
+    // Mapeo CV
+    profileData.cv_url = candidate.cv_url || '';
+    profileData.cv_filename = candidate.cv_url ? 'CV Cargado (PDF)' : 'No hay CV cargado';
 
   } catch (err) {
     console.error("Error cargando perfil:", err);
@@ -84,6 +82,50 @@ async function fetchProfile() {
     loading.value = false;
   }
 }
+
+// --- CV UPLOAD ---
+const triggerFileInput = () => {
+  fileInput.value.click();
+};
+
+const handleFileChange = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (file.type !== 'application/pdf') {
+    notification.message = 'Solo se permiten archivos PDF';
+    notification.show = true;
+    setTimeout(() => { notification.show = false; }, 3000);
+    return;
+  }
+
+  uploadingCv.value = true;
+  try {
+    const response = await uploadCV(file);
+    
+    if (response.ok && response.result?.secure_url) {
+      const cvUrl = response.result.secure_url;
+      
+      await coreApi.patch('/api/me/candidate', {
+        cv_url: cvUrl
+      });
+
+      profileData.cv_url = cvUrl;
+      profileData.cv_filename = file.name;
+      
+      notification.message = 'CV subido correctamente';
+      notification.show = true;
+    }
+  } catch (err) {
+    console.error('Error subiendo CV:', err);
+    notification.message = 'Error al subir el CV';
+    notification.show = true;
+  } finally {
+    uploadingCv.value = false;
+    setTimeout(() => { notification.show = false; }, 3000);
+    event.target.value = ''; 
+  }
+};
 
 // --- UPDATE PROFILE ---
 async function updateCandidate(cardKey) {
@@ -104,7 +146,6 @@ async function updateCandidate(cardKey) {
     else if (cardKey === 'academic') {
       payload.end_year = profileData.anio_egreso ? parseInt(profileData.anio_egreso) : null;
       // Nota: major_id requiere un ID numérico. 
-      // Si el input es texto, no podemos enviarlo directamente al campo major_id.
       // Por ahora omitimos major_id hasta tener un selector de carreras.
     }
     
@@ -131,8 +172,6 @@ async function updateCandidate(cardKey) {
     notification.message = 'Error al guardar los cambios';
     notification.show = true;
     setTimeout(() => { notification.show = false; }, 3000);
-    // Revertir cambios en UI si es crítico, o dejar que el usuario reintente
-    throw err; // Propagar para que el toggle no cierre si hay error grave (opcional)
   }
 }
 
@@ -151,14 +190,6 @@ const editingCards = reactive({
   links: false,
 });
 
-// State for inline skill adding
-const addingSkill = reactive({
-  technical: false,
-  soft: false,
-  value: '',
-});
-const newSkillInput = ref(null);
-
 let originalProfileData = {};
 
 async function toggleCardEditMode(cardKey, saveChanges = false) {
@@ -176,36 +207,6 @@ async function toggleCardEditMode(cardKey, saveChanges = false) {
     originalProfileData = JSON.parse(JSON.stringify(profileData));
     editingCards[cardKey] = true;
   }
-}
-
-async function showAddSkillInput(type) {
-  if(type === 'technical') {
-    addingSkill.technical = true;
-  } else {
-    addingSkill.soft = true;
-  }
-  await nextTick();
-  newSkillInput.value?.focus();
-}
-
-function commitNewSkill(type) {
-  const skill = addingSkill.value.trim();
-  const skillList = type === 'technical' ? profileData.habilidades_tecnicas : profileData.habilidades_blandas;
-  if (skill && !skillList.includes(skill)) {
-    skillList.push(skill);
-  }
-  cancelAddSkill();
-}
-
-function cancelAddSkill() {
-  addingSkill.technical = false;
-  addingSkill.soft = false;
-  addingSkill.value = '';
-}
-
-function removeSkill(type, index) {
-  const skillList = type === 'technical' ? 'habilidades_tecnicas' : 'habilidades_blandas';
-  profileData[skillList].splice(index, 1);
 }
 
 const fullName = computed(() => `${profileData.nombres} ${profileData.apellidos}`);
@@ -288,10 +289,8 @@ onMounted(() => {
             </div>
              <div class="card-content">
                 <ul class="info-list">
-                    <li><span>Carrera</span><strong v-if="!editingCards.academic">{{ profileData.carrera }}</strong><input v-else v-model="profileData.carrera" class="edit-input"/></li>
-                    <li><span>Ciclo Actual</span><strong v-if="!editingCards.academic">{{ profileData.ciclo_actual }}</strong><input v-else v-model="profileData.ciclo_actual" type="number" class="edit-input"/></li>
+                    <li><span>Carrera</span><strong v-if="!editingCards.academic">{{ profileData.carrera }}</strong><input v-else v-model="profileData.carrera" class="edit-input" disabled title="Edición de carrera próximamente"/></li>
                     <li><span>Año Egreso</span><strong v-if="!editingCards.academic">{{ profileData.anio_egreso || 'N/A' }}</strong><input v-else v-model="profileData.anio_egreso" type="number" class="edit-input"/></li>
-                    <li><span>Promedio</span><strong v-if="!editingCards.academic">{{ profileData.promedio_ponderado.toFixed(2) }}</strong><input v-else v-model="profileData.promedio_ponderado" type="number" step="0.01" class="edit-input"/></li>
                 </ul>
                 <div v-if="editingCards.academic" class="flex gap-3 mt-4">
                     <button @click="toggleCardEditMode('academic', true)" class="save-button">Guardar</button>
@@ -317,49 +316,62 @@ onMounted(() => {
             </div>
         </div>
 
-        <div class="bento-card md:col-span-12">
-            <h3 class="card-title">Skills & Tech Stack</h3>
-            <div class="card-content space-y-6">
-                <div>
-                    <h4 class="font-semibold text-white/90 mb-3">Técnicas</h4>
-                    <div class="flex flex-wrap items-center gap-3">
-                        <span v-for="(skill, index) in profileData.habilidades_tecnicas" :key="`tech-${skill}`" class="skill-pill">
-                            {{ skill }} <button @click="removeSkill('technical', index)" class="skill-remove-btn">&times;</button>
-                        </span>
-                        <button v-if="!addingSkill.technical" @click="showAddSkillInput('technical')" class="add-skill-btn">+ Agregar</button>
-                        <input v-else ref="newSkillInput" v-model="addingSkill.value" @keyup.enter="commitNewSkill('technical')" @blur="cancelAddSkill" type="text" class="inline-edit-input" placeholder="Añadir..."/>
-                    </div>
-                </div>
-                 <div>
-                    <h4 class="font-semibold text-white/90 mb-3">Blandas</h4>
-                    <div class="flex flex-wrap items-center gap-3">
-                         <span v-for="(skill, index) in profileData.habilidades_blandas" :key="`soft-${skill}`" class="skill-pill">
-                            {{ skill }} <button @click="removeSkill('soft', index)" class="skill-remove-btn">&times;</button>
-                        </span>
-                        <button v-if="!addingSkill.soft" @click="showAddSkillInput('soft')" class="add-skill-btn">+ Agregar</button>
-                        <input v-else ref="newSkillInput" v-model="addingSkill.value" @keyup.enter="commitNewSkill('soft')" @blur="cancelAddSkill" type="text" class="inline-edit-input" placeholder="Añadir..."/>
-                    </div>
-                </div>
-                <div class="pt-4 flex justify-end">
-                    <button class="save-button">Guardar cambios</button>
-                </div>
-            </div>
-        </div>
-        
         <div class="md:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bento-card">
-                <h3 class="card-title">Documentación</h3>
+
+            <div class="bento-card relative">
+                <h3 class="card-title mb-4">Documentación</h3>
                 <div class="card-content">
-                    <a href="#" class="flex items-center gap-4 p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
-                        <svg class="h-10 w-10 text-[#cb2b46] flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
-                        <div>
-                            <p class="font-semibold text-white truncate">{{ profileData.cv_filename }}</p>
-                            <p class="text-xs text-white/60">Descargar CV</p>
+                    <!-- Hidden File Input -->
+                    <input 
+                        type="file" 
+                        ref="fileInput" 
+                        accept="application/pdf" 
+                        class="hidden" 
+                        @change="handleFileChange"
+                    />
+
+                    <div class="flex items-center justify-between p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors border border-white/5 hover:border-[#b62667]/30 group">
+                        
+                        <!-- File Info / Link -->
+                        <div class="flex items-center gap-4 flex-1 min-w-0">
+                            <div class="p-2 bg-red-500/10 rounded-lg text-red-400">
+                                <svg class="h-8 w-8 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-semibold text-white truncate" :title="profileData.cv_filename">
+                                    {{ profileData.cv_filename }}
+                                </p>
+                                <a 
+                                    v-if="profileData.cv_url" 
+                                    :href="profileData.cv_url" 
+                                    target="_blank"
+                                    class="text-xs text-[#b62667] hover:underline flex items-center gap-1 mt-0.5"
+                                >
+                                    Ver documento
+                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                </a>
+                                <p v-else class="text-xs text-white/40 mt-0.5">Formato PDF (Max. 5MB)</p>
+                            </div>
                         </div>
-                    </a>
+
+                        <!-- Action Button -->
+                        <button 
+                            @click="triggerFileInput" 
+                            :disabled="uploadingCv"
+                            class="ml-4 px-4 py-2 text-sm font-bold text-white bg-white/10 hover:bg-[#b62667] rounded-lg transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <span v-if="uploadingCv">
+                                <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            </span>
+                            <span v-else>
+                                {{ profileData.cv_url ? 'Actualizar' : 'Subir' }}
+                            </span>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="bento-card">
+
                  <div class="card-header">
                     <h3 class="card-title">Enlaces & Contacto</h3>
                     <button @click="toggleCardEditMode('links')" class="edit-button" title="Editar">
