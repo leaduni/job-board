@@ -1,59 +1,154 @@
 <script setup>
 import { ref, reactive, computed, nextTick, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuth } from '@/composables/useAuth';
+import { coreApi } from '@/services/coreApi';
 
-// --- NOTIFICATION STATE & LOGIC ---
+const router = useRouter();
+const { logout } = useAuth();
+
+// --- NOTIFICATION STATE ---
 const notification = reactive({
   show: false,
   message: '',
 });
 
-const NOTIFICATION_MESSAGES = {
-  register: '¡Cuenta creada exitosamente! Bienvenid@ a Bolsa Laboral - LEAD UNI',
-  login: '¡Bienvenid@ de nuevo! Las ofertas te esperan',
-};
-
-onMounted(() => {
-  const action = localStorage.getItem('auth_action');
-  if (action && NOTIFICATION_MESSAGES[action]) {
-    notification.message = NOTIFICATION_MESSAGES[action];
-    notification.show = true;
-    localStorage.removeItem('auth_action');
-    
-    setTimeout(() => {
-      notification.show = false;
-    }, 4000);
-  }
-});
-
-
 // --- STATE MANAGEMENT ---
+const loading = ref(true);
+const error = ref(null);
 
 const profileData = reactive({
-  nombres: 'Alexandra',
-  apellidos: 'Torres',
-  telefono: '987654321',
-  fecha_nacimiento: '1998-05-20',
-  departamento: 'Lima',
-  distrito: 'Miraflores',
-  carrera: 'Ingeniería de Software con IA',
-  ciclo_actual: 8,
+  nombres: '',
+  apellidos: '',
+  telefono: '',
+  fecha_nacimiento: '',
+  departamento: '', // Extraer de 'location'
+  distrito: '',     // Extraer de 'location'
+  carrera: 'Ingeniería de Software (Mock)', // TODO: Resolver major_id
+  ciclo_actual: 0,
   anio_egreso: null,
-  promedio_ponderado: 18.55,
-  sobre_mi: 'Desarrolladora de software apasionada por la inteligencia artificial y el desarrollo de aplicaciones web. Buscando oportunidades para aplicar mis habilidades en proyectos desafiantes y crecer profesionalmente en un entorno innovador.',
-  habilidades_tecnicas: ['Vue.js', 'React', 'Node.js', 'Python', 'FastAPI'],
-  habilidades_blandas: ['Comunicación Efectiva', 'Trabajo en Equipo', 'Resolución de Problemas'],
-  linkedin_url: 'https://linkedin.com/in/alexandratorres',
-  github_url: 'https://github.com/atorres',
-  portfolio_url: 'https://portfolio.dev/atorres',
-  cv_filename: 'cv_alexandra_torres_2026.pdf',
+  promedio_ponderado: 0,
+  sobre_mi: '',
+  habilidades_tecnicas: [],
+  habilidades_blandas: [],
+  linkedin_url: '',
+  github_url: '',
+  portfolio_url: '',
+  cv_filename: 'No hay CV cargado',
 });
 
+// --- API FETCH ---
+async function fetchProfile() {
+  loading.value = true;
+  try {
+    const { data } = await coreApi.get('/api/me');
+    
+    // data = { user: {...}, candidate: {...} }
+    const candidate = data.candidate || {};
+    const user = data.user || {};
+
+    // Mapeo de campos
+    profileData.nombres = candidate.first_name || '';
+    profileData.apellidos = candidate.last_name || '';
+    profileData.telefono = candidate.phone || '';
+    
+    // Formatear fecha para input type="date" (YYYY-MM-DD)
+    if (candidate.birth_date) {
+      profileData.fecha_nacimiento = candidate.birth_date.split('T')[0];
+    }
+    
+    // Location parse
+    if (candidate.location) {
+      const parts = candidate.location.split(',');
+      profileData.distrito = parts[0]?.trim() || '';
+      // Si solo hay una parte, asignarla a distrito, si hay dos, la segunda es depto
+      profileData.departamento = parts.length > 1 ? parts[1]?.trim() : '';
+    }
+
+    profileData.anio_egreso = candidate.end_year;
+    // profileData.carrera = ... (necesitamos un catálogo de majors para mostrar el nombre)
+    
+    profileData.sobre_mi = candidate.bio || '';
+    profileData.linkedin_url = candidate.linkedin_url || '';
+    profileData.github_url = candidate.github_url || '';
+    profileData.portfolio_url = candidate.portfolio_url || '';
+
+  } catch (err) {
+    console.error("Error cargando perfil:", err);
+    error.value = "No se pudo cargar la información del perfil.";
+    
+    if (err.response?.status === 401) {
+      router.push('/auth/login');
+    }
+  } finally {
+    loading.value = false;
+  }
+}
+
+// --- UPDATE PROFILE ---
+async function updateCandidate(cardKey) {
+  try {
+    const payload = {};
+
+    // Construir payload según la tarjeta editada
+    if (cardKey === 'personal') {
+      payload.first_name = profileData.nombres;
+      payload.last_name = profileData.apellidos;
+      payload.phone = profileData.telefono;
+      payload.birth_date = profileData.fecha_nacimiento;
+      // Combinar ubicación
+      const loc = [profileData.distrito, profileData.departamento].filter(Boolean).join(', ');
+      payload.location = loc;
+    }
+    
+    else if (cardKey === 'academic') {
+      payload.end_year = profileData.anio_egreso ? parseInt(profileData.anio_egreso) : null;
+      // Nota: major_id requiere un ID numérico. 
+      // Si el input es texto, no podemos enviarlo directamente al campo major_id.
+      // Por ahora omitimos major_id hasta tener un selector de carreras.
+    }
+    
+    else if (cardKey === 'about') {
+      payload.bio = profileData.sobre_mi;
+    }
+    
+    else if (cardKey === 'links') {
+      payload.linkedin_url = profileData.linkedin_url;
+      payload.github_url = profileData.github_url;
+      payload.portfolio_url = profileData.portfolio_url;
+    }
+
+    // Llamada PATCH
+    await coreApi.patch('/api/me/candidate', payload);
+
+    // Feedback visual
+    notification.message = 'Perfil actualizado correctamente';
+    notification.show = true;
+    setTimeout(() => { notification.show = false; }, 3000);
+
+  } catch (err) {
+    console.error("Error actualizando perfil:", err);
+    notification.message = 'Error al guardar los cambios';
+    notification.show = true;
+    setTimeout(() => { notification.show = false; }, 3000);
+    // Revertir cambios en UI si es crítico, o dejar que el usuario reintente
+    throw err; // Propagar para que el toggle no cierre si hay error grave (opcional)
+  }
+}
+
+// --- LOGOUT ---
+const handleLogout = () => {
+  logout();
+  router.push('/auth/login');
+};
+
+// --- LOGIC (Existing editing logic) ---
 // State for granular editing of cards
 const editingCards = reactive({
   personal: false,
   academic: false,
   about: false,
-  links: false, // New state for the links card
+  links: false,
 });
 
 // State for inline skill adding
@@ -66,25 +161,22 @@ const newSkillInput = ref(null);
 
 let originalProfileData = {};
 
-// --- LOGIC ---
-
-function toggleCardEditMode(cardKey, saveChanges = false) {
-  if (editingCards[cardKey]) { // If currently editing
+async function toggleCardEditMode(cardKey, saveChanges = false) {
+  if (editingCards[cardKey]) { // Si estamos guardando/cancelando
     if (saveChanges) {
-      // Logic to save data would go here (e.g., API call)
-      console.log('Saving changes for', cardKey, profileData);
+      // Guardar cambios en API
+      await updateCandidate(cardKey);
     } else {
-      // Revert changes
+      // Cancelar: Revertir cambios
       Object.assign(profileData, originalProfileData);
     }
     editingCards[cardKey] = false;
-  } else { // If not editing
+  } else { // Entrar en modo edición
     // Store a snapshot of the current state before editing
     originalProfileData = JSON.parse(JSON.stringify(profileData));
     editingCards[cardKey] = true;
   }
 }
-
 
 async function showAddSkillInput(type) {
   if(type === 'technical') {
@@ -93,7 +185,7 @@ async function showAddSkillInput(type) {
     addingSkill.soft = true;
   }
   await nextTick();
-  newSkillInput.value.focus();
+  newSkillInput.value?.focus();
 }
 
 function commitNewSkill(type) {
@@ -117,20 +209,50 @@ function removeSkill(type, index) {
 }
 
 const fullName = computed(() => `${profileData.nombres} ${profileData.apellidos}`);
+
+onMounted(() => {
+  fetchProfile();
+  
+  // Notification logic
+  const action = localStorage.getItem('auth_action');
+  const NOTIFICATION_MESSAGES = {
+    register: '¡Cuenta creada exitosamente! Bienvenid@ a Bolsa Laboral - LEAD UNI',
+    login: '¡Bienvenid@ de nuevo! Las ofertas te esperan',
+  };
+  if (action && NOTIFICATION_MESSAGES[action]) {
+    notification.message = NOTIFICATION_MESSAGES[action];
+    notification.show = true;
+    localStorage.removeItem('auth_action');
+    setTimeout(() => { notification.show = false; }, 4000);
+  }
+});
 </script>
+
 
 <template>
   <div class="min-h-screen bg-[var(--lead-900,#0a0a14)] text-gray-200 font-sans pt-32">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
       
-      <header class="flex flex-col sm:flex-row items-center gap-6 mb-12">
-        <img class="h-24 w-24 rounded-full object-cover border-2 border-white/20" src="/src/assets/avatar-placeholder.jpg" alt="Avatar">
-        <div>
-            <h1 class="text-4xl font-bold bg-gradient-to-r from-[#a0218b] to-[#b62667] bg-clip-text text-transparent">
-                {{ fullName }}
-            </h1>
-            <p class="text-lg text-white/80">{{ profileData.carrera }}</p>
+      <header class="flex flex-col sm:flex-row items-center gap-6 mb-12 justify-between">
+        <div class="flex items-center gap-6">
+          <img class="h-24 w-24 rounded-full object-cover border-2 border-white/20" src="/src/assets/avatar-placeholder.jpg" alt="Avatar">
+          <div class="text-center sm:text-left">
+              <h1 class="text-4xl font-bold bg-gradient-to-r from-[#a0218b] to-[#b62667] bg-clip-text text-transparent">
+                  {{ fullName }}
+              </h1>
+              <p class="text-lg text-white/80">{{ profileData.carrera }}</p>
+          </div>
         </div>
+        
+        <button 
+          @click="handleLogout" 
+          class="flex items-center gap-2 px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors text-sm font-bold"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          Cerrar Sesión
+        </button>
       </header>
 
       <main class="grid grid-cols-1 md:grid-cols-12 gap-6">

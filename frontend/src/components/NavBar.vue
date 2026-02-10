@@ -103,13 +103,17 @@
           </template>
 
           <template v-else>
-            <div class="text-[13px] font-bold text-white/95">
+            <router-link
+              to="auth/login"
+              class="text-[13px] font-bold text-white/95"
+            >
               Iniciar sesión
-            </div>
+            </router-link>
           </template>
         </div>
 
-        <div
+        <router-link
+          to="/perfil"
           class="h-11 w-11 overflow-hidden rounded-full border-2 border-[rgba(160,33,139,0.12)] bg-[#111]"
           aria-hidden="true"
         >
@@ -118,7 +122,7 @@
             alt="avatar"
             class="h-full w-full object-cover"
           />
-        </div>
+        </router-link>
       </div>
     </div>
   </nav>

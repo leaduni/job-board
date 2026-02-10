@@ -1,84 +1,96 @@
 <script setup>
-defineProps({
+import { computed } from 'vue';
+
+const props = defineProps({
   course: {
     type: Object,
     required: true,
-    default: () => ({
-      title: 'Título del Curso de Ejemplo',
-      provider: 'Proveedor de Ejemplo',
-      duration: '10h',
-      level: 'Intermedio',
-      price: 0,
-      image: 'https://via.placeholder.com/400x225',
-      hasCertificate: true,
-    }),
   },
+});
+
+const imageUrl = computed(() => {
+  if (props.course.imagen?.url) {
+    return `${import.meta.env.VITE_CMS_API_URL}${props.course.imagen.url}`;
+  }
+  return 'https://via.placeholder.com/400x225?text=Curso';
+});
+
+const badgeClass = computed(() => {
+  return props.course.esGratuito
+    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+    : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
+});
+
+const badgeText = computed(() => {
+  return props.course.esGratuito ? 'Gratis' : 'Pago';
 });
 </script>
 
 <template>
-  <div
-    class="group relative bg-[#1e1e3a] rounded-[12px] overflow-hidden border border-transparent hover:border-[#b62667] transition-all duration-300 ease-in-out"
+  <a
+    :href="course.url"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="group flex flex-col h-full bg-[#17102C] rounded-2xl overflow-hidden border border-white/5 hover:border-[#b62667] transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[#b62667]/20 hover:-translate-y-1"
   >
-    <!-- Image and Hover Elements Container -->
-    <div class="relative overflow-hidden">
+    <!-- Image Container -->
+    <div class="relative h-44 overflow-hidden bg-[#2a1630]">
       <img
-        :src="course.image"
-        alt="Imagen del curso"
-        class="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-300 ease-in-out"
+        :src="imageUrl"
+        :alt="course.titulo"
+        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        loading="lazy"
       />
-      <!-- Hover Overlay for Button -->
-      <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <button class="bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white font-bold py-2 px-4 rounded-lg transform hover:scale-105 transition-transform">
-          Ver Detalles
-        </button>
-      </div>
       
-      <!-- "Gratis" Badge -->
+      <!-- Gradient Overlay -->
+      <div class="absolute inset-0 bg-gradient-to-t from-[#17102C] to-transparent opacity-60"></div>
+
+      <!-- Price/Status Badge -->
       <div
-        v-if="course.price === 0"
-        class="absolute top-2 right-2 text-xs font-bold px-3 py-1 rounded-full bg-cyan-500/10 backdrop-blur-md border border-cyan-500/20 text-cyan-300"
+        class="absolute top-3 right-3 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border backdrop-blur-md"
+        :class="badgeClass"
       >
-        Gratis
+        {{ badgeText }}
       </div>
     </div>
 
-    <!-- Content Area -->
-    <div class="p-4">
-      <p class="text-[10px] tracking-widest text-white/50 uppercase">
-        {{ course.provider }}
-      </p>
-      <h3 class="text-[16px] font-bold text-white mt-1 min-h-[48px]">
-        {{ course.title }}
+    <!-- Content -->
+    <div class="flex flex-col flex-grow p-5">
+      <!-- Provider -->
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-[11px] font-bold text-[#b62667] uppercase tracking-widest bg-[#b62667]/10 px-2 py-0.5 rounded">
+          {{ course.proveedor }}
+        </span>
+      </div>
+
+      <!-- Title -->
+      <h3 class="text-lg font-bold text-white leading-tight mb-3 line-clamp-2 group-hover:text-[#ff5a9e] transition-colors">
+        {{ course.titulo }}
       </h3>
-      
-      <!-- Metadata Row -->
-      <div class="flex flex-wrap items-center text-white/50 text-sm mt-3 gap-x-4 gap-y-2">
-        <!-- Duration -->
-        <div class="flex items-center" title="Duración">
-           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l3 3a1 1 0 001.414-1.414L11 10.586V6z" clip-rule="evenodd" />
+
+      <!-- Metadata -->
+      <div class="mt-auto flex items-center gap-4 text-xs text-gray-400 border-t border-white/5 pt-4">
+        <div v-if="course.duracionHoras" class="flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <span>{{ course.duration }}</span>
+          {{ course.duracionHoras }}h
         </div>
-
-        <!-- Level -->
-        <div class="flex items-center" title="Nivel">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
-                <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
-            </svg>
-            <span>{{ course.level }}</span>
+        
+        <div v-if="course.nivel" class="flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          {{ course.nivel }}
         </div>
-
-        <!-- Certificate -->
-        <div v-if="course.hasCertificate" class="flex items-center" title="Incluye Certificado">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M9 2a1 1 0 00-1 1v1.618C5.835 5.42 4 7.962 4 11c0 3.866 3.134 7 7 7s7-3.134 7-7c0-3.038-1.835-5.58-4.268-6.382V3a1 1 0 00-1-1H9zm-3 9a3 3 0 106 0 3 3 0 00-6 0zm14 0a7 7 0 11-14 0 7 7 0 0114 0z" clip-rule="evenodd" />
-            </svg>
-            <span>Certificado</span>
+        
+        <!-- Arrow Icon (Visual cue for external link) -->
+        <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-[-10px] group-hover:translate-x-0 duration-300 text-[#b62667]">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
         </div>
       </div>
     </div>
-  </div>
+  </a>
 </template>

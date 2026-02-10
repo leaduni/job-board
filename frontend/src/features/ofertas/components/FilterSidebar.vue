@@ -15,13 +15,12 @@
     <section class="py-4 border-b border-gray-800">
       <h3 class="text-white font-bold text-sm tracking-wider mb-3 font-['League_Spartan',_sans-serif]">MODALIDAD</h3>
       <ul class="space-y-2">
-        <li v-for="(modalidad, i) in modalidades" :key="i" class="flex items-center justify-between gap-x-4">
+        <li v-for="(item, i) in modalidades" :key="i" class="flex items-center justify-between gap-x-4">
           <label class="flex items-center gap-3 cursor-pointer group">
-            <input type="checkbox" :value="modalidad" v-model="selectedModalidades"
+            <input type="checkbox" :value="item.value" v-model="selectedModalidades"
               class="appearance-none w-5 h-5 bg-gray-700/50 rounded-md checked:accent-[#b62667] checked:bg-[#b62667] checked:border-transparent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-[#b62667]" />
-            <span class="text-gray-300 group-hover:text-white transition-colors text-xs">{{ modalidad }}</span>
+            <span class="text-gray-300 group-hover:text-white transition-colors text-xs">{{ item.label }}</span>
           </label>
-          <span class="text-slate-500 ml-auto text-sm">12</span>
         </li>
       </ul>
     </section>
@@ -30,13 +29,12 @@
     <section class="py-4 border-b border-gray-800">
       <h3 class="text-white font-bold text-sm tracking-wider mb-3 font-['League_Spartan',_sans-serif]">TIPO DE CONTRATO</h3>
       <ul class="space-y-2">
-        <li v-for="(tipo, i) in tiposContrato" :key="i" class="flex items-center justify-between gap-x-4">
+        <li v-for="(item, i) in tiposContrato" :key="i" class="flex items-center justify-between gap-x-4">
           <label class="flex items-center gap-3 cursor-pointer group">
-            <input type="checkbox" :value="tipo" v-model="selectedTiposContrato"
+            <input type="checkbox" :value="item.value" v-model="selectedTiposContrato"
               class="appearance-none w-5 h-5 bg-gray-700/50 rounded-md checked:accent-[#b62667] checked:bg-[#b62667] checked:border-transparent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-[#b62667]" />
-            <span class="text-gray-300 group-hover:text-white transition-colors text-xs">{{ tipo }}</span>
+            <span class="text-gray-300 group-hover:text-white transition-colors text-xs">{{ item.label }}</span>
           </label>
-          <span class="text-slate-500 ml-auto text-sm">8</span>
         </li>
       </ul>
     </section>
@@ -45,13 +43,12 @@
     <section class="py-4">
       <h3 class="text-white font-bold text-sm tracking-wider mb-3 font-['League_Spartan',_sans-serif]">NIVEL DE EXPERIENCIA</h3>
       <ul class="space-y-2">
-        <li v-for="(nivel, i) in nivelesExperiencia" :key="i" class="flex items-center justify-between gap-x-4">
+        <li v-for="(item, i) in nivelesExperiencia" :key="i" class="flex items-center justify-between gap-x-4">
           <label class="flex items-center gap-3 cursor-pointer group">
-            <input type="checkbox" :value="nivel" v-model="selectedNivelesExperiencia"
+            <input type="checkbox" :value="item.value" v-model="selectedNivelesExperiencia"
               class="appearance-none w-5 h-5 bg-gray-700/50 rounded-md checked:accent-[#b62667] checked:bg-[#b62667] checked:border-transparent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-[#b62667]" />
-            <span class="text-gray-300 group-hover:text-white transition-colors text-xs">{{ nivel }}</span>
+            <span class="text-gray-300 group-hover:text-white transition-colors text-xs">{{ item.label }}</span>
           </label>
-          <span class="text-slate-500 ml-auto text-sm">5</span>
         </li>
       </ul>
     </section>
@@ -70,25 +67,26 @@
 <script setup>
 import { ref, watch } from 'vue';
 
+// Mapa de valores: [Label legible, Valor backend]
 const modalidades = [
-  'Presencial',
-  'Remoto',
-  'Híbrido',
+  { label: 'Presencial', value: 'presencial' },
+  { label: 'Remoto', value: 'remoto' },
+  { label: 'Híbrido', value: 'hibrido' },
 ];
 
 const tiposContrato = [
-  'Prácticas Pre-profesionales',
-  'Prácticas Profesionales',
-  'Tiempo Completo',
-  'Medio Tiempo',
-  'Freelance',
+  { label: 'Prácticas Pre-profesionales', value: 'practicas_pre' },
+  { label: 'Prácticas Profesionales', value: 'practicas_pro' },
+  { label: 'Tiempo Completo', value: 'tiempo_completo' },
+  { label: 'Medio Tiempo', value: 'medio_tiempo' },
+  { label: 'Freelance', value: 'freelance' },
 ];
 
 const nivelesExperiencia = [
-  'Sin experiencia',
-  'Menos de 1 año',
-  '1-3 años',
-  'Más de 3 años',
+  { label: 'Sin experiencia', value: 'sin_experiencia' },
+  { label: 'Menos de 1 año', value: 'menos_1_anio' },
+  { label: '1-3 años', value: '1_3_anios' },
+  { label: 'Más de 3 años', value: 'mas_3_anios' },
 ];
 
 const selectedModalidades = ref([]);

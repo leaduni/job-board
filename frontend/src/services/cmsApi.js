@@ -5,10 +5,11 @@ const api = axios.create({
 });
 
 export const cmsApi = {
-  async getProjects() {
-    const { data } = await api.get("/projects");
+  async getProjects(params = {}) {
+    const { data } = await api.get("/projects", { params });
     return data;
   },
+
 
   async getCompanies() {
     const { data } = await api.get("/companies");
@@ -19,4 +20,10 @@ export const cmsApi = {
     const { data } = await api.get(`/projects/${id}`);
     return data;
   },
+
+  async getCourses(params = {}) {
+    const { data } = await api.get("/courses", { params });
+    return data;
+  },
 };
+
