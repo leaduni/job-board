@@ -1,7 +1,7 @@
 <!-- OfferSummaryCard.vue -->
 <template>
   <aside class="p-[18px] px-[20px] rounded-[12px] bg-gradient-to-t from-[rgba(24,8,40,0.55)] to-[rgba(10,8,35,0.65)] border-2 border-[#b62667]">
-    <h4 class="font-['League_Spartan'] text-[16px] tracking-[0.3px] text-[rgba(255,255,255,0.45)] mb-[14px]">Resumen de la oferta</h4>
+    <h2 class="font-heading text-2xl mb-[12px] text-[rgba(255,255,255,0.95)]">Resumen de la oferta</h2>
 
     <ul>
       <li class="flex justify-between items-center py-[6px]">

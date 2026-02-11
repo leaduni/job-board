@@ -20,37 +20,30 @@
 
       <!-- Content -->
       <template v-else-if="oferta">
-        <!-- Header -->
-        <OfferHeader :oferta="oferta">
-          <!-- Acciones futuras (guardar / compartir) -->
-          <template #actions>
-            <!-- reservado -->
-          </template>
-        </OfferHeader>
 
-        <!-- Main grid -->
-        <div
-          class="grid grid-cols-[1fr_360px] gap-[28px] items-start max-[1100px]:grid-cols-1"
-        >
-          <!-- Columna principal -->
-          <div class="flex flex-col gap-[28px]">
-            <OfferMainContent :oferta="oferta" />
-            <SkillGapBridge />
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+          <!-- Columna Izquierda (Header, Contenido, Skills) -->
+          <div class="contents md:flex md:flex-col md:col-span-2 gap-6">
+            <OfferHeader :oferta="oferta" class="order-1 w-full" />
+            <OfferMainContent :oferta="oferta" class="order-2 w-full" />
+            <SkillGapBridge class="order-4 w-full" />
           </div>
 
-          <!-- Sidebar -->
-          <OfferApplySidebar
-            :oferta="oferta"
-            :yaPostulado="yaPostulado"
-            :postulando="postulando"
-            :mensaje="mensaje"
-            @postular="postular"
-            @guardar="guardarOferta"
-            @compartir="compartirOferta"
-          >
-            <!-- Summary debajo del CTA -->
-            <OfferSummaryCard :oferta="oferta" />
-          </OfferApplySidebar>
+          <!-- Columna Derecha (Acciones, Resumen) -->
+          <div class="contents md:flex md:flex-col md:col-span-1 gap-6">
+            <OfferApplySidebar
+              :oferta="oferta"
+              :yaPostulado="yaPostulado"
+              :postulando="postulando"
+              :mensaje="mensaje"
+              @postular="postular"
+              @guardar="guardarOferta"
+              @compartir="compartirOferta"
+              class="order-3 w-full"
+            />
+            <OfferSummaryCard :oferta="oferta" class="order-5 w-full" />
+          </div>
+
         </div>
       </template>
 
@@ -75,9 +68,8 @@ import { useRoute, useRouter } from "vue-router";
 import RedirectionModal from "@/components/modals/RedirectionModal.vue";
 
 // Servicios
-import { obtenerOfertaPorId } from "../services/ofertas.service";
-import { coreApi } from "@/services/coreApi";
-import { useAuth } from "@/composables/useAuth";
+import { obtenerOfertaPorId } from '../services/ofertas.service'
+
 
 // Componentes
 import OfferHeader from "../components/detail/OfferHeader.vue";

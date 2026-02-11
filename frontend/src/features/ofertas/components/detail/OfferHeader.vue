@@ -1,13 +1,14 @@
 <template>
-  <section class="flex items-center justify-between gap-[18px] p-[22px] rounded-[12px] bg-gradient-to-t from-[rgba(18,13,38,0.92)] to-[rgba(23,16,44,0.88)] border-2 border-[#b62667] shadow-[0_20px_60px_rgba(6,6,28,0.6)] mb-[28px]" v-if="oferta">
-    <div class="flex gap-[18px] items-center flex-1 min-w-0">
+  <section class="flex items-center justify-between gap-[18px] p-[22px] rounded-[12px] bg-gradient-to-t from-[rgba(18,13,38,0.92)] to-[rgba(23,16,44,0.88)] border-2 border-[#b62667] shadow-[0_20px_60px_rgba(6,6,28,0.6)]" v-if="oferta">
+    <div class="flex gap-[18px] items-start flex-1 min-w-0">
       <!-- Logo -->
-      <div class="w-[84px] h-[84px] rounded-[12px] overflow-hidden flex items-center justify-center bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.03)]">
+      <div class="w-12 h-12 lg:w-[84px] lg:h-[84px] aspect-square rounded-[12px] overflow-hidden flex items-center justify-center bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.03)] flex-shrink-0">
         <!-- Si luego tienes logo real, cambias esto por <img :src="..." /> -->
         <img
           v-if="logoUrl"
           :src="logoUrl"
           alt="Logo empresa"
+          class="w-full h-full object-cover"
         />
         <div v-else class="text-lg font-bold">
           {{ inicialEmpresa }}
@@ -15,10 +16,10 @@
       </div>
 
       <!-- Título + empresa + meta -->
-      <div class="min-w-0">
+      <div class="flex flex-col flex-1 min-w-0">
         <h1 class="font-['League_Spartan'] text-[28px] mb-[8px] text-[var(--text)] leading-[1.03]">{{ oferta.titulo }}</h1>
 
-        <div class="text-[var(--muted-2)] text-[14px] flex gap-[8px] items-center mb-[8px]">
+        <div class="text-[var(--muted-2)] text-[14px] flex gap-[8px] items-center mb-[8px] flex-wrap">
           <span class="font-bold text-[var(--accent-pink-2)]">{{ oferta.company?.nombre_comercial || 'Empresa' }}</span>
           <span class="text-[rgba(255,255,255,0.16)] mx-[6px]">•</span>
           <span class="text-[var(--muted-2)]">{{ publicadoTexto }}</span>
