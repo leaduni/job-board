@@ -6,3 +6,16 @@ export const coreApi = axios.create({
     'Content-Type': 'application/json',
   },
 })
+
+// Interceptor para inyectar el token JWT automáticamente
+coreApi.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('authToken')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => Promise.reject(error)
+)
+

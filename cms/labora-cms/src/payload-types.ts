@@ -175,7 +175,7 @@ export interface Media {
 export interface Course {
   id: number;
   titulo: string;
-  descripcion: string;
+  descripcion?: string | null;
   proveedor: string;
   url: string;
   esGratuito?: boolean | null;
@@ -293,6 +293,7 @@ export interface Project {
    */
   email_contacto?: string | null;
   instrucciones_postulacion?: string | null;
+  link_postulacion?: string | null;
   /**
    * Solo las ofertas "Activas" se muestran públicamente
    */
@@ -567,6 +568,7 @@ export interface ProjectsSelect<T extends boolean = true> {
   beneficios?: T;
   email_contacto?: T;
   instrucciones_postulacion?: T;
+  link_postulacion?: T;
   estado?: T;
   fecha_publicacion?: T;
   fecha_cierre?: T;

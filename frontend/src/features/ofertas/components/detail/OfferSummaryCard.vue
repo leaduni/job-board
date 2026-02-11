@@ -14,11 +14,11 @@
       </li>
       <li class="flex justify-between items-center py-[6px]">
         <span class="text-[13px] text-[rgba(255,255,255,0.45)]">Ubicación</span>
-        <strong class="text-[13px] text-[rgba(255,255,255,0.95)] font-semibold">{{ ubicacionTexto }}</strong>
+        <strong class="text-[13px] text-[rgba(255,255,255,0.95)] font-semibold text-right max-w-[50%] truncate" :title="ubicacionTexto">{{ ubicacionTexto }}</strong>
       </li>
-      <li class="flex justify-between items-center py-[6px]">
-        <span class="text-[13px] text-[rgba(255,255,255,0.45)]">Vacantes</span>
-        <strong class="text-[13px] text-[rgba(255,255,255,0.95)] font-semibold">{{ vacantesTexto }}</strong>
+      <li class="flex justify-between items-center py-[6px]" v-if="horarioTexto">
+        <span class="text-[13px] text-[rgba(255,255,255,0.45)]">Horario</span>
+        <strong class="text-[13px] text-[rgba(255,255,255,0.95)] font-semibold text-right max-w-[50%] truncate" :title="horarioTexto">{{ horarioTexto }}</strong>
       </li>
     </ul>
   </aside>
@@ -35,12 +35,17 @@ const props = defineProps({
 const salarioTexto = computed(() => {
   const c = props.oferta?.compensacion;
   if (!c || c.mostrar_salario === false) return 'No especificado';
+  
+  // Asumimos PEN si no viene moneda
+  const currency = 'S/'; 
   const min = c.salario_min;
   const max = c.salario_max;
-  if (min && max) return `$${min} - $${max}`;
-  if (min) return `Desde $${min}`;
-  if (max) return `Hasta $${max}`;
-  return 'No especificado';
+  
+  if (min && max) return `${currency} ${min} - ${max}`;
+  if (min) return `Desde ${currency} ${min}`;
+  if (max) return `Hasta ${currency} ${max}`;
+  
+  return 'A tratar';
 });
 
 const experienciaTexto = computed(() => {
@@ -63,16 +68,13 @@ const experienciaTexto = computed(() => {
 
 const ubicacionTexto = computed(() => {
   const u = props.oferta?.ubicacion;
-  const dep = u?.departamento;
-  const dist = u?.distrito;
-  if (dep && dist) return `${dist}, ${dep}`;
-  if (dep) return dep;
-  if (dist) return dist;
-  return 'Remoto / No especificado';
+  if (!u) return 'Remoto / No especificado';
+  
+  const parts = [u.distrito, u.departamento].filter(Boolean);
+  return parts.length > 0 ? parts.join(', ') : 'No especificado';
 });
 
-const vacantesTexto = computed(() => {
-  // No existe en tu JSON actual
-  return 'No especificado';
+const horarioTexto = computed(() => {
+  return props.oferta?.horario || null;
 });
 </script>

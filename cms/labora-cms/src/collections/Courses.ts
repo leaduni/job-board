@@ -22,7 +22,6 @@ export const Courses: CollectionConfig = {
     {
       name: 'descripcion',
       type: 'textarea',
-      required: true,
       label: 'Descripción',
     },
     {

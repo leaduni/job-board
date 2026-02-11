@@ -193,6 +193,7 @@
 </template>
 
 <script setup>
+
 import { ref, computed } from 'vue'
 import { useAuth } from '@/composables/useAuth'
 
@@ -209,6 +210,7 @@ const displayName = computed(() => {
 const carrera = computed(() => {
   return user.value?.carrera || ''
 })
+
 </script>
 
 <style scoped>

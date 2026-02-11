@@ -1,136 +1,259 @@
 <script setup>
 import { ref, reactive, computed, nextTick, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuth } from '@/composables/useAuth';
+import { coreApi } from '@/services/coreApi';
+import { uploadCV } from '@/services/upload.service';
 
-// --- NOTIFICATION STATE & LOGIC ---
+const router = useRouter();
+const { logout } = useAuth();
+
+// --- NOTIFICATION STATE ---
 const notification = reactive({
   show: false,
   message: '',
 });
 
-const NOTIFICATION_MESSAGES = {
-  register: '¡Cuenta creada exitosamente! Bienvenid@ a Bolsa Laboral - LEAD UNI',
-  login: '¡Bienvenid@ de nuevo! Las ofertas te esperan',
-};
-
-onMounted(() => {
-  const action = localStorage.getItem('auth_action');
-  if (action && NOTIFICATION_MESSAGES[action]) {
-    notification.message = NOTIFICATION_MESSAGES[action];
-    notification.show = true;
-    localStorage.removeItem('auth_action');
-    
-    setTimeout(() => {
-      notification.show = false;
-    }, 4000);
-  }
-});
-
-
 // --- STATE MANAGEMENT ---
+const loading = ref(true);
+const uploadingCv = ref(false);
+const error = ref(null);
+const fileInput = ref(null);
 
 const profileData = reactive({
-  nombres: 'Alexandra',
-  apellidos: 'Torres',
-  telefono: '987654321',
-  fecha_nacimiento: '1998-05-20',
-  departamento: 'Lima',
-  distrito: 'Miraflores',
-  carrera: 'Ingeniería de Software con IA',
-  ciclo_actual: 8,
+  nombres: '',
+  apellidos: '',
+  telefono: '',
+  fecha_nacimiento: '',
+  departamento: '', 
+  distrito: '',     
+  carrera: 'Ingeniería de Software (Mock)', 
   anio_egreso: null,
-  promedio_ponderado: 18.55,
-  sobre_mi: 'Desarrolladora de software apasionada por la inteligencia artificial y el desarrollo de aplicaciones web. Buscando oportunidades para aplicar mis habilidades en proyectos desafiantes y crecer profesionalmente en un entorno innovador.',
-  habilidades_tecnicas: ['Vue.js', 'React', 'Node.js', 'Python', 'FastAPI'],
-  habilidades_blandas: ['Comunicación Efectiva', 'Trabajo en Equipo', 'Resolución de Problemas'],
-  linkedin_url: 'https://linkedin.com/in/alexandratorres',
-  github_url: 'https://github.com/atorres',
-  portfolio_url: 'https://portfolio.dev/atorres',
-  cv_filename: 'cv_alexandra_torres_2026.pdf',
+  sobre_mi: '',
+  linkedin_url: '',
+  github_url: '',
+  portfolio_url: '',
+  cv_url: '', 
+  cv_filename: 'No hay CV cargado',
 });
 
+// --- API FETCH ---
+async function fetchProfile() {
+  loading.value = true;
+  try {
+    const { data } = await coreApi.get('/api/me');
+    
+    const candidate = data.candidate || {};
+    const user = data.user || {};
+
+    // Mapeo de campos
+    profileData.nombres = candidate.first_name || '';
+    profileData.apellidos = candidate.last_name || '';
+    profileData.telefono = candidate.phone || '';
+    
+    if (candidate.birth_date) {
+      profileData.fecha_nacimiento = candidate.birth_date.split('T')[0];
+    }
+    
+    if (candidate.location) {
+      const parts = candidate.location.split(',');
+      profileData.distrito = parts[0]?.trim() || '';
+      profileData.departamento = parts.length > 1 ? parts[1]?.trim() : '';
+    }
+
+    profileData.anio_egreso = candidate.end_year;
+    profileData.sobre_mi = candidate.bio || '';
+    profileData.linkedin_url = candidate.linkedin_url || '';
+    profileData.github_url = candidate.github_url || '';
+    profileData.portfolio_url = candidate.portfolio_url || '';
+    
+    // Mapeo CV
+    profileData.cv_url = candidate.cv_url || '';
+    profileData.cv_filename = candidate.cv_url ? 'CV Cargado (PDF)' : 'No hay CV cargado';
+
+  } catch (err) {
+    console.error("Error cargando perfil:", err);
+    error.value = "No se pudo cargar la información del perfil.";
+    
+    if (err.response?.status === 401) {
+      router.push('/auth/login');
+    }
+  } finally {
+    loading.value = false;
+  }
+}
+
+// --- CV UPLOAD ---
+const triggerFileInput = () => {
+  fileInput.value.click();
+};
+
+const handleFileChange = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (file.type !== 'application/pdf') {
+    notification.message = 'Solo se permiten archivos PDF';
+    notification.show = true;
+    setTimeout(() => { notification.show = false; }, 3000);
+    return;
+  }
+
+  uploadingCv.value = true;
+  try {
+    const response = await uploadCV(file);
+    
+    if (response.ok && response.result?.secure_url) {
+      const cvUrl = response.result.secure_url;
+      
+      await coreApi.patch('/api/me/candidate', {
+        cv_url: cvUrl
+      });
+
+      profileData.cv_url = cvUrl;
+      profileData.cv_filename = file.name;
+      
+      notification.message = 'CV subido correctamente';
+      notification.show = true;
+    }
+  } catch (err) {
+    console.error('Error subiendo CV:', err);
+    notification.message = 'Error al subir el CV';
+    notification.show = true;
+  } finally {
+    uploadingCv.value = false;
+    setTimeout(() => { notification.show = false; }, 3000);
+    event.target.value = ''; 
+  }
+};
+
+// --- UPDATE PROFILE ---
+async function updateCandidate(cardKey) {
+  try {
+    const payload = {};
+
+    // Construir payload según la tarjeta editada
+    if (cardKey === 'personal') {
+      payload.first_name = profileData.nombres;
+      payload.last_name = profileData.apellidos;
+      payload.phone = profileData.telefono;
+      payload.birth_date = profileData.fecha_nacimiento;
+      // Combinar ubicación
+      const loc = [profileData.distrito, profileData.departamento].filter(Boolean).join(', ');
+      payload.location = loc;
+    }
+    
+    else if (cardKey === 'academic') {
+      payload.end_year = profileData.anio_egreso ? parseInt(profileData.anio_egreso) : null;
+      // Nota: major_id requiere un ID numérico. 
+      // Por ahora omitimos major_id hasta tener un selector de carreras.
+    }
+    
+    else if (cardKey === 'about') {
+      payload.bio = profileData.sobre_mi;
+    }
+    
+    else if (cardKey === 'links') {
+      payload.linkedin_url = profileData.linkedin_url;
+      payload.github_url = profileData.github_url;
+      payload.portfolio_url = profileData.portfolio_url;
+    }
+
+    // Llamada PATCH
+    await coreApi.patch('/api/me/candidate', payload);
+
+    // Feedback visual
+    notification.message = 'Perfil actualizado correctamente';
+    notification.show = true;
+    setTimeout(() => { notification.show = false; }, 3000);
+
+  } catch (err) {
+    console.error("Error actualizando perfil:", err);
+    notification.message = 'Error al guardar los cambios';
+    notification.show = true;
+    setTimeout(() => { notification.show = false; }, 3000);
+  }
+}
+
+// --- LOGOUT ---
+const handleLogout = () => {
+  logout();
+  router.push('/auth/login');
+};
+
+// --- LOGIC (Existing editing logic) ---
 // State for granular editing of cards
 const editingCards = reactive({
   personal: false,
   academic: false,
   about: false,
-  links: false, // New state for the links card
+  links: false,
 });
-
-// State for inline skill adding
-const addingSkill = reactive({
-  technical: false,
-  soft: false,
-  value: '',
-});
-const newSkillInput = ref(null);
 
 let originalProfileData = {};
 
-// --- LOGIC ---
-
-function toggleCardEditMode(cardKey, saveChanges = false) {
-  if (editingCards[cardKey]) { // If currently editing
+async function toggleCardEditMode(cardKey, saveChanges = false) {
+  if (editingCards[cardKey]) { // Si estamos guardando/cancelando
     if (saveChanges) {
-      // Logic to save data would go here (e.g., API call)
-      console.log('Saving changes for', cardKey, profileData);
+      // Guardar cambios en API
+      await updateCandidate(cardKey);
     } else {
-      // Revert changes
+      // Cancelar: Revertir cambios
       Object.assign(profileData, originalProfileData);
     }
     editingCards[cardKey] = false;
-  } else { // If not editing
+  } else { // Entrar en modo edición
     // Store a snapshot of the current state before editing
     originalProfileData = JSON.parse(JSON.stringify(profileData));
     editingCards[cardKey] = true;
   }
 }
 
-
-async function showAddSkillInput(type) {
-  if(type === 'technical') {
-    addingSkill.technical = true;
-  } else {
-    addingSkill.soft = true;
-  }
-  await nextTick();
-  newSkillInput.value.focus();
-}
-
-function commitNewSkill(type) {
-  const skill = addingSkill.value.trim();
-  const skillList = type === 'technical' ? profileData.habilidades_tecnicas : profileData.habilidades_blandas;
-  if (skill && !skillList.includes(skill)) {
-    skillList.push(skill);
-  }
-  cancelAddSkill();
-}
-
-function cancelAddSkill() {
-  addingSkill.technical = false;
-  addingSkill.soft = false;
-  addingSkill.value = '';
-}
-
-function removeSkill(type, index) {
-  const skillList = type === 'technical' ? 'habilidades_tecnicas' : 'habilidades_blandas';
-  profileData[skillList].splice(index, 1);
-}
-
 const fullName = computed(() => `${profileData.nombres} ${profileData.apellidos}`);
+
+onMounted(() => {
+  fetchProfile();
+  
+  // Notification logic
+  const action = localStorage.getItem('auth_action');
+  const NOTIFICATION_MESSAGES = {
+    register: '¡Cuenta creada exitosamente! Bienvenid@ a Bolsa Laboral - LEAD UNI',
+    login: '¡Bienvenid@ de nuevo! Las ofertas te esperan',
+  };
+  if (action && NOTIFICATION_MESSAGES[action]) {
+    notification.message = NOTIFICATION_MESSAGES[action];
+    notification.show = true;
+    localStorage.removeItem('auth_action');
+    setTimeout(() => { notification.show = false; }, 4000);
+  }
+});
 </script>
+
 
 <template>
   <div class="min-h-screen bg-[var(--lead-900,#0a0a14)] text-gray-200 font-sans pt-32">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
       
-      <header class="flex flex-col sm:flex-row items-center gap-6 mb-12">
-        <img class="h-24 w-24 rounded-full object-cover border-2 border-white/20" src="/src/assets/avatar-placeholder.jpg" alt="Avatar">
-        <div>
-            <h1 class="text-4xl font-bold bg-gradient-to-r from-[#a0218b] to-[#b62667] bg-clip-text text-transparent">
-                {{ fullName }}
-            </h1>
-            <p class="text-lg text-white/80">{{ profileData.carrera }}</p>
+      <header class="flex flex-col sm:flex-row items-center gap-6 mb-12 justify-between">
+        <div class="flex items-center gap-6">
+          <img class="h-24 w-24 rounded-full object-cover border-2 border-white/20" src="/src/assets/avatar-placeholder.jpg" alt="Avatar">
+          <div class="text-center sm:text-left">
+              <h1 class="text-4xl font-bold bg-gradient-to-r from-[#a0218b] to-[#b62667] bg-clip-text text-transparent">
+                  {{ fullName }}
+              </h1>
+              <p class="text-lg text-white/80">{{ profileData.carrera }}</p>
+          </div>
         </div>
+        
+        <button 
+          @click="handleLogout" 
+          class="flex items-center gap-2 px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors text-sm font-bold"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          Cerrar Sesión
+        </button>
       </header>
 
       <main class="grid grid-cols-1 md:grid-cols-12 gap-6">
@@ -166,10 +289,8 @@ const fullName = computed(() => `${profileData.nombres} ${profileData.apellidos}
             </div>
              <div class="card-content">
                 <ul class="info-list">
-                    <li><span>Carrera</span><strong v-if="!editingCards.academic">{{ profileData.carrera }}</strong><input v-else v-model="profileData.carrera" class="edit-input"/></li>
-                    <li><span>Ciclo Actual</span><strong v-if="!editingCards.academic">{{ profileData.ciclo_actual }}</strong><input v-else v-model="profileData.ciclo_actual" type="number" class="edit-input"/></li>
+                    <li><span>Carrera</span><strong v-if="!editingCards.academic">{{ profileData.carrera }}</strong><input v-else v-model="profileData.carrera" class="edit-input" disabled title="Edición de carrera próximamente"/></li>
                     <li><span>Año Egreso</span><strong v-if="!editingCards.academic">{{ profileData.anio_egreso || 'N/A' }}</strong><input v-else v-model="profileData.anio_egreso" type="number" class="edit-input"/></li>
-                    <li><span>Promedio</span><strong v-if="!editingCards.academic">{{ profileData.promedio_ponderado.toFixed(2) }}</strong><input v-else v-model="profileData.promedio_ponderado" type="number" step="0.01" class="edit-input"/></li>
                 </ul>
                 <div v-if="editingCards.academic" class="flex gap-3 mt-4">
                     <button @click="toggleCardEditMode('academic', true)" class="save-button">Guardar</button>
@@ -195,49 +316,62 @@ const fullName = computed(() => `${profileData.nombres} ${profileData.apellidos}
             </div>
         </div>
 
-        <div class="bento-card md:col-span-12">
-            <h3 class="card-title">Skills & Tech Stack</h3>
-            <div class="card-content space-y-6">
-                <div>
-                    <h4 class="font-semibold text-white/90 mb-3">Técnicas</h4>
-                    <div class="flex flex-wrap items-center gap-3">
-                        <span v-for="(skill, index) in profileData.habilidades_tecnicas" :key="`tech-${skill}`" class="skill-pill">
-                            {{ skill }} <button @click="removeSkill('technical', index)" class="skill-remove-btn">&times;</button>
-                        </span>
-                        <button v-if="!addingSkill.technical" @click="showAddSkillInput('technical')" class="add-skill-btn">+ Agregar</button>
-                        <input v-else ref="newSkillInput" v-model="addingSkill.value" @keyup.enter="commitNewSkill('technical')" @blur="cancelAddSkill" type="text" class="inline-edit-input" placeholder="Añadir..."/>
-                    </div>
-                </div>
-                 <div>
-                    <h4 class="font-semibold text-white/90 mb-3">Blandas</h4>
-                    <div class="flex flex-wrap items-center gap-3">
-                         <span v-for="(skill, index) in profileData.habilidades_blandas" :key="`soft-${skill}`" class="skill-pill">
-                            {{ skill }} <button @click="removeSkill('soft', index)" class="skill-remove-btn">&times;</button>
-                        </span>
-                        <button v-if="!addingSkill.soft" @click="showAddSkillInput('soft')" class="add-skill-btn">+ Agregar</button>
-                        <input v-else ref="newSkillInput" v-model="addingSkill.value" @keyup.enter="commitNewSkill('soft')" @blur="cancelAddSkill" type="text" class="inline-edit-input" placeholder="Añadir..."/>
-                    </div>
-                </div>
-                <div class="pt-4 flex justify-end">
-                    <button class="save-button">Guardar cambios</button>
-                </div>
-            </div>
-        </div>
-        
         <div class="md:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bento-card">
-                <h3 class="card-title">Documentación</h3>
+
+            <div class="bento-card relative">
+                <h3 class="card-title mb-4">Documentación</h3>
                 <div class="card-content">
-                    <a href="#" class="flex items-center gap-4 p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
-                        <svg class="h-10 w-10 text-[#cb2b46] flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
-                        <div>
-                            <p class="font-semibold text-white truncate">{{ profileData.cv_filename }}</p>
-                            <p class="text-xs text-white/60">Descargar CV</p>
+                    <!-- Hidden File Input -->
+                    <input 
+                        type="file" 
+                        ref="fileInput" 
+                        accept="application/pdf" 
+                        class="hidden" 
+                        @change="handleFileChange"
+                    />
+
+                    <div class="flex items-center justify-between p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors border border-white/5 hover:border-[#b62667]/30 group">
+                        
+                        <!-- File Info / Link -->
+                        <div class="flex items-center gap-4 flex-1 min-w-0">
+                            <div class="p-2 bg-red-500/10 rounded-lg text-red-400">
+                                <svg class="h-8 w-8 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-semibold text-white truncate" :title="profileData.cv_filename">
+                                    {{ profileData.cv_filename }}
+                                </p>
+                                <a 
+                                    v-if="profileData.cv_url" 
+                                    :href="profileData.cv_url" 
+                                    target="_blank"
+                                    class="text-xs text-[#b62667] hover:underline flex items-center gap-1 mt-0.5"
+                                >
+                                    Ver documento
+                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                </a>
+                                <p v-else class="text-xs text-white/40 mt-0.5">Formato PDF (Max. 5MB)</p>
+                            </div>
                         </div>
-                    </a>
+
+                        <!-- Action Button -->
+                        <button 
+                            @click="triggerFileInput" 
+                            :disabled="uploadingCv"
+                            class="ml-4 px-4 py-2 text-sm font-bold text-white bg-white/10 hover:bg-[#b62667] rounded-lg transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <span v-if="uploadingCv">
+                                <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            </span>
+                            <span v-else>
+                                {{ profileData.cv_url ? 'Actualizar' : 'Subir' }}
+                            </span>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="bento-card">
+
                  <div class="card-header">
                     <h3 class="card-title">Enlaces & Contacto</h3>
                     <button @click="toggleCardEditMode('links')" class="edit-button" title="Editar">

@@ -7,7 +7,7 @@ import sharp from 'sharp'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
-import { Courses } from "./collections/Courses";
+import { Courses } from './collections/Courses'
 import { StaticContent } from './collections/StaticContent'
 import { Offers } from './collections/Projects'
 import { Companies } from './collections/Companies'
@@ -21,6 +21,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
+  cors: '*',
   collections: [Users, Media, Courses, StaticContent, Offers, Companies],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
@@ -29,8 +30,8 @@ export default buildConfig({
   },
   db: postgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URL || ''
-    },
+      connectionString: process.env.DATABASE_URL || '',
+    }
   }),
   sharp,
   plugins: [],

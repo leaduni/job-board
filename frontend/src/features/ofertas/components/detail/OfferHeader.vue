@@ -50,14 +50,14 @@ const props = defineProps({
 });
 
 // Por ahora: logo null en tu JSON => fallback
-const logoUrl = computed(() => props.oferta?.company?.logo || null);
+const logoUrl = computed(() => props.oferta?.company?.logo?.url ? `${import.meta.env.VITE_CMS_API_URL}${props.oferta.company.logo.url}` : null);
 
 const inicialEmpresa = computed(() => {
   const n = props.oferta?.company?.nombre_comercial?.trim();
   return n ? n.slice(0, 1).toUpperCase() : 'E';
 });
 
-// Texto "Publicado hace X días" (simple, luego lo mejoramos)
+// Texto "Publicado hace X días"
 const publicadoTexto = computed(() => {
   const fecha = props.oferta?.fecha_publicacion;
   if (!fecha) return 'Publicado recientemente';
@@ -76,7 +76,6 @@ const publicadoTexto = computed(() => {
 const estadoTexto = computed(() => {
   const e = props.oferta?.estado;
   if (!e) return '';
-  // tu backend usa 'activa', 'cerrada'...
   return e === 'activa' ? 'Oferta Activa' : e === 'cerrada' ? 'Oferta Cerrada' : e;
 });
 
@@ -91,7 +90,6 @@ const estadoClasses = computed(() => {
   }
 });
 
-// Mappers simples (luego los refinamos)
 const contratoTexto = computed(() => {
   const v = props.oferta?.tipo_contrato;
   if (!v) return '';
@@ -114,6 +112,6 @@ const experienciaTexto = computed(() => {
     '1_3_anios': '1 - 3 años',
     'mas_3_anios': 'Más de 3 años',
   };
-  return map[v] || v.replace(/_/g, ' '); // Fallback to replacing underscores if not in map
+  return map[v] || v.replace(/_/g, ' ');
 });
 </script>

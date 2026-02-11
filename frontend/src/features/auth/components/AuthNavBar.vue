@@ -1,4 +1,5 @@
 <template>
+
   <nav
     class="bg-gradient-to-b from-[#2a1630] to-[#201028] h-16 sticky top-0 z-50 border-b border-[rgba(160,33,139,0.06)]"
     role="navigation"
@@ -62,7 +63,7 @@ const authLink = computed(() => {
   if (route.path.includes('/login')) {
     return {
       to: '/auth/register/estudiante',
-      text: 'Registrarse como candidato'
+      text: 'Crear cuenta'
     }
   }
   return {

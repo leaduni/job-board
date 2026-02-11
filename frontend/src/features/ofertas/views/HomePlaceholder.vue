@@ -1,4 +1,5 @@
 <template>
+
   <div class="flex flex-col min-h-screen bg-[#0a0a16] text-white lg:grid lg:grid-cols-2">
     <!-- Top/Left Column: Content -->
     <div class="relative z-10 flex flex-col items-center justify-center order-1 pt-32 pb-16 lg:items-start lg:order-none">
@@ -52,10 +53,12 @@
         </svg>
       </div>
     </div>
+
   </div>
 </template>
 
 <script setup>
+
 import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue';
 
 const nexusContainer = ref(null);
@@ -222,3 +225,4 @@ onUnmounted(() => {
 }
 .cta-button:hover { animation: pulse-shadow 2s infinite ease-in-out; }
 </style>
+
