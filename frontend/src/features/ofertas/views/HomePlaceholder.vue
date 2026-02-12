@@ -190,7 +190,7 @@
                 {{ job.company?.nombre_comercial?.[0] || "E" }}
               </div>
               <span
-                class="inline-flex items-center rounded-full bg-[#a6249d]/20 px-2.5 py-0.5 text-xs font-medium text-[#ff6ec7] border border-[#a6249d]/30 capitalize"
+                class="inline-flex items-center rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-medium text-emerald-400 border border-emerald-500/30 capitalize"
               >
                 {{ job.modalidad }}
               </span>
@@ -242,29 +242,33 @@
 
     <!-- Call to Action -->
     <section
-      class="relative isolate overflow-hidden bg-[#1A0B2E] py-16 sm:py-24 lg:py-32"
+      class="relative isolate overflow-hidden bg-[#1A0B2E] py-8 sm:py-10 lg:py-12"
     >
-      <div class="mx-auto max-w-7xl px-6 lg:px-8">
-        <div
-          class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2"
-        >
-          <div class="max-w-xl lg:max-w-lg">
+      <div class="mx-auto max-w-6xl px-6 lg:px-8">
+        <div class="flex flex-col items-center text-center gap-6 lg:flex-row lg:gap-8 lg:items-center lg:justify-center">
+          <div class="flex flex-col items-center gap-4 max-w-lg lg:flex-1">
             <h2
               class="text-3xl font-bold tracking-tight text-white sm:text-4xl"
             >
               ¿Listo para impulsar tu carrera?
             </h2>
-            <p class="mt-4 text-lg leading-8 text-gray-300">
+            <p class="text-lg leading-8 text-gray-300">
               Crea tu perfil profesional, sube tu CV y deja que las empresas te
               encuentren. Es completamente gratis para estudiantes y egresados.
             </p>
-            <div class="mt-6 flex max-w-md gap-x-4">
-              <button
-                class="flex-none rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-[#1A0B2E] shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-              >
-                Comenzar ahora
-              </button>
-            </div>
+            <router-link
+              to="/auth/register/estudiante"
+              class="mt-4 inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#d93340] to-[#a6249d] px-8 py-4 text-base font-bold text-white shadow-lg shadow-[#a6249d]/40 hover:from-[#a6249d] hover:to-[#d93340] hover:shadow-[#a6249d]/50 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a6249d] transition-all duration-300"
+            >
+              Comenzar ahora
+            </router-link>
+          </div>
+          <div class="flex justify-center flex-shrink-0 lg:flex-1">
+            <img
+              src="/capybara-carrera.png"
+              alt="Impulsa tu carrera con LeadUNI"
+              class="max-w-[200px] sm:max-w-[240px] lg:max-w-sm xl:max-w-md"
+            />
           </div>
         </div>
       </div>

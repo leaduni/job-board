@@ -10,7 +10,7 @@ export const Companies: CollectionConfig = {
     },
     access: {
         read: () => true, // Público
-        create: ({ req: { user } }) => !!user, // Solo admins
+        create: () => true, // Público (registro de empresas, como users)
         update: ({ req: { user } }) => !!user,
         delete: ({ req: { user } }) => !!user,
     },
@@ -86,8 +86,8 @@ export const Companies: CollectionConfig = {
         {
             name: 'tiene_convenio',
             type: 'checkbox',
-            label: '¿Tiene convenio con LeadUNI/UNI?',
             defaultValue: false,
+            label: '¿Tiene convenio con LeadUNI/UNI?',
             admin: {
                 description: 'Las empresas con convenio aparecen destacadas',
             },

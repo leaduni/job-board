@@ -16,6 +16,11 @@ export const cmsApi = {
     return data;
   },
 
+  async createCompany(companyData) {
+    const { data } = await api.post("/companies", companyData);
+    return data;
+  },
+
   async getProjectById(id) {
     const { data } = await api.get(`/projects/${id}`);
     return data;
