@@ -1,14 +1,14 @@
 <template>
-  <aside class="w-72 bg-[#121225] border-2 border-[#b62667] rounded-2xl p-6 shadow-lg">
+  <aside class="w-72 bg-[#121225] border-2 border-[#a6249d] rounded-2xl p-6 shadow-lg">
     <div class="flex items-center justify-between mb-5">
       <h2 class="text-white font-bold text-lg flex items-center gap-2">
-        <svg class="w-5 h-5 text-[#b62667]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <svg class="w-5 h-5 text-[#d93340]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
         </svg>
         Filtros
       </h2>
-      <button @click="clearAllFilters" class="text-sm text-[#b62667] underline hover:no-underline focus:outline-none">Limpiar todo</button>
+      <button @click="clearAllFilters" class="text-sm text-[#d93340] underline hover:no-underline focus:outline-none">Limpiar todo</button>
     </div>
 
     <!-- Modalidad -->
@@ -18,7 +18,7 @@
         <li v-for="(item, i) in modalidades" :key="i" class="flex items-center justify-between gap-x-4">
           <label class="flex items-center gap-3 cursor-pointer group">
             <input type="checkbox" :value="item.value" v-model="selectedModalidades"
-              class="appearance-none w-5 h-5 bg-gray-700/50 rounded-md checked:accent-[#b62667] checked:bg-[#b62667] checked:border-transparent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-[#b62667]" />
+              class="appearance-none w-5 h-5 bg-gray-700/50 rounded-md checked:accent-[#a6249d] checked:bg-[#a6249d] checked:border-transparent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-[#a6249d]" />
             <span class="text-gray-300 group-hover:text-white transition-colors text-xs">{{ item.label }}</span>
           </label>
         </li>
@@ -32,7 +32,7 @@
         <li v-for="(item, i) in tiposContrato" :key="i" class="flex items-center justify-between gap-x-4">
           <label class="flex items-center gap-3 cursor-pointer group">
             <input type="checkbox" :value="item.value" v-model="selectedTiposContrato"
-              class="appearance-none w-5 h-5 bg-gray-700/50 rounded-md checked:accent-[#b62667] checked:bg-[#b62667] checked:border-transparent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-[#b62667]" />
+              class="appearance-none w-5 h-5 bg-gray-700/50 rounded-md checked:accent-[#a6249d] checked:bg-[#a6249d] checked:border-transparent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-[#a6249d]" />
             <span class="text-gray-300 group-hover:text-white transition-colors text-xs">{{ item.label }}</span>
           </label>
         </li>
@@ -46,7 +46,7 @@
         <li v-for="(item, i) in nivelesExperiencia" :key="i" class="flex items-center justify-between gap-x-4">
           <label class="flex items-center gap-3 cursor-pointer group">
             <input type="checkbox" :value="item.value" v-model="selectedNivelesExperiencia"
-              class="appearance-none w-5 h-5 bg-gray-700/50 rounded-md checked:accent-[#b62667] checked:bg-[#b62667] checked:border-transparent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-[#b62667]" />
+              class="appearance-none w-5 h-5 bg-gray-700/50 rounded-md checked:accent-[#a6249d] checked:bg-[#a6249d] checked:border-transparent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-[#a6249d]" />
             <span class="text-gray-300 group-hover:text-white transition-colors text-xs">{{ item.label }}</span>
           </label>
         </li>
@@ -54,10 +54,10 @@
     </section>
 
     <!-- CTA Box -->
-    <div class="mt-6 p-5 rounded-xl bg-gradient-to-br from-pink-900/20 to-purple-900/10 border border-[#b62667] text-center">
+    <div class="mt-6 p-5 rounded-xl bg-gradient-to-br from-pink-900/20 to-purple-900/10 border border-[#a6249d] text-center">
       <h4 class="font-bold text-white mb-1 text-base">¡Sube tu CV!</h4>
       <p class="text-sm text-gray-400 mb-4">Las empresas buscan perfiles como el tuyo.</p>
-      <button class="w-full bg-gradient-to-r from-[#a0218b] to-[#b62667] text-white font-bold py-2.5 px-4 rounded-lg hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-[#b62667]">
+      <button class="w-full bg-gradient-to-r from-[#d93340] to-[#a6249d] text-white font-bold py-2.5 px-4 rounded-lg hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-[#a6249d]">
         Actualizar Perfil
       </button>
     </div>
@@ -65,7 +65,14 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
+
+const props = defineProps({
+  initialFilters: {
+    type: Object,
+    default: () => ({}),
+  },
+});
 
 // Mapa de valores: [Label legible, Valor backend]
 const modalidades = [
@@ -100,6 +107,13 @@ const clearAllFilters = () => {
   selectedTiposContrato.value = [];
   selectedNivelesExperiencia.value = [];
 };
+
+onMounted(() => {
+  const init = props.initialFilters;
+  if (init.modalidades?.length) selectedModalidades.value = [...init.modalidades];
+  if (init.tiposContrato?.length) selectedTiposContrato.value = [...init.tiposContrato];
+  if (init.nivelesExperiencia?.length) selectedNivelesExperiencia.value = [...init.nivelesExperiencia];
+});
 
 watch([selectedModalidades, selectedTiposContrato, selectedNivelesExperiencia], () => {
   emit('filter-change', {

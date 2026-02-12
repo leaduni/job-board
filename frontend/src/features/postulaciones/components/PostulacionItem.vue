@@ -43,11 +43,11 @@ async function cancelarPostulacion() {
 </script>
 
 <template>
-  <article class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-lg bg-[#16162a] border border-white/5 p-5 transition-colors hover:border-[#b62667]/30">
+  <article class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-lg bg-[#16162a] border border-white/5 p-5 transition-colors hover:border-[#a6249d]/30">
     <!-- Lado izquierdo: info principal -->
     <div class="flex-grow">
         <h3 class="m-0 text-lg font-bold text-white mb-1">
-            <router-link :to="`/ofertas/${postulacion.oferta_id}`" class="hover:text-[#b62667] transition-colors">
+            <router-link :to="`/ofertas/${postulacion.oferta_id}`" class="hover:text-[#ff6ec7] transition-colors">
               {{ postulacion.titulo || `Oferta #${postulacion.oferta_id}` }}
             </router-link>
         </h3>

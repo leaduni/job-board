@@ -99,21 +99,21 @@ const goToPage = (p) => {
 </script>
 
 <template>
-  <div class="bg-[#09092a] text-white min-h-screen pt-[calc(72px+24px)] pb-20 font-sans">
+  <div class="bg-[rgb(9,9,42)] text-white min-h-screen pt-[calc(72px+24px)] pb-20 font-sans">
     <div class="container mx-auto px-4 py-8 max-w-7xl">
       
       <!-- Header -->
       <div class="mb-10 text-center md:text-left">
-        <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 mb-3">
+        <h1 class="font-['League_Spartan',_sans-serif] text-4xl font-extrabold text-transparent bg-clip-text bg-white mb-3">
           Explora Cursos
         </h1>
-        <p class="text-gray-400 text-lg max-w-2xl">
+        <p class="text-white/70 text-lg max-w-2xl">
           Descubre recursos educativos seleccionados para impulsar tu carrera profesional.
         </p>
       </div>
 
       <!-- Filters Bar -->
-      <div class="bg-[#121225] p-6 rounded-2xl border border-white/5 mb-10 shadow-xl shadow-black/20">
+      <div class="bg-[#121225] p-6 rounded-2xl border-2 border-[#a6249d] mb-10 shadow-xl shadow-black/20 focus-within:ring-2 focus-within:ring-[#a6249d]/30 transition-all duration-300">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
           
           <!-- Buscador Principal -->
@@ -129,7 +129,7 @@ const goToPage = (p) => {
                 v-model="filters.search"
                 type="text" 
                 placeholder="Ej. Desarrollo Web..." 
-                class="block w-full pl-10 pr-3 py-3 bg-[#1e1e3a] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#b62667] focus:border-transparent transition-all"
+                class="block w-full pl-10 pr-3 py-3 bg-[#1e1e3a] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#a6249d] focus:border-transparent transition-all"
               >
             </div>
           </div>
@@ -147,7 +147,7 @@ const goToPage = (p) => {
                 v-model="filters.provider"
                 type="text" 
                 placeholder="Ej. Platzi, Udemy..." 
-                class="block w-full pl-10 pr-3 py-3 bg-[#1e1e3a] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#b62667] focus:border-transparent transition-all"
+                class="block w-full pl-10 pr-3 py-3 bg-[#1e1e3a] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#a6249d] focus:border-transparent transition-all"
               >
             </div>
           </div>
@@ -157,7 +157,7 @@ const goToPage = (p) => {
             <label class="flex items-center space-x-3 cursor-pointer group select-none">
               <div class="relative">
                 <input type="checkbox" v-model="filters.isFree" class="sr-only peer">
-                <div class="w-12 h-7 bg-gray-700 rounded-full peer-focus:ring-2 peer-focus:ring-[#b62667] peer-checked:bg-[#b62667] transition-colors duration-300 ease-in-out"></div>
+                <div class="w-12 h-7 bg-gray-700 rounded-full peer-focus:ring-2 peer-focus:ring-[#a6249d] peer-checked:bg-[#a6249d] transition-colors duration-300 ease-in-out"></div>
                 <div class="absolute left-1 top-1 bg-white w-5 h-5 rounded-full peer-checked:translate-x-5 transition-transform duration-300 shadow-md"></div>
               </div>
               <span class="text-gray-300 font-medium group-hover:text-white transition-colors">Solo Gratuitos</span>
@@ -169,18 +169,18 @@ const goToPage = (p) => {
 
       <!-- Loading State -->
       <div v-if="loading" class="py-32 text-center">
-        <div class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#b62667]"></div>
+        <div class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#d93340]"></div>
         <p class="mt-4 text-gray-400 animate-pulse">Buscando cursos...</p>
       </div>
       
       <!-- Empty State -->
-      <div v-else-if="courses.length === 0" class="py-32 text-center bg-[#121225]/50 rounded-2xl border border-white/5 border-dashed">
+      <div v-else-if="courses.length === 0" class="py-32 text-center bg-[#121225]/50 rounded-2xl border border-[#a6249d]/20 border-dashed">
         <svg class="mx-auto h-16 w-16 text-gray-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <h3 class="text-xl font-bold text-white mb-2">No encontramos resultados</h3>
         <p class="text-gray-500 max-w-md mx-auto">Intenta ajustar tus filtros o buscar con otros términos.</p>
-        <button @click="filters = { search: '', provider: '', isFree: false }" class="mt-6 text-[#b62667] hover:text-[#d23b97] font-medium underline underline-offset-4">
+        <button @click="filters = { search: '', provider: '', isFree: false }" class="mt-6 text-[#d93340] hover:text-[#ff6ec7] font-medium underline underline-offset-4">
           Limpiar filtros
         </button>
       </div>
@@ -202,7 +202,7 @@ const goToPage = (p) => {
           <button 
             @click="prevPage"
             :disabled="!pagination.hasPrevPage"
-            class="p-2 rounded-lg border border-white/10 hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-white"
+            class="p-2 rounded-lg border border-[#a6249d]/30 hover:bg-[#a6249d]/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-white"
             title="Anterior"
           >
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -218,7 +218,7 @@ const goToPage = (p) => {
                 v-if="p === 1 || p === pagination.totalPages || (p >= pagination.page - 1 && p <= pagination.page + 1)"
                 @click="goToPage(p)"
                 class="w-10 h-10 rounded-lg flex items-center justify-center font-medium transition-all duration-200"
-                :class="p === pagination.page ? 'bg-[#b62667] text-white shadow-lg shadow-[#b62667]/20' : 'bg-[#1e1e3a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white'"
+                :class="p === pagination.page ? 'bg-[#d93340] text-white shadow-lg shadow-[#a6249d]/20' : 'bg-[#1e1e3a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white'"
               >
                 {{ p }}
               </button>
@@ -230,7 +230,7 @@ const goToPage = (p) => {
           <button 
             @click="nextPage"
             :disabled="!pagination.hasNextPage"
-            class="p-2 rounded-lg border border-white/10 hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-white"
+            class="p-2 rounded-lg border border-[#a6249d]/30 hover:bg-[#a6249d]/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-white"
             title="Siguiente"
           >
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -240,7 +240,7 @@ const goToPage = (p) => {
         </div>
 
         <!-- Results count text -->
-        <div class="text-center mt-6 text-sm text-gray-500">
+        <div class="text-center mt-6 text-sm text-white/70">
           Mostrando {{ courses.length }} de {{ pagination.totalDocs }} resultados
         </div>
       </div>

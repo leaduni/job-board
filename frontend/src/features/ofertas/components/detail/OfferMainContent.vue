@@ -1,5 +1,5 @@
 <template>
-  <section class="bg-gradient-to-b from-[rgba(23,16,44,0.85)] to-[rgba(18,13,38,0.92)] rounded-[12px] px-[28px] py-[26px] border-2 border-[#b62667] shadow-[0_20px_60px_rgba(6,6,28,0.6)]" v-if="oferta">
+  <section class="bg-gradient-to-b from-[rgba(23,16,44,0.85)] to-[rgba(18,13,38,0.92)] rounded-[12px] px-[28px] py-[26px] border-2 border-[#a6249d] shadow-[0_20px_60px_rgba(6,6,28,0.6)]" v-if="oferta">
     <!-- Acerca del puesto -->
     <div class="bg-transparent mb-[20px]">
       <h2 class="font-heading text-2xl mb-[12px] text-[rgba(255,255,255,0.95)]">Acerca del Puesto</h2>
@@ -13,7 +13,7 @@
     <div class="bg-transparent mb-[20px] grid grid-cols-1 md:grid-cols-2 gap-[22px] mt-[12px]">
       <!-- Requisitos -->
       <div>
-        <h3 class="text-[16px] text-lead-500 mb-[10px] font-bold">Requisitos</h3>
+        <h3 class="text-[16px] text-[#a6249d] mb-[10px] font-bold">Requisitos</h3>
 
         <div class="text-[rgba(255,255,255,0.45)] whitespace-pre-line" v-if="requisitosTexto">
           {{ requisitosTexto }}
@@ -26,7 +26,7 @@
 
       <!-- Carreras Objetivo (Nuevo) -->
       <div>
-        <h3 class="text-[16px] text-lead-500 mb-[10px] font-bold">Carreras Afines</h3>
+        <h3 class="text-[16px] text-[#a6249d] mb-[10px] font-bold">Carreras Afines</h3>
 
         <div class="text-[rgba(255,255,255,0.45)]" v-if="carrerasTexto">
           {{ carrerasTexto }}

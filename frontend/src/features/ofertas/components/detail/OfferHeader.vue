@@ -1,5 +1,5 @@
 <template>
-  <section class="flex items-center justify-between gap-[18px] p-[22px] rounded-[12px] bg-gradient-to-t from-[rgba(18,13,38,0.92)] to-[rgba(23,16,44,0.88)] border-2 border-[#b62667] shadow-[0_20px_60px_rgba(6,6,28,0.6)] mb-[28px]" v-if="oferta">
+  <section class="flex items-center justify-between gap-[18px] p-[22px] rounded-[12px] bg-gradient-to-t from-[rgba(18,13,38,0.92)] to-[rgba(23,16,44,0.88)] border-2 border-[#a6249d] shadow-[0_20px_60px_rgba(6,6,28,0.6)] mb-[28px]" v-if="oferta">
     <div class="flex gap-[18px] items-center flex-1 min-w-0">
       <!-- Logo -->
       <div class="w-[84px] h-[84px] rounded-[12px] overflow-hidden flex items-center justify-center bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.03)]">

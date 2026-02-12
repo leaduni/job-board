@@ -1,13 +1,13 @@
 <template>
-  <section class="bg-[#09092a] min-h-screen pt-[calc(72px+24px)]">
+  <section class="bg-[rgb(9,9,42)] min-h-screen pt-[calc(72px+24px)]">
     <div class="max-w-[1240px] mx-auto px-8 py-10">
 
       <!-- Header -->
       <header class="mb-10">
-        <h1 class="font-['League_Spartan',_sans-serif] text-3xl mb-2">
+        <h1 class="font-['League_Spartan',_sans-serif] text-3xl sm:text-4xl font-bold mb-2 bg-white bg-clip-text text-transparent">
           Ofertas Laborales
         </h1>
-        <p class="text-[rgba(255,255,255,0.45)] m-0">
+        <p class="text-white/70 m-0">
           Encuentra prácticas, empleos junior y primeras oportunidades profesionales
         </p>
       </header>
@@ -15,7 +15,7 @@
       <!-- Search + Sort row -->
       <div class="flex items-stretch gap-4 mb-8">
         <!-- SearchBar -->
-        <div class="flex-grow bg-[#121225] rounded-xl border-2 border-[#b62667] focus-within:ring-2 focus-within:ring-[#b62667]/30 transition-all duration-300">
+        <div class="flex-grow bg-[#121225] rounded-xl border-2 border-[#a6249d] focus-within:ring-2 focus-within:ring-[#a6249d]/30 transition-all duration-300">
           <SearchBar v-model="filters.search" />
         </div>
 
@@ -23,7 +23,7 @@
         <div class="relative flex items-center">
           <label for="sort" class="text-sm text-gray-400 mr-3 shrink-0">Ordenar por:</label>
           <div class="relative h-full">
-            <select id="sort" v-model="filters.sort" class="appearance-none bg-[#121225] text-white border-2 border-[#b62667] rounded-xl px-4 pr-10 h-full focus:outline-none focus:ring-2 focus:ring-[#b62667]/50">
+            <select id="sort" v-model="filters.sort" class="appearance-none bg-[#121225] text-white border-2 border-[#a6249d] rounded-xl px-4 pr-10 h-full focus:outline-none focus:ring-2 focus:ring-[#a6249d]/50">
               <option value="-createdAt" class="bg-[#0a0a14] text-white">Más recientes</option>
               <option value="createdAt" class="bg-[#0a0a14] text-white">Más antiguas</option>
             </select>
@@ -37,20 +37,23 @@
       <!-- Layout columns -->
       <div class="flex gap-7 items-start">
         <!-- Sidebar -->
-        <FilterSidebar @filter-change="handleSidebarFilter" />
+        <FilterSidebar
+          :initial-filters="{ modalidades: filters.modalidades, tiposContrato: filters.tiposContrato, nivelesExperiencia: filters.nivelesExperiencia }"
+          @filter-change="handleSidebarFilter"
+        />
 
         <!-- Contenido -->
         <main class="flex-1 min-w-0">
           <div class="flex items-center justify-between gap-3 my-3 mb-5">
-            <h2 class="m-0 text-xl font-['League_Spartan',_sans-serif]">{{ pagination.totalDocs }} Ofertas encontradas</h2>
-            <div class="text-[rgba(255,255,255,0.45)]" v-if="pagination.totalDocs > 0">
+            <h2 class="m-0 text-xl font-['League_Spartan',_sans-serif] font-bold text-white">{{ pagination.totalDocs }} Ofertas encontradas</h2>
+            <div class="text-white/70" v-if="pagination.totalDocs > 0">
               <span class="text-sm">Mostrando {{ startItem }}-{{ endItem }} de {{ pagination.totalDocs }}</span>
             </div>
           </div>
 
           <!-- Loading -->
           <div v-if="loading" class="py-20 text-center">
-             <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#b62667]"></div>
+             <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#d93340]"></div>
              <p class="mt-4 text-[rgba(255,255,255,0.45)]">Cargando ofertas...</p>
           </div>
 
@@ -89,12 +92,15 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { listarOfertas } from '../services/ofertas.service'
 
 import JobCard from '../components/JobCard.vue'
 import FilterSidebar from '../components/FilterSidebar.vue'
 import SearchBar from '../components/SearchBar.vue'
 import Pagination from '../components/Pagination.vue'
+
+const route = useRoute()
 
 // Estado
 const ofertas = ref([])
@@ -110,12 +116,28 @@ const pagination = ref({
   hasNextPage: false
 })
 
+// Valores iniciales desde URL (antes del primer render)
+function getInitialFilters() {
+  const q = route.query
+  let search = ''
+  let tiposContrato = []
+  if (q.search) search = String(q.search).trim()
+  if (q.tipo_contrato) {
+    const valid = ['practicas_pre', 'practicas_pro', 'tiempo_completo', 'medio_tiempo', 'freelance']
+    const values = String(q.tipo_contrato).split(',').map(v => v.trim())
+    tiposContrato = [...new Set(values.filter(v => valid.includes(v)))]
+  }
+  return { search, tiposContrato }
+}
+
+const initialFromUrl = getInitialFilters()
+
 // Filtros reactivos
 const filters = ref({
-  search: '',
+  search: initialFromUrl.search,
   sort: '-createdAt',
   modalidades: [],
-  tiposContrato: [],
+  tiposContrato: initialFromUrl.tiposContrato,
   nivelesExperiencia: []
 })
 
@@ -223,6 +245,7 @@ async function fetchOfertas() {
 
 // Inicialización
 onMounted(() => {
+  window.scrollTo(0, 0)
   fetchOfertas()
 })
 </script>

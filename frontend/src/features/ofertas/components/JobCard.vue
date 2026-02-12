@@ -1,45 +1,43 @@
 <template>
-  <article class="h-full bg-[rgba(9,9,42,0.6)] border-2 border-[#b62667] rounded-[12px] p-[20px] flex flex-col gap-[12px] shadow-[0_8px_26px_rgba(0,0,0,0.6)] text-white/95 transition-transform transition-shadow duration-150 ease-in-out min-h-0 hover:-translate-y-[8px] hover:border-[#b62667] hover:shadow-[0_40px_100px_rgba(6,6,28,0.76),_0_12px_40px_rgba(0,0,0,0.7)]">
-    
-    <!-- Header -->
-    <div class="flex items-start justify-between gap-[12px]">
-      <div class="flex-1 min-w-0">
-        <!-- Title with line clamp -->
-        <h3 class="font-['League_Spartan',sans-serif] text-[18px] mb-[4px] text-white/95 line-clamp-2 leading-tight min-h-[44px]" :title="oferta.titulo">
-          {{ oferta.titulo }}
-        </h3>
-        <p class="text-[13px] text-white/45 truncate">{{ oferta.company?.nombre_comercial || 'Empresa Confidencial' }}</p>
+  <article class="group h-full flex flex-col bg-[#1A0B2E]/90 backdrop-blur-lg rounded-2xl border border-[#a6249d]/30 hover:border-[#a6249d]/50 p-6 gap-4 shadow-lg text-white/95 transition-all duration-300 min-h-0 hover:-translate-y-1 hover:shadow-xl">
+    <!-- Fila superior: logo+título a la izquierda, estado (ACTIVA) a la derecha -->
+    <div class="flex items-start justify-between gap-4">
+      <div class="flex items-start gap-3 min-w-0 flex-1">
+        <div class="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center text-white/80 font-bold text-xl uppercase flex-shrink-0">
+          {{ oferta.company?.nombre_comercial?.[0] || 'E' }}
+        </div>
+        <div class="min-w-0 flex-1">
+          <h3 class="font-['League_Spartan',sans-serif] text-lg font-bold mb-1 text-white/95 line-clamp-2 leading-tight group-hover:text-[#ff6ec7] transition-colors" :title="oferta.titulo">
+            {{ oferta.titulo }}
+          </h3>
+          <p class="text-sm text-white/60 truncate">{{ oferta.company?.nombre_comercial || 'Empresa Confidencial' }}</p>
+        </div>
       </div>
-
-      <!-- Badge Estado -->
-      <div class="flex-shrink-0 ml-[8px]">
-        <span v-if="oferta.estado" class="text-[10px] uppercase font-bold" :class="estadoClasses">
-          {{ oferta.estado }}
-        </span>
-      </div>
+      <span v-if="oferta.estado" class="flex-shrink-0 text-[10px] uppercase font-bold" :class="estadoClasses">{{ oferta.estado }}</span>
     </div>
 
-    <!-- Tags -->
-    <div class="flex gap-[8px] items-center flex-wrap text-white/45 text-[13px]">
-      <span v-if="oferta.modalidad" class="inline-flex items-center justify-center px-[10px] py-[4px] rounded-full bg-white/5 border border-white/10 text-white/60 text-[11px] whitespace-nowrap">
+    <!-- Tags: modalidad y nivel_experiencia al costado, mismo color y alineados -->
+    <div class="flex gap-2 flex-wrap items-center">
+      <span v-if="oferta.modalidad" class="inline-flex items-center justify-center px-[10px] py-[4px] rounded-full bg-white/5 border border-white/10 text-white/60 text-[11px] whitespace-nowrap leading-none">
         {{ getDisplayLabel(oferta.modalidad) }}
       </span>
-      <span v-if="oferta.nivel_experiencia" class="inline-flex items-center justify-center px-[10px] py-[4px] rounded-full bg-white/5 border border-white/10 text-white/60 text-[11px] whitespace-nowrap">
+      <span v-if="oferta.nivel_experiencia" class="inline-flex items-center justify-center px-[10px] py-[4px] rounded-full bg-white/5 border border-white/10 text-white/60 text-[11px] whitespace-nowrap leading-none">
         {{ getDisplayLabel(oferta.nivel_experiencia) }}
       </span>
     </div>
 
     <!-- Descripción (Truncada) -->
     <div class="flex-grow">
-      <p class="text-white/50 text-[13px] leading-[1.5] line-clamp-3">
+      <p class="text-white/50 text-sm leading-relaxed line-clamp-3">
         {{ descripcionCorta }}
       </p>
     </div>
 
-    <!-- Footer Action -->
-    <div class="mt-auto pt-2">
-      <router-link :to="`/ofertas/${oferta.id}`" class="block w-full">
-        <button class="w-full px-[12px] py-[10px] rounded-[10px] bg-gradient-to-r from-[#a0218b] to-[#b62667] text-white font-bold text-sm shadow-[0_6px_18px_rgba(182,38,103,0.18)] hover:shadow-[0_10px_24px_rgba(182,38,103,0.3)] transition-all duration-200">
+    <!-- Footer -->
+    <div class="mt-auto pt-4 border-t border-white/10 flex items-center justify-between gap-3">
+      <span class="text-sm font-medium text-white/90 capitalize">{{ oferta.tipo_contrato ? getDisplayLabel(oferta.tipo_contrato) : 'Ver detalles' }}</span>
+      <router-link :to="`/ofertas/${oferta.id}`" class="shrink-0">
+        <button class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#d93340] to-[#a6249d] text-white font-bold text-sm shadow-lg shadow-[#a6249d]/20 hover:shadow-[#a6249d]/30 transition-all duration-200">
           Ver detalles
         </button>
       </router-link>
