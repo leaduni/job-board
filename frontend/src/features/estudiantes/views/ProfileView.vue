@@ -5,6 +5,7 @@ import { useAuth } from '@/composables/useAuth';
 import { coreApi } from '@/services/coreApi';
 import { uploadCV } from '@/services/upload.service';
 import { CARRERAS_UNI, ANIO_EGRESO_MIN, ANIO_EGRESO_MAX } from '@/config/constants';
+import { DEPARTAMENTOS, DEPARTAMENTOS_DISTRITOS } from '@/config/ubicacion-peru';
 
 const router = useRouter();
 const { logout } = useAuth();
@@ -38,6 +39,11 @@ const profileData = reactive({
   cv_filename: 'No hay CV cargado',
 });
 
+const distritosDelDepartamento = computed(() => {
+  const dep = profileData.departamento;
+  return dep ? (DEPARTAMENTOS_DISTRITOS[dep] || []).slice().sort() : [];
+});
+
 // --- API FETCH ---
 async function fetchProfile() {
   loading.value = true;
@@ -57,9 +63,10 @@ async function fetchProfile() {
     }
     
     if (candidate.location) {
-      const parts = candidate.location.split(',');
-      profileData.distrito = parts[0]?.trim() || '';
-      profileData.departamento = parts.length > 1 ? parts[1]?.trim() : '';
+      const parts = candidate.location.split(',').map(p => p?.trim() || '');
+      profileData.distrito = parts[0] || '';
+      const depRaw = parts.length > 1 ? parts[1] : '';
+      profileData.departamento = DEPARTAMENTOS.find(d => d.toLowerCase() === depRaw.toLowerCase()) || depRaw;
     }
 
     profileData.anio_egreso = candidate.end_year ?? null;
@@ -295,7 +302,7 @@ onMounted(() => {
                     <li><span>Apellidos</span><strong v-if="!editingCards.personal">{{ profileData.apellidos }}</strong><input v-else v-model="profileData.apellidos" class="edit-input"/></li>
                     <li><span>Teléfono</span><strong v-if="!editingCards.personal">{{ profileData.telefono }}</strong><input v-else v-model="profileData.telefono" class="edit-input"/></li>
                     <li><span>Nacimiento</span><strong v-if="!editingCards.personal">{{ profileData.fecha_nacimiento }}</strong><input v-else v-model="profileData.fecha_nacimiento" type="date" class="edit-input"/></li>
-                    <li><span>Ubicación</span><strong v-if="!editingCards.personal">{{ profileData.distrito }}{{ profileData.departamento ? ', ' + profileData.departamento : '' }}</strong><div v-else class="flex gap-2"><input v-model="profileData.distrito" class="edit-input flex-1" placeholder="Distrito"/><input v-model="profileData.departamento" class="edit-input flex-1" placeholder="Departamento"/></div></li>
+                    <li><span>Ubicación</span><strong v-if="!editingCards.personal">{{ profileData.distrito }}{{ profileData.departamento ? ', ' + profileData.departamento : '' }}</strong><div v-else class="flex flex-col gap-2"><select v-model="profileData.departamento" class="edit-input" @change="profileData.distrito = ''"><option value="">Seleccionar departamento</option><option v-for="d in DEPARTAMENTOS" :key="d" :value="d">{{ d }}</option></select><select v-model="profileData.distrito" class="edit-input" :disabled="!profileData.departamento"><option value="">Seleccionar distrito</option><option v-for="dist in distritosDelDepartamento" :key="dist" :value="dist">{{ dist }}</option></select></div></li>
                 </ul>
                 <div v-if="editingCards.personal" class="flex gap-3 mt-4">
                     <button @click="toggleCardEditMode('personal', true)" class="save-button">Guardar</button>
