@@ -1,43 +1,43 @@
 <template>
-  <article class="group h-full flex flex-col bg-[#1A0B2E]/90 backdrop-blur-lg rounded-2xl border border-[#a6249d]/30 hover:border-[#a6249d]/50 p-6 gap-4 shadow-lg text-white/95 transition-all duration-300 min-h-0 hover:-translate-y-1 hover:shadow-xl">
+  <article class="group h-full flex flex-col bg-[#1A0B2E]/90 backdrop-blur-lg rounded-xl sm:rounded-2xl border border-[#a6249d]/30 hover:border-[#a6249d]/50 p-4 sm:p-5 lg:p-6 gap-3 sm:gap-4 shadow-lg text-white/95 transition-all duration-300 min-h-0 hover:-translate-y-1 hover:shadow-xl">
     <!-- Fila superior: logo+título a la izquierda, estado (ACTIVA) a la derecha -->
-    <div class="flex items-start justify-between gap-4">
-      <div class="flex items-start gap-3 min-w-0 flex-1">
-        <div class="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center text-white/80 font-bold text-xl uppercase flex-shrink-0">
+    <div class="flex items-start justify-between gap-3 sm:gap-4">
+      <div class="flex items-start gap-2 sm:gap-3 min-w-0 flex-1">
+        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-white/10 flex items-center justify-center text-white/80 font-bold text-lg sm:text-xl uppercase flex-shrink-0">
           {{ oferta.company?.nombre_comercial?.[0] || 'E' }}
         </div>
         <div class="min-w-0 flex-1">
-          <h3 class="font-['League_Spartan',sans-serif] text-lg font-bold mb-1 text-white/95 line-clamp-2 leading-tight group-hover:text-[#ff6ec7] transition-colors" :title="oferta.titulo">
+          <h3 class="font-['League_Spartan',sans-serif] text-base sm:text-lg font-bold mb-0.5 sm:mb-1 text-white/95 line-clamp-2 leading-tight group-hover:text-[#ff6ec7] transition-colors" :title="oferta.titulo">
             {{ oferta.titulo }}
           </h3>
-          <p class="text-sm text-white/60 truncate">{{ oferta.company?.nombre_comercial || 'Empresa Confidencial' }}</p>
+          <p class="text-xs sm:text-sm text-white/60 truncate">{{ oferta.company?.nombre_comercial || 'Empresa Confidencial' }}</p>
         </div>
       </div>
-      <span v-if="oferta.estado" class="flex-shrink-0 text-[10px] uppercase font-bold" :class="estadoClasses">{{ oferta.estado }}</span>
+      <span v-if="oferta.estado" class="flex-shrink-0 text-[9px] sm:text-[10px] uppercase font-bold" :class="estadoClasses">{{ oferta.estado }}</span>
     </div>
 
     <!-- Tags: modalidad y nivel_experiencia al costado, mismo color y alineados -->
-    <div class="flex gap-2 flex-wrap items-center">
-      <span v-if="oferta.modalidad" class="inline-flex items-center justify-center px-[10px] py-[4px] rounded-full bg-white/5 border border-white/10 text-white/60 text-[11px] whitespace-nowrap leading-none">
+    <div class="flex gap-1.5 sm:gap-2 flex-wrap items-center">
+      <span v-if="oferta.modalidad" class="inline-flex items-center justify-center px-2 sm:px-[10px] py-1 sm:py-[4px] rounded-full bg-white/5 border border-white/10 text-white/60 text-[10px] sm:text-[11px] whitespace-nowrap leading-none">
         {{ getDisplayLabel(oferta.modalidad) }}
       </span>
-      <span v-if="oferta.nivel_experiencia" class="inline-flex items-center justify-center px-[10px] py-[4px] rounded-full bg-white/5 border border-white/10 text-white/60 text-[11px] whitespace-nowrap leading-none">
+      <span v-if="oferta.nivel_experiencia" class="inline-flex items-center justify-center px-2 sm:px-[10px] py-1 sm:py-[4px] rounded-full bg-white/5 border border-white/10 text-white/60 text-[10px] sm:text-[11px] whitespace-nowrap leading-none">
         {{ getDisplayLabel(oferta.nivel_experiencia) }}
       </span>
     </div>
 
     <!-- Descripción (Truncada) -->
-    <div class="flex-grow">
-      <p class="text-white/50 text-sm leading-relaxed line-clamp-3">
+    <div class="flex-grow min-h-0">
+      <p class="text-white/85 text-sm sm:text-base leading-[1.6] line-clamp-3">
         {{ descripcionCorta }}
       </p>
     </div>
 
     <!-- Footer -->
-    <div class="mt-auto pt-4 border-t border-white/10 flex items-center justify-between gap-3">
-      <span class="text-sm font-medium text-white/90 capitalize">{{ oferta.tipo_contrato ? getDisplayLabel(oferta.tipo_contrato) : 'Ver detalles' }}</span>
-      <router-link :to="`/ofertas/${oferta.id}`" class="shrink-0">
-        <button class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#d93340] to-[#a6249d] text-white font-bold text-sm shadow-lg shadow-[#a6249d]/20 hover:shadow-[#a6249d]/30 transition-all duration-200">
+    <div class="mt-auto pt-3 sm:pt-4 border-t border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3">
+      <span class="text-xs sm:text-sm font-medium text-white/90 capitalize order-2 sm:order-1">{{ oferta.tipo_contrato ? getDisplayLabel(oferta.tipo_contrato) : 'Ver detalles' }}</span>
+      <router-link :to="`/ofertas/${oferta.id}`" class="shrink-0 order-1 sm:order-2">
+        <button class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#d93340] to-[#a6249d] text-white font-bold text-sm shadow-lg shadow-[#a6249d]/20 hover:shadow-[#a6249d]/30 transition-all duration-200">
           Ver detalles
         </button>
       </router-link>

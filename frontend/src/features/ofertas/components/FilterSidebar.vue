@@ -1,14 +1,27 @@
 <template>
-  <aside class="w-72 bg-[#121225] border-2 border-[#a6249d] rounded-2xl p-6 shadow-lg">
-    <div class="flex items-center justify-between mb-5">
-      <h2 class="text-white font-bold text-lg flex items-center gap-2">
-        <svg class="w-5 h-5 text-[#d93340]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+  <aside class="w-full lg:w-72 h-full lg:h-auto overflow-y-auto lg:overflow-visible bg-[#121225] border-2 border-[#a6249d] rounded-none lg:rounded-2xl p-4 sm:p-6 shadow-lg">
+    <div class="flex items-center justify-between mb-5 sticky top-0 bg-[#121225] pt-2 pb-2 -mt-2 z-10 lg:static lg:pt-0 lg:pb-0 lg:mt-0">
+      <h2 class="text-white font-bold text-base sm:text-lg flex items-center gap-2">
+        <svg class="w-5 h-5 text-[#d93340] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
         </svg>
         Filtros
       </h2>
-      <button @click="clearAllFilters" class="text-sm text-[#d93340] underline hover:no-underline focus:outline-none">Limpiar todo</button>
+      <div class="flex items-center gap-2">
+        <button @click="clearAllFilters" class="text-sm text-[#d93340] underline hover:no-underline focus:outline-none">Limpiar todo</button>
+        <button
+          v-if="showClose"
+          type="button"
+          @click="$emit('close')"
+          class="lg:hidden p-2 -m-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+          aria-label="Cerrar filtros"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
     </div>
 
     <!-- Modalidad -->
@@ -72,7 +85,13 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  showClose: {
+    type: Boolean,
+    default: false,
+  },
 });
+
+const emit = defineEmits(['filter-change', 'close']);
 
 // Mapa de valores: [Label legible, Valor backend]
 const modalidades = [
@@ -100,7 +119,6 @@ const selectedModalidades = ref([]);
 const selectedTiposContrato = ref([]);
 const selectedNivelesExperiencia = ref([]);
 
-const emit = defineEmits(['filter-change']);
 
 const clearAllFilters = () => {
   selectedModalidades.value = [];

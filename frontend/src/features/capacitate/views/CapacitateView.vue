@@ -1,9 +1,11 @@
 <script setup>
 import CourseCard from '@/features/capacitate/components/CourseCard.vue';
-import { ref, onMounted, watch } from 'vue';
+import CapacitateFilterSidebar from '@/features/capacitate/components/CapacitateFilterSidebar.vue';
+import SearchBar from '@/features/ofertas/components/SearchBar.vue';
+import { ref, onMounted, watch, computed, onUnmounted } from 'vue';
 import { cmsApi } from '@/services/cmsApi';
 
-// Estado de datos
+// Estado
 const courses = ref([]);
 const loading = ref(true);
 const pagination = ref({
@@ -12,52 +14,86 @@ const pagination = ref({
   totalPages: 1,
   hasPrevPage: false,
   hasNextPage: false,
-  totalDocs: 0
+  totalDocs: 0,
 });
 
-// Filtros
+// Filtros de búsqueda (panel principal)
 const filters = ref({
   search: '',
   provider: '',
-  isFree: false
 });
 
-// Debounce helper simple
+// Filtros del sidebar (proveedor, nivel, duración, gratis, orden)
+const sidebarFilters = ref({
+  proveedor: '',
+  niveles: [],
+  duracion: '',
+  soloGratis: false,
+  sort: '-createdAt',
+});
+
+// Drawer móvil
+const showFiltersMobile = ref(false);
+
+const filterCount = computed(() => {
+  const sf = sidebarFilters.value;
+  let count = (sf.niveles?.length || 0) + (sf.soloGratis ? 1 : 0);
+  if (sf.duracion) count += 1;
+  if (sf.proveedor?.trim()) count += 1;
+  return count;
+});
+
+// Debounce
 let timeout = null;
 const debouncedFetch = () => {
   if (timeout) clearTimeout(timeout);
-  timeout = setTimeout(() => {
-    fetchCourses(1); // Reset a pág 1 al filtrar
-  }, 500);
+  timeout = setTimeout(() => fetchCourses(1), 500);
 };
 
-// Función principal de carga
 async function fetchCourses(page = 1) {
   loading.value = true;
   try {
     const params = {
       limit: pagination.value.limit,
-      page: page,
+      page,
+      sort: sidebarFilters.value.sort,
     };
 
-    // Construcción de query params para Payload CMS
     if (filters.value.search) {
       params['where[titulo][like]'] = filters.value.search;
     }
-    
-    if (filters.value.provider) {
-      params['where[proveedor][like]'] = filters.value.provider;
+    // Proveedor: prioridad al selector del sidebar (exacto), sino búsqueda por texto del panel
+    if (sidebarFilters.value.proveedor?.trim()) {
+      params['where[proveedor][equals]'] = sidebarFilters.value.proveedor.trim();
+    } else if (filters.value.provider?.trim()) {
+      params['where[proveedor][like]'] = filters.value.provider.trim();
     }
-
-    if (filters.value.isFree) {
+    if (sidebarFilters.value.soloGratis) {
       params['where[esGratuito][equals]'] = true;
     }
 
-    // Ordenar por más reciente por defecto
-    params.sort = '-createdAt';
+    // Niveles (múltiples)
+    if (sidebarFilters.value.niveles?.length > 0) {
+      sidebarFilters.value.niveles.forEach((val, i) => {
+        params[`where[nivel][in][${i}]`] = val;
+      });
+    }
+
+    // Duración (rango)
+    const dur = sidebarFilters.value.duracion;
+    if (dur === '0-5') {
+      params['where[duracionHoras][less_than]'] = 5;
+    } else if (dur === '5-20') {
+      params['where[duracionHoras][greater_than_equal]'] = 5;
+      params['where[duracionHoras][less_than_equal]'] = 20;
+    } else if (dur === '20-50') {
+      params['where[duracionHoras][greater_than_equal]'] = 20;
+      params['where[duracionHoras][less_than_equal]'] = 50;
+    } else if (dur === '50+') {
+      params['where[duracionHoras][greater_than]'] = 50;
+    }
 
     const response = await cmsApi.getCourses(params);
-    
     courses.value = response.docs || [];
     pagination.value = {
       page: response.page,
@@ -65,9 +101,8 @@ async function fetchCourses(page = 1) {
       totalPages: response.totalPages,
       hasPrevPage: response.hasPrevPage,
       hasNextPage: response.hasNextPage,
-      totalDocs: response.totalDocs
+      totalDocs: response.totalDocs,
     };
-
   } catch (error) {
     console.error('Error cargando cursos:', error);
     courses.value = [];
@@ -76,179 +111,204 @@ async function fetchCourses(page = 1) {
   }
 }
 
-// Watchers
+function handleSidebarFilter(newFilters) {
+  sidebarFilters.value = {
+    proveedor: newFilters.proveedor || '',
+    niveles: newFilters.niveles || [],
+    duracion: newFilters.duracion || '',
+    soloGratis: newFilters.soloGratis || false,
+    sort: newFilters.sort || '-createdAt',
+  };
+  pagination.value.page = 1;
+}
+
+const sidebarKey = ref(0);
+function clearAllFilters() {
+  filters.value = { search: '', provider: '' };
+  sidebarFilters.value = { proveedor: '', niveles: [], duracion: '', soloGratis: false, sort: '-createdAt' };
+  sidebarKey.value += 1; // Reinicia estado del sidebar
+  fetchCourses(1);
+  showFiltersMobile.value = false;
+}
+
 watch(() => filters.value.search, debouncedFetch);
 watch(() => filters.value.provider, debouncedFetch);
-watch(() => filters.value.isFree, () => fetchCourses(1)); // Checkbox inmediato
+watch(sidebarFilters, () => fetchCourses(1), { deep: true });
 
-// Lifecycle
-onMounted(() => {
-  fetchCourses();
+watch(showFiltersMobile, (open) => {
+  document.body.style.overflow = open ? 'hidden' : '';
 });
+onUnmounted(() => { document.body.style.overflow = ''; });
 
-// Paginación handlers
-const nextPage = () => {
-  if (pagination.value.hasNextPage) fetchCourses(pagination.value.page + 1);
-};
-const prevPage = () => {
-  if (pagination.value.hasPrevPage) fetchCourses(pagination.value.page - 1);
-};
-const goToPage = (p) => {
-  if (p !== pagination.value.page) fetchCourses(p);
-};
+onMounted(() => fetchCourses());
+
+const nextPage = () => { if (pagination.value.hasNextPage) fetchCourses(pagination.value.page + 1); };
+const prevPage = () => { if (pagination.value.hasPrevPage) fetchCourses(pagination.value.page - 1); };
+const goToPage = (p) => { if (p !== pagination.value.page) fetchCourses(p); };
 </script>
 
 <template>
-  <div class="bg-[rgb(9,9,42)] text-white min-h-screen pt-[calc(72px+24px)] pb-20 font-sans">
-    <div class="container mx-auto px-4 py-8 max-w-7xl">
-      
+  <div class="bg-[rgb(9,9,42)] text-white min-h-screen pt-[calc(72px+24px)] sm:pt-[calc(72px+32px)] pb-20">
+    <div class="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+
       <!-- Header -->
-      <div class="mb-10 text-center md:text-left">
-        <h1 class="font-['League_Spartan',_sans-serif] text-4xl font-extrabold text-transparent bg-clip-text bg-white mb-3">
+      <header class="mb-6 sm:mb-8 lg:mb-10">
+        <h1 class="font-['League_Spartan',_sans-serif] text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 bg-white bg-clip-text text-transparent">
           Explora Cursos
         </h1>
-        <p class="text-white/70 text-lg max-w-2xl">
+        <p class="text-white/70 m-0 text-sm sm:text-base max-w-2xl">
           Descubre recursos educativos seleccionados para impulsar tu carrera profesional.
         </p>
-      </div>
+      </header>
 
-      <!-- Filters Bar -->
-      <div class="bg-[#121225] p-6 rounded-2xl border-2 border-[#a6249d] mb-10 shadow-xl shadow-black/20 focus-within:ring-2 focus-within:ring-[#a6249d]/30 transition-all duration-300">
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
-          
-          <!-- Buscador Principal -->
-          <div class="md:col-span-5 relative">
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Buscar por título</label>
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+      <!-- Panel de búsqueda mejorado -->
+      <div class="mb-6 sm:mb-8 rounded-2xl border-2 border-[#a6249d] bg-gradient-to-br from-[#121225] to-[#0d0d1a] p-4 sm:p-5 shadow-xl shadow-[#a6249d]/5 focus-within:ring-2 focus-within:ring-[#a6249d]/30 transition-all duration-300">
+        <div class="flex flex-col lg:flex-row lg:items-end gap-4">
+          <div class="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-[#ff6ec7] uppercase tracking-wider mb-1.5">Título del curso</label>
+              <div class="rounded-xl border-2 border-[#a6249d]/50 bg-[#0a0a14]/80 focus-within:border-[#a6249d] transition-all">
+                <SearchBar v-model="filters.search" placeholder="Ej. Desarrollo Web, Python..." />
               </div>
-              <input 
-                v-model="filters.search"
-                type="text" 
-                placeholder="Ej. Desarrollo Web..." 
-                class="block w-full pl-10 pr-3 py-3 bg-[#1e1e3a] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#a6249d] focus:border-transparent transition-all"
-              >
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-[#ff6ec7] uppercase tracking-wider mb-1.5">Proveedor / Plataforma</label>
+              <div class="rounded-xl border-2 border-[#a6249d]/50 bg-[#0a0a14]/80 focus-within:border-[#a6249d] transition-all">
+                <div class="relative">
+                  <span class="absolute left-4 inset-y-0 flex items-center">
+                    <svg class="w-5 h-5 text-[#a6249d]/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  </span>
+                  <input
+                    v-model="filters.provider"
+                    type="text"
+                    placeholder="Ej. Coursera, Platzi..."
+                    class="w-full pl-12 pr-4 py-3 bg-transparent text-white placeholder-gray-500 focus:outline-none text-base rounded-xl"
+                  />
+                </div>
+              </div>
             </div>
           </div>
-
-          <!-- Buscador Proveedor -->
-          <div class="md:col-span-4 relative">
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Proveedor</label>
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-              </div>
-              <input 
-                v-model="filters.provider"
-                type="text" 
-                placeholder="Ej. Platzi, Udemy..." 
-                class="block w-full pl-10 pr-3 py-3 bg-[#1e1e3a] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#a6249d] focus:border-transparent transition-all"
-              >
-            </div>
+          <div v-if="filterCount > 0 || filters.search || filters.provider" class="lg:pl-4 lg:border-l lg:border-gray-700/50">
+            <button
+              type="button"
+              @click="clearAllFilters"
+              class="text-sm text-[#d93340] hover:text-[#ff6ec7] font-medium underline underline-offset-2"
+            >
+              Limpiar búsqueda y filtros
+            </button>
           </div>
-
-          <!-- Filtro Gratis -->
-          <div class="md:col-span-3 flex items-center h-full pb-3">
-            <label class="flex items-center space-x-3 cursor-pointer group select-none">
-              <div class="relative">
-                <input type="checkbox" v-model="filters.isFree" class="sr-only peer">
-                <div class="w-12 h-7 bg-gray-700 rounded-full peer-focus:ring-2 peer-focus:ring-[#a6249d] peer-checked:bg-[#a6249d] transition-colors duration-300 ease-in-out"></div>
-                <div class="absolute left-1 top-1 bg-white w-5 h-5 rounded-full peer-checked:translate-x-5 transition-transform duration-300 shadow-md"></div>
-              </div>
-              <span class="text-gray-300 font-medium group-hover:text-white transition-colors">Solo Gratuitos</span>
-            </label>
-          </div>
-
         </div>
       </div>
 
-      <!-- Loading State -->
-      <div v-if="loading" class="py-32 text-center">
-        <div class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#d93340]"></div>
-        <p class="mt-4 text-gray-400 animate-pulse">Buscando cursos...</p>
-      </div>
-      
-      <!-- Empty State -->
-      <div v-else-if="courses.length === 0" class="py-32 text-center bg-[#121225]/50 rounded-2xl border border-[#a6249d]/20 border-dashed">
-        <svg class="mx-auto h-16 w-16 text-gray-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      <!-- Botón filtros móvil -->
+      <button
+        type="button"
+        @click="showFiltersMobile = true"
+        class="lg:hidden flex items-center gap-2 mb-4 px-4 py-3 w-full sm:w-auto bg-[#121225] border-2 border-[#a6249d] rounded-xl text-white font-medium hover:bg-[#1a1a35] transition-colors"
+      >
+        <svg class="w-5 h-5 text-[#d93340]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
         </svg>
-        <h3 class="text-xl font-bold text-white mb-2">No encontramos resultados</h3>
-        <p class="text-gray-500 max-w-md mx-auto">Intenta ajustar tus filtros o buscar con otros términos.</p>
-        <button @click="filters = { search: '', provider: '', isFree: false }" class="mt-6 text-[#d93340] hover:text-[#ff6ec7] font-medium underline underline-offset-4">
-          Limpiar filtros
-        </button>
-      </div>
+        Filtros
+        <span v-if="filterCount > 0" class="ml-1 px-2 py-0.5 rounded-full bg-[#a6249d] text-xs">{{ filterCount }}</span>
+      </button>
 
-      <!-- Content -->
-      <div v-else>
-        <!-- Courses Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
-          <CourseCard
-            v-for="course in courses"
-            :key="course.id"
-            :course="course"
+      <Transition name="fade">
+        <div v-if="showFiltersMobile" class="lg:hidden fixed inset-0 bg-black/60 z-40" aria-hidden="true" @click="showFiltersMobile = false" />
+      </Transition>
+
+      <!-- Layout: sidebar + main -->
+      <div class="flex gap-4 sm:gap-6 lg:gap-7 items-start relative">
+        <div
+          :class="[
+            'lg:relative lg:block lg:w-72 lg:shrink-0',
+            'fixed top-0 left-0 h-full z-50 w-[min(320px,90vw)] transition-transform duration-300 ease-out',
+            showFiltersMobile ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          ]"
+        >
+          <CapacitateFilterSidebar
+            :key="sidebarKey"
+            :initial-filters="{ proveedor: sidebarFilters.proveedor, niveles: sidebarFilters.niveles, duracion: sidebarFilters.duracion, soloGratis: sidebarFilters.soloGratis, sort: sidebarFilters.sort }"
+            :show-close="showFiltersMobile"
+            @filter-change="handleSidebarFilter"
+            @close="showFiltersMobile = false"
           />
         </div>
 
-        <!-- Pagination -->
-        <div class="flex justify-center items-center gap-2 mt-8" v-if="pagination.totalPages > 1">
-          <!-- Prev Button -->
-          <button 
-            @click="prevPage"
-            :disabled="!pagination.hasPrevPage"
-            class="p-2 rounded-lg border border-[#a6249d]/30 hover:bg-[#a6249d]/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-white"
-            title="Anterior"
-          >
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-
-          <!-- Page Numbers (Simplified logic: show all or max 5 around current) -->
-          <div class="flex gap-2 mx-2">
-            <template v-for="p in pagination.totalPages" :key="p">
-              <!-- Show first, last, current, and surrounding pages logic could be added here. For now, simple list if not too large -->
-              <button 
-                v-if="p === 1 || p === pagination.totalPages || (p >= pagination.page - 1 && p <= pagination.page + 1)"
-                @click="goToPage(p)"
-                class="w-10 h-10 rounded-lg flex items-center justify-center font-medium transition-all duration-200"
-                :class="p === pagination.page ? 'bg-[#d93340] text-white shadow-lg shadow-[#a6249d]/20' : 'bg-[#1e1e3a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white'"
-              >
-                {{ p }}
-              </button>
-              <span v-else-if="p === pagination.page - 2 || p === pagination.page + 2" class="flex items-end px-1 text-gray-600">...</span>
-            </template>
+        <main class="flex-1 min-w-0 w-full">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4 sm:mb-5">
+            <h2 class="m-0 text-lg sm:text-xl font-['League_Spartan',_sans-serif] font-bold text-white">
+              {{ pagination.totalDocs }} curso{{ pagination.totalDocs !== 1 ? 's' : '' }} encontrado{{ pagination.totalDocs !== 1 ? 's' : '' }}
+            </h2>
+            <span v-if="pagination.totalDocs > 0" class="text-xs sm:text-sm text-white/70">
+              Página {{ pagination.page }} de {{ pagination.totalPages }}
+            </span>
           </div>
 
-          <!-- Next Button -->
-          <button 
-            @click="nextPage"
-            :disabled="!pagination.hasNextPage"
-            class="p-2 rounded-lg border border-[#a6249d]/30 hover:bg-[#a6249d]/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-white"
-            title="Siguiente"
-          >
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          <div v-if="loading" class="py-20 text-center">
+            <div class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#d93340]"></div>
+            <p class="mt-4 text-gray-400">Buscando cursos...</p>
+          </div>
+
+          <div v-else-if="courses.length === 0" class="py-20 text-center bg-[#121225]/50 rounded-2xl border border-[#a6249d]/20 border-dashed">
+            <svg class="mx-auto h-16 w-16 text-gray-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
-          </button>
-        </div>
+            <h3 class="text-xl font-bold text-white mb-2">No encontramos cursos</h3>
+            <p class="text-gray-500 max-w-md mx-auto">Prueba ajustando los filtros o buscando con otros términos.</p>
+            <button @click="clearAllFilters" class="mt-6 text-[#d93340] hover:text-[#ff6ec7] font-medium underline">
+              Limpiar filtros
+            </button>
+          </div>
 
-        <!-- Results count text -->
-        <div class="text-center mt-6 text-sm text-white/70">
-          Mostrando {{ courses.length }} de {{ pagination.totalDocs }} resultados
-        </div>
+          <div v-else>
+            <div class="grid grid-cols-1 min-[500px]:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+              <CourseCard v-for="course in courses" :key="course.id" :course="course" />
+            </div>
+
+            <div v-if="pagination.totalPages > 1" class="flex justify-center items-center gap-2 mt-8 flex-wrap">
+              <button
+                @click="prevPage"
+                :disabled="!pagination.hasPrevPage"
+                class="p-2.5 rounded-lg border border-[#a6249d]/30 hover:bg-[#a6249d]/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-white min-h-[44px]"
+                title="Anterior"
+              >
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <template v-for="p in pagination.totalPages" :key="p">
+                <button
+                  v-if="p === 1 || p === pagination.totalPages || (p >= pagination.page - 1 && p <= pagination.page + 1)"
+                  @click="goToPage(p)"
+                  class="w-10 h-10 rounded-lg flex items-center justify-center font-medium text-sm transition-all min-h-[44px]"
+                  :class="p === pagination.page ? 'bg-[#d93340] text-white' : 'bg-[#1e1e3a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white'"
+                >
+                  {{ p }}
+                </button>
+                <span v-else-if="p === pagination.page - 2 || p === pagination.page + 2" class="flex items-center px-1 text-gray-500">…</span>
+              </template>
+              <button
+                @click="nextPage"
+                :disabled="!pagination.hasNextPage"
+                class="p-2.5 rounded-lg border border-[#a6249d]/30 hover:bg-[#a6249d]/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-white min-h-[44px]"
+                title="Siguiente"
+              >
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </main>
       </div>
-
     </div>
   </div>
 </template>
 
 <style scoped>
-/* Custom scrollbar if needed */
+.fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>

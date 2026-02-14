@@ -1,53 +1,100 @@
 <template>
-  <section class="bg-[rgb(9,9,42)] min-h-screen pt-[calc(72px+24px)]">
-    <div class="max-w-[1240px] mx-auto px-8 py-10">
+  <section class="bg-[rgb(9,9,42)] min-h-screen pt-[calc(72px+24px)] sm:pt-[calc(72px+32px)]">
+    <div class="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
 
       <!-- Header -->
-      <header class="mb-10">
-        <h1 class="font-['League_Spartan',_sans-serif] text-3xl sm:text-4xl font-bold mb-2 bg-white bg-clip-text text-transparent">
+      <header class="mb-6 sm:mb-8 lg:mb-10">
+        <h1 class="font-['League_Spartan',_sans-serif] text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 bg-white bg-clip-text text-transparent">
           Ofertas Laborales
         </h1>
-        <p class="text-white/70 m-0">
+        <p class="text-white/70 m-0 text-sm sm:text-base">
           Encuentra prácticas, empleos junior y primeras oportunidades profesionales
         </p>
       </header>
 
-      <!-- Search + Sort row -->
-      <div class="flex items-stretch gap-4 mb-8">
-        <!-- SearchBar -->
-        <div class="flex-grow bg-[#121225] rounded-xl border-2 border-[#a6249d] focus-within:ring-2 focus-within:ring-[#a6249d]/30 transition-all duration-300">
-          <SearchBar v-model="filters.search" />
-        </div>
-
-        <!-- Sort by -->
-        <div class="relative flex items-center">
-          <label for="sort" class="text-sm text-gray-400 mr-3 shrink-0">Ordenar por:</label>
-          <div class="relative h-full">
-            <select id="sort" v-model="filters.sort" class="appearance-none bg-[#121225] text-white border-2 border-[#a6249d] rounded-xl px-4 pr-10 h-full focus:outline-none focus:ring-2 focus:ring-[#a6249d]/50">
-              <option value="-createdAt" class="bg-[#0a0a14] text-white">Más recientes</option>
-              <option value="createdAt" class="bg-[#0a0a14] text-white">Más antiguas</option>
-            </select>
-            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+      <!-- Panel de búsqueda mejorado -->
+      <div class="mb-6 sm:mb-8 rounded-2xl border-2 border-[#a6249d] bg-gradient-to-br from-[#121225] to-[#0d0d1a] p-4 sm:p-5 shadow-xl shadow-[#a6249d]/5 focus-within:ring-2 focus-within:ring-[#a6249d]/30 focus-within:shadow-[#a6249d]/10 transition-all duration-300">
+        <div class="flex flex-col lg:flex-row lg:items-center gap-4">
+          <!-- Buscador principal -->
+          <div class="flex-1 min-w-0">
+            <label class="block text-xs font-bold text-[#ff6ec7] uppercase tracking-wider mb-1.5">Buscar ofertas</label>
+            <div class="rounded-xl border-2 border-[#a6249d]/50 bg-[#0a0a14]/80 focus-within:border-[#a6249d] focus-within:ring-2 focus-within:ring-[#a6249d]/20 transition-all">
+              <SearchBar v-model="filters.search" />
+            </div>
+          </div>
+          <!-- Ordenar y filtros rápido (desktop) -->
+          <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 lg:border-l lg:border-gray-700/50 lg:pl-6">
+            <div class="flex items-center gap-2 shrink-0">
+              <label for="sort" class="text-xs font-bold text-gray-400 uppercase tracking-wider shrink-0">Ordenar</label>
+              <div class="relative flex-1 sm:flex-initial min-w-0">
+                <select id="sort" v-model="filters.sort" class="w-full sm:w-auto appearance-none bg-[#0a0a14] text-white border border-gray-700 rounded-lg px-4 pr-9 py-2.5 min-h-[44px] sm:min-h-0 focus:outline-none focus:ring-2 focus:ring-[#a6249d]/50 text-sm">
+                  <option value="-createdAt" class="bg-[#0a0a14] text-white">Más recientes</option>
+                  <option value="createdAt" class="bg-[#0a0a14] text-white">Más antiguas</option>
+                  <option value="titulo" class="bg-[#0a0a14] text-white">A → Z</option>
+                  <option value="-titulo" class="bg-[#0a0a14] text-white">Z → A</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+              </div>
+            </div>
+            <div v-if="filterCount > 0" class="hidden sm:flex items-center text-sm text-[#a6249d]/90">
+              <span class="inline-flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
+                {{ filterCount }} filtro{{ filterCount > 1 ? 's' : '' }} activo{{ filterCount > 1 ? 's' : '' }}
+              </span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Layout columns -->
-      <div class="flex gap-7 items-start">
-        <!-- Sidebar -->
-        <FilterSidebar
-          :initial-filters="{ modalidades: filters.modalidades, tiposContrato: filters.tiposContrato, nivelesExperiencia: filters.nivelesExperiencia }"
-          @filter-change="handleSidebarFilter"
+      <!-- Mobile: Botón para abrir filtros -->
+      <button
+        type="button"
+        @click="showFiltersMobile = true"
+        class="lg:hidden flex items-center gap-2 mb-4 px-4 py-3 w-full sm:w-auto bg-[#121225] border-2 border-[#a6249d] rounded-xl text-white font-medium hover:bg-[#1a1a35] transition-colors"
+      >
+        <svg class="w-5 h-5 text-[#d93340]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+        </svg>
+        Filtros
+        <span v-if="filterCount > 0" class="ml-1 px-2 py-0.5 rounded-full bg-[#a6249d] text-xs">{{ filterCount }}</span>
+      </button>
+
+      <!-- Backdrop móvil -->
+      <Transition name="fade">
+        <div
+          v-if="showFiltersMobile"
+          class="lg:hidden fixed inset-0 bg-black/60 z-40"
+          aria-hidden="true"
+          @click="showFiltersMobile = false"
         />
+      </Transition>
+
+      <!-- Layout columns -->
+      <div class="flex gap-4 sm:gap-6 lg:gap-7 items-start relative">
+        <!-- Sidebar: drawer en móvil, fijo en desktop -->
+        <div
+          :class="[
+            'lg:relative lg:block lg:w-72 lg:shrink-0',
+            'fixed top-0 left-0 h-full z-50 w-[min(320px,90vw)] transition-transform duration-300 ease-out',
+            showFiltersMobile ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          ]"
+        >
+          <FilterSidebar
+            :initial-filters="{ modalidades: filters.modalidades, tiposContrato: filters.tiposContrato, nivelesExperiencia: filters.nivelesExperiencia }"
+            :show-close="showFiltersMobile"
+            @filter-change="handleSidebarFilter"
+            @close="showFiltersMobile = false"
+          />
+        </div>
 
         <!-- Contenido -->
-        <main class="flex-1 min-w-0">
-          <div class="flex items-center justify-between gap-3 my-3 mb-5">
-            <h2 class="m-0 text-xl font-['League_Spartan',_sans-serif] font-bold text-white">{{ pagination.totalDocs }} Ofertas encontradas</h2>
+        <main class="flex-1 min-w-0 w-full">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 my-3 mb-4 sm:mb-5">
+            <h2 class="m-0 text-lg sm:text-xl font-['League_Spartan',_sans-serif] font-bold text-white">{{ pagination.totalDocs }} Ofertas encontradas</h2>
             <div class="text-white/70" v-if="pagination.totalDocs > 0">
-              <span class="text-sm">Mostrando {{ startItem }}-{{ endItem }} de {{ pagination.totalDocs }}</span>
+              <span class="text-xs sm:text-sm">Mostrando {{ startItem }}-{{ endItem }} de {{ pagination.totalDocs }}</span>
             </div>
           </div>
 
@@ -67,7 +114,7 @@
           </div>
 
           <!-- Grid -->
-          <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 items-start">
+          <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-7 items-start">
             <JobCard
               v-for="oferta in ofertas"
               :key="oferta.id"
@@ -76,7 +123,7 @@
           </div>
 
           <!-- Pagination -->
-          <div v-if="!loading && pagination.totalPages > 1" class="flex justify-center mt-10">
+          <div v-if="!loading && pagination.totalPages > 1" class="flex justify-center mt-6 sm:mt-8 lg:mt-10">
             <Pagination
               :current-page="pagination.page"
               :total-pages="pagination.totalPages"
@@ -91,7 +138,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { listarOfertas } from '../services/ofertas.service'
 
@@ -144,6 +191,13 @@ const filters = ref({
 // Helpers para texto "Mostrando X-Y de Z"
 const startItem = computed(() => (pagination.value.page - 1) * pagination.value.limit + 1)
 const endItem = computed(() => Math.min(pagination.value.page * pagination.value.limit, pagination.value.totalDocs))
+
+// Drawer de filtros en móvil
+const showFiltersMobile = ref(false)
+const filterCount = computed(() => {
+  const f = filters.value
+  return (f.modalidades?.length || 0) + (f.tiposContrato?.length || 0) + (f.nivelesExperiencia?.length || 0)
+})
 
 // Debounce para búsqueda
 let timeout = null
@@ -243,9 +297,33 @@ async function fetchOfertas() {
   }
 }
 
+// Bloquear scroll del body cuando el drawer de filtros está abierto en móvil
+watch(showFiltersMobile, (open) => {
+  if (open) {
+    document.body.style.overflow = 'hidden'
+  } else {
+    document.body.style.overflow = ''
+  }
+})
+
+onUnmounted(() => {
+  document.body.style.overflow = ''
+})
+
 // Inicialización
 onMounted(() => {
   window.scrollTo(0, 0)
   fetchOfertas()
 })
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

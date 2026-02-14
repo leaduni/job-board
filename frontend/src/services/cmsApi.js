@@ -30,5 +30,10 @@ export const cmsApi = {
     const { data } = await api.get("/courses", { params });
     return data;
   },
+
+  async getProveedores() {
+    const { data } = await api.get("/proveedores");
+    return data;
+  },
 };
 
