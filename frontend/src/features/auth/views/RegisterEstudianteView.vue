@@ -281,21 +281,13 @@ import { useRouter } from "vue-router";
 import { useAuth } from "@/composables/useAuth";
 
 const router = useRouter();
-const { register } = useAuth();
+const { register, requestEmailCode } = useAuth();
 
 const loading = ref(false);
 const errorMsg = ref("");
 const successMsg = ref("");
 const step = ref("form");
 const showConfirmError = ref(false);
-const serverCode = ref("");
-const codeExpiresAt = ref(0);
-
-const RESEND_API_KEY = import.meta.env.VITE_RESEND_API_KEY;
-const RESEND_FROM_EMAIL =
-  import.meta.env.VITE_RESEND_FROM_EMAIL || "onboarding@resend.dev";
-
-const generateCode = () => String(Math.floor(1000 + Math.random() * 9000));
 
 const form = reactive({
   nombres: "",
@@ -307,34 +299,7 @@ const form = reactive({
 });
 
 const sendVerificationCode = async () => {
-  if (!RESEND_API_KEY) {
-    throw new Error("Falta VITE_RESEND_API_KEY en el .env del frontend.");
-  }
-
-  const nextCode = generateCode();
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${RESEND_API_KEY}`,
-    },
-    body: JSON.stringify({
-      from: RESEND_FROM_EMAIL,
-      to: [form.user_email],
-      subject: "Código de verificación - Bolsa Laboral LEAD UNI",
-      html: `<div style="font-family:Arial,sans-serif;color:#111;line-height:1.5;"><h2>Verifica tu correo</h2><p>Tu código de verificación es:</p><p style="font-size:32px;font-weight:700;letter-spacing:4px;margin:16px 0;">${nextCode}</p><p>Este código vence en 10 minutos.</p></div>`,
-    }),
-  });
-
-  if (!response.ok) {
-    const details = await response.json().catch(() => ({}));
-    throw new Error(
-      details?.message || details?.error || "No se pudo enviar el código.",
-    );
-  }
-
-  serverCode.value = nextCode;
-  codeExpiresAt.value = Date.now() + 10 * 60 * 1000;
+  await requestEmailCode({ email: form.user_email });
 
   step.value = "code";
   successMsg.value = "Código enviado. Revisa tu correo para continuar.";
@@ -375,16 +340,6 @@ const handleRegister = async () => {
       errorMsg.value = "Ingresa un código válido de 4 dígitos.";
       return;
     }
-
-    if (!serverCode.value || Date.now() > codeExpiresAt.value) {
-      errorMsg.value = "El código venció. Solicita uno nuevo.";
-      return;
-    }
-
-    if (form.verificationCode !== serverCode.value) {
-      errorMsg.value = "Código incorrecto.";
-      return;
-    }
   }
 
   loading.value = true;
@@ -398,11 +353,9 @@ const handleRegister = async () => {
     await register({
       email: form.user_email,
       password: form.password,
+      code: form.verificationCode,
       role: "user",
     });
-
-    serverCode.value = "";
-    codeExpiresAt.value = 0;
 
     router.push("/perfil");
   } catch (error) {

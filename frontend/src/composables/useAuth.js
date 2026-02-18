@@ -1,5 +1,4 @@
 import { ref, computed } from "vue";
-import axios from "axios";
 import { coreApi } from "@/services/coreApi";
 
 // Claves de localStorage
@@ -9,13 +8,6 @@ const USER_KEY = "authUser";
 // Estado reactivo global (Singleton)
 const user = ref(null);
 const token = ref(null);
-
-const authApi = axios.create({
-  baseURL: `${import.meta.env.VITE_CMS_API_URL}/api`,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
 
 // Computed
 const isAuthenticated = computed(() => !!token.value && !!user.value);
@@ -43,7 +35,7 @@ export function useAuth() {
    */
   async function login({ email, password }) {
     try {
-      const response = await authApi.post("/users/login", { email, password });
+      const response = await coreApi.post("/api/auth/login", { email, password });
 
       const { user: userData, token: tokenData } = response.data;
 
@@ -67,12 +59,13 @@ export function useAuth() {
    */
   async function register(payload) {
     try {
-      await authApi.post("/users", {
-        email: payload.email,
-        password: payload.password,
-        role: payload.role || "user",
-      });
-      return await login({ email: payload.email, password: payload.password });
+      const response = await coreApi.post("/api/auth/register", payload);
+      const { user: userData, token: tokenData } = response.data;
+      user.value = userData;
+      token.value = tokenData;
+      localStorage.setItem(TOKEN_KEY, tokenData);
+      localStorage.setItem(USER_KEY, JSON.stringify(userData));
+      return userData;
     } catch (error) {
       console.error(
         "Error en registro:",
@@ -81,6 +74,21 @@ export function useAuth() {
       throw new Error(
         error.response?.data?.error || "No se pudo completar el registro",
       );
+    }
+  }
+
+  async function requestEmailCode(payload) {
+    try {
+      const response = await coreApi.post("/api/auth/send-code", {
+        email: payload.email,
+      });
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Error enviando código:",
+        error.response?.data || error.message,
+      );
+      throw new Error(error.response?.data?.error || "No se pudo enviar el código");
     }
   }
 
@@ -130,6 +138,7 @@ export function useAuth() {
     isAuthenticated,
     initAuth,
     login,
+    requestEmailCode,
     register,
     registerEmpresa,
     logout,
