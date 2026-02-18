@@ -49,21 +49,27 @@
           {{ errorMsg }}
         </div>
 
+        <!-- Success Message -->
+        <div v-if="successMsg" class="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-200 text-sm text-center">
+          {{ successMsg }}
+        </div>
+
         <!-- Name Fields Row -->
-        <div class="grid grid-cols-2 gap-4">
+        <div v-if="step === 'form'" class="grid grid-cols-2 gap-4">
           <div class="space-y-1.5">
-            <label class="block text-xs font-bold text-white/70 uppercase tracking-wider ml-1">Nombres</label>
-            <input v-model="form.nombres" type="text" required class="input-field" placeholder="Ej. Juan">
+            <label for="reg-nombres" class="block text-xs font-bold text-white/70 uppercase tracking-wider ml-1">Nombres</label>
+            <input id="reg-nombres" v-model="form.nombres" type="text" required class="input-field" placeholder="Ej. Juan">
           </div>
           <div class="space-y-1.5">
-            <label class="block text-xs font-bold text-white/70 uppercase tracking-wider ml-1">Apellidos</label>
-            <input v-model="form.apellidos" type="text" required class="input-field" placeholder="Ej. Pérez">
+            <label for="reg-apellidos" class="block text-xs font-bold text-white/70 uppercase tracking-wider ml-1">Apellidos</label>
+            <input id="reg-apellidos" v-model="form.apellidos" type="text" required class="input-field" placeholder="Ej. Pérez">
           </div>
         </div>
 
         <!-- Contact Info -->
-        <div class="space-y-1.5">
+        <div v-if="step === 'form'" class="space-y-1.5">
           <label
+            for="reg-email"
             class="block text-xs font-bold text-white/70 uppercase tracking-wider ml-1"
             >Correo Institucional</label
           >
@@ -75,6 +81,7 @@
             </div>
             <input
               v-model="form.user_email"
+              id="reg-email"
               type="email"
               required
               class="input-field pl-11"
@@ -84,9 +91,10 @@
         </div>
 
         <!-- Security -->
-        <div class="space-y-5">
+        <div v-if="step === 'form'" class="space-y-5">
           <div class="space-y-1.5">
             <label
+              for="reg-password"
               class="block text-xs font-bold text-white/70 uppercase tracking-wider ml-1"
               >Contraseña</label
             >
@@ -96,6 +104,7 @@
                 </div>
                 <input
                   v-model="form.password"
+                  id="reg-password"
                   type="password"
                   required
                   class="input-field pl-11"
@@ -105,6 +114,7 @@
           </div>
           <div class="space-y-1.5">
             <label
+              for="reg-password-confirm"
               class="block text-xs font-bold text-white/70 uppercase tracking-wider ml-1"
               >Confirmar Contraseña</label
             >
@@ -114,6 +124,7 @@
                 </div>
                 <input
                   v-model="form.confirmPassword"
+                  id="reg-password-confirm"
                   type="password"
                   required
                   class="input-field pl-11"
@@ -123,6 +134,22 @@
           </div>
         </div>
         
+        <div v-if="step === 'code'" class="space-y-1.5">
+          <label for="reg-verification-code" class="block text-xs font-bold text-white/70 uppercase tracking-wider ml-1">Código de verificación</label>
+          <input
+            v-model="form.verificationCode"
+            id="reg-verification-code"
+            type="text"
+            inputmode="numeric"
+            maxlength="4"
+            class="input-field"
+            placeholder="1234"
+          >
+          <p class="text-xs text-white/50 ml-1">
+            Te enviamos un código de 4 dígitos a {{ form.user_email }}.
+          </p>
+        </div>
+
         <!-- Submit Button -->
         <div class="pt-4">
           <button
@@ -130,8 +157,22 @@
             :disabled="loading"
             class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl text-sm font-bold text-white bg-gradient-to-r from-[#a0218b] to-[#b62667] hover:from-[#b62667] hover:to-[#a0218b] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#a0218b] shadow-lg shadow-[#a0218b]/30 hover:shadow-[#a0218b]/50 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span v-if="loading">Creando cuenta...</span>
-            <span v-else>Crear Cuenta</span>
+            <span v-if="loading">
+              {{ step === 'form' ? 'Enviando código...' : 'Verificando...' }}
+            </span>
+            <span v-else>
+              {{ step === 'form' ? 'Enviar código de verificación' : 'Confirmar y crear cuenta' }}
+            </span>
+          </button>
+
+          <button
+            v-if="step === 'code'"
+            type="button"
+            :disabled="loading"
+            class="w-full mt-3 flex justify-center py-3 px-4 border border-white/10 rounded-xl text-sm font-bold text-white/90 bg-transparent hover:bg-white/5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="handleResendCode"
+          >
+            Reenviar código
           </button>
         </div>
       </form>
@@ -159,10 +200,12 @@ import { useRouter } from "vue-router";
 import { useAuth } from "@/composables/useAuth";
 
 const router = useRouter();
-const { register } = useAuth();
+const { register, requestEmailCode } = useAuth();
 
 const loading = ref(false);
 const errorMsg = ref("");
+const successMsg = ref("");
+const step = ref('form');
 
 const form = reactive({
   nombres: '',
@@ -170,10 +213,39 @@ const form = reactive({
   user_email: '',
   password: '',
   confirmPassword: '',
+  verificationCode: '',
 });
+
+const sendVerificationCode = async () => {
+  await requestEmailCode({
+    email: form.user_email,
+    password: form.password,
+    firstName: form.nombres,
+    lastName: form.apellidos,
+    role: 'user',
+  });
+
+  step.value = 'code';
+  successMsg.value = 'Código enviado. Revisa tu correo para continuar.';
+};
+
+const handleResendCode = async () => {
+  errorMsg.value = '';
+  successMsg.value = '';
+  loading.value = true;
+
+  try {
+    await sendVerificationCode();
+  } catch (error) {
+    errorMsg.value = error.message;
+  } finally {
+    loading.value = false;
+  }
+};
 
 const handleRegister = async () => {
   errorMsg.value = '';
+  successMsg.value = '';
   
   // 1. Validación de campos
   if (!form.nombres || !form.apellidos || !form.user_email || !form.password) {
@@ -186,18 +258,28 @@ const handleRegister = async () => {
     return;
   }
   
+  if (step.value === 'code') {
+    if (!/^\d{4}$/.test(form.verificationCode)) {
+      errorMsg.value = 'Ingresa un código válido de 4 dígitos.';
+      return;
+    }
+  }
+
   loading.value = true;
 
   try {
-    // 2. Registro real
+    if (step.value === 'form') {
+      await sendVerificationCode();
+      return;
+    }
+
     await register({
       email: form.user_email,
       password: form.password,
-      first_name: form.nombres, // Backend exige first_name
-      last_name: form.apellidos, // Backend exige last_name
-      role: 'user', 
+      code: form.verificationCode,
+      role: 'user',
     });
-    
+
     router.push('/perfil');
   } catch (error) {
     errorMsg.value = error.message;

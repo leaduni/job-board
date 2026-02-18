@@ -1,6 +1,5 @@
 import { ref, computed } from 'vue'
-import { coreApi } from '@/services/coreApi'
-import { useRouter } from 'vue-router'
+import axios from 'axios'
 
 // Claves de localStorage
 const TOKEN_KEY = 'authToken'
@@ -10,12 +9,17 @@ const USER_KEY = 'authUser'
 const user = ref(null)
 const token = ref(null)
 
+const authApi = axios.create({
+  baseURL: `${import.meta.env.VITE_CMS_API_URL}/api`,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
+
 // Computed
 const isAuthenticated = computed(() => !!token.value && !!user.value)
 
 export function useAuth() {
-  const router = useRouter() // Nota: puede ser undefined fuera de componentes
-
   /**
    * Inicializa el estado de autenticación al cargar la app
    */
@@ -27,7 +31,7 @@ export function useAuth() {
       try {
         token.value = storedToken
         user.value = JSON.parse(storedUser)
-      } catch (e) {
+      } catch {
         logout()
       }
     }
@@ -38,7 +42,7 @@ export function useAuth() {
    */
   async function login({ email, password }) {
     try {
-      const response = await coreApi.post('/api/auth/login', { email, password })
+      const response = await authApi.post('/users/login', { email, password })
       
       const { user: userData, token: tokenData } = response.data
       
@@ -57,24 +61,23 @@ export function useAuth() {
     }
   }
 
+  async function requestEmailCode(payload) {
+    try {
+      const response = await authApi.post('/auth/send-code', payload)
+      return response.data
+    } catch (error) {
+      console.error('Error enviando código:', error.response?.data || error.message)
+      throw new Error(error.response?.data?.error || 'No se pudo enviar el código')
+    }
+  }
+
   /**
    * Registra un nuevo usuario
    */
   async function register(payload) {
     try {
-      // payload: { email, password, nombres, apellidos, telefono, ... }
-      const response = await coreApi.post('/api/auth/register', payload)
-      
-      const { user: userData, token: tokenData } = response.data
-      
-      // Auto-login tras registro exitoso
-      user.value = userData
-      token.value = tokenData
-      
-      localStorage.setItem(TOKEN_KEY, tokenData)
-      localStorage.setItem(USER_KEY, JSON.stringify(userData))
-      
-      return userData
+      await authApi.post('/auth/verify-and-register', payload)
+      return await login({ email: payload.email, password: payload.password })
     } catch (error) {
       console.error('Error en registro:', error.response?.data || error.message)
       throw new Error(error.response?.data?.error || 'No se pudo completar el registro')
@@ -92,7 +95,7 @@ export function useAuth() {
     
     // Redirigir a login si es posible (si se llama desde componente)
     // O dejar que la UI reaccione al cambio de estado
-    window.location.href = '/auth/login'
+    globalThis.location.href = '/auth/login'
   }
 
   return {
@@ -101,6 +104,7 @@ export function useAuth() {
     isAuthenticated,
     initAuth,
     login,
+    requestEmailCode,
     register,
     logout
   }
