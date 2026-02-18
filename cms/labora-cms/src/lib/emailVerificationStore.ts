@@ -1,23 +1,18 @@
-export type PendingRegistration = {
-  email: string
-  password: string
-  firstName: string
-  lastName: string
-  role: 'user' | 'admin'
+export type PendingVerification = {
   code: string
   expiresAt: number
   attempts: number
   lastSentAt: number
 }
 
-type Store = Map<string, PendingRegistration>
+type Store = Map<string, PendingVerification>
 
 declare global {
   // eslint-disable-next-line no-var
   var __leadUniEmailVerificationStore: Store | undefined
 }
 
-const store: Store = globalThis.__leadUniEmailVerificationStore ?? new Map<string, PendingRegistration>()
+const store: Store = globalThis.__leadUniEmailVerificationStore ?? new Map<string, PendingVerification>()
 
 globalThis.__leadUniEmailVerificationStore ??= store
 

@@ -1,38 +1,39 @@
-import { ref, computed } from 'vue'
-import axios from 'axios'
+import { ref, computed } from "vue";
+import axios from "axios";
+import { coreApi } from "@/services/coreApi";
 
 // Claves de localStorage
-const TOKEN_KEY = 'authToken'
-const USER_KEY = 'authUser'
+const TOKEN_KEY = "authToken";
+const USER_KEY = "authUser";
 
 // Estado reactivo global (Singleton)
-const user = ref(null)
-const token = ref(null)
+const user = ref(null);
+const token = ref(null);
 
 const authApi = axios.create({
   baseURL: `${import.meta.env.VITE_CMS_API_URL}/api`,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
-})
+});
 
 // Computed
-const isAuthenticated = computed(() => !!token.value && !!user.value)
+const isAuthenticated = computed(() => !!token.value && !!user.value);
 
 export function useAuth() {
   /**
    * Inicializa el estado de autenticación al cargar la app
    */
   function initAuth() {
-    const storedToken = localStorage.getItem(TOKEN_KEY)
-    const storedUser = localStorage.getItem(USER_KEY)
+    const storedToken = localStorage.getItem(TOKEN_KEY);
+    const storedUser = localStorage.getItem(USER_KEY);
 
     if (storedToken && storedUser) {
       try {
-        token.value = storedToken
-        user.value = JSON.parse(storedUser)
+        token.value = storedToken;
+        user.value = JSON.parse(storedUser);
       } catch {
-        logout()
+        logout();
       }
     }
   }
@@ -42,32 +43,22 @@ export function useAuth() {
    */
   async function login({ email, password }) {
     try {
-      const response = await authApi.post('/users/login', { email, password })
-      
-      const { user: userData, token: tokenData } = response.data
-      
-      // Actualizar estado
-      user.value = userData
-      token.value = tokenData
-      
-      // Persistir
-      localStorage.setItem(TOKEN_KEY, tokenData)
-      localStorage.setItem(USER_KEY, JSON.stringify(userData))
-      
-      return userData
-    } catch (error) {
-      console.error('Error en login:', error.response?.data || error.message)
-      throw new Error(error.response?.data?.error || 'Credenciales inválidas')
-    }
-  }
+      const response = await authApi.post("/users/login", { email, password });
 
-  async function requestEmailCode(payload) {
-    try {
-      const response = await authApi.post('/auth/send-code', payload)
-      return response.data
+      const { user: userData, token: tokenData } = response.data;
+
+      // Actualizar estado
+      user.value = userData;
+      token.value = tokenData;
+
+      // Persistir
+      localStorage.setItem(TOKEN_KEY, tokenData);
+      localStorage.setItem(USER_KEY, JSON.stringify(userData));
+
+      return userData;
     } catch (error) {
-      console.error('Error enviando código:', error.response?.data || error.message)
-      throw new Error(error.response?.data?.error || 'No se pudo enviar el código')
+      console.error("Error en login:", error.response?.data || error.message);
+      throw new Error(error.response?.data?.error || "Credenciales inválidas");
     }
   }
 
@@ -76,11 +67,20 @@ export function useAuth() {
    */
   async function register(payload) {
     try {
-      await authApi.post('/auth/verify-and-register', payload)
-      return await login({ email: payload.email, password: payload.password })
+      await authApi.post("/users", {
+        email: payload.email,
+        password: payload.password,
+        role: payload.role || "user",
+      });
+      return await login({ email: payload.email, password: payload.password });
     } catch (error) {
-      console.error('Error en registro:', error.response?.data || error.message)
-      throw new Error(error.response?.data?.error || 'No se pudo completar el registro')
+      console.error(
+        "Error en registro:",
+        error.response?.data || error.message,
+      );
+      throw new Error(
+        error.response?.data?.error || "No se pudo completar el registro",
+      );
     }
   }
 
@@ -89,16 +89,24 @@ export function useAuth() {
    */
   async function registerEmpresa(payload) {
     try {
-      const response = await coreApi.post('/api/auth/register-empresa', payload)
-      const { user: userData, token: tokenData } = response.data
-      user.value = userData
-      token.value = tokenData
-      localStorage.setItem(TOKEN_KEY, tokenData)
-      localStorage.setItem(USER_KEY, JSON.stringify(userData))
-      return userData
+      const response = await coreApi.post(
+        "/api/auth/register-empresa",
+        payload,
+      );
+      const { user: userData, token: tokenData } = response.data;
+      user.value = userData;
+      token.value = tokenData;
+      localStorage.setItem(TOKEN_KEY, tokenData);
+      localStorage.setItem(USER_KEY, JSON.stringify(userData));
+      return userData;
     } catch (error) {
-      console.error('Error en registro empresa:', error.response?.data || error.message)
-      throw new Error(error.response?.data?.error || 'No se pudo completar el registro')
+      console.error(
+        "Error en registro empresa:",
+        error.response?.data || error.message,
+      );
+      throw new Error(
+        error.response?.data?.error || "No se pudo completar el registro",
+      );
     }
   }
 
@@ -106,14 +114,14 @@ export function useAuth() {
    * Cierra la sesión
    */
   function logout() {
-    user.value = null
-    token.value = null
-    localStorage.removeItem(TOKEN_KEY)
-    localStorage.removeItem(USER_KEY)
-    
+    user.value = null;
+    token.value = null;
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+
     // Redirigir a login si es posible (si se llama desde componente)
     // O dejar que la UI reaccione al cambio de estado
-    globalThis.location.href = '/auth/login'
+    globalThis.location.href = "/auth/login";
   }
 
   return {
@@ -122,9 +130,8 @@ export function useAuth() {
     isAuthenticated,
     initAuth,
     login,
-    requestEmailCode,
     register,
     registerEmpresa,
-    logout
-  }
+    logout,
+  };
 }
