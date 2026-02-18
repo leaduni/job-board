@@ -35,7 +35,10 @@ export function useAuth() {
    */
   async function login({ email, password }) {
     try {
-      const response = await coreApi.post("/api/auth/login", { email, password });
+      const response = await coreApi.post("/api/auth/login", {
+        email,
+        password,
+      });
 
       const { user: userData, token: tokenData } = response.data;
 
@@ -88,7 +91,9 @@ export function useAuth() {
         "Error enviando código:",
         error.response?.data || error.message,
       );
-      throw new Error(error.response?.data?.error || "No se pudo enviar el código");
+      throw new Error(
+        error.response?.data?.error || "No se pudo enviar el código",
+      );
     }
   }
 
