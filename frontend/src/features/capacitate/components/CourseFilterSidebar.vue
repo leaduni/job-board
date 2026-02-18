@@ -1,9 +1,9 @@
 <template>
-  <aside class="w-full bg-[#121225] border-2 border-[#b62667] rounded-2xl p-6 shadow-lg h-fit">
+  <aside class="w-full bg-[#121225] border-2 border-[#a6249d] rounded-2xl p-6 shadow-lg h-fit">
     <!-- Header -->
     <div class="flex items-center justify-between mb-5">
       <div class="flex items-center gap-3">
-        <div class="w-1 h-6 bg-[#b62667] rounded-full"></div>
+        <div class="w-1 h-6 bg-[#a6249d] rounded-full"></div>
         <h2 class="text-white font-bold text-lg">Filtros de Capacitación</h2>
       </div>
     </div>
@@ -17,10 +17,10 @@
             <button
               @click="toggleDropdown"
               type="button"
-              class="w-full flex items-center justify-between bg-[#1e1e3a] border border-gray-700 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#b62667]/50"
+              class="w-full flex items-center justify-between bg-[#1e1e3a] border border-gray-700 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#a6249d]/50"
             >
               <span>{{ selectedRoleName }}</span>
-              <svg :class="['w-5 h-5 text-[#b62667] transition-transform duration-300', isOpen && 'rotate-180']" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              <svg :class="['w-5 h-5 text-[#d93340] transition-transform duration-300', isOpen && 'rotate-180']" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
             
             <transition
@@ -31,13 +31,13 @@
               leave-from-class="transform opacity-100 scale-100"
               leave-to-class="transform opacity-0 scale-95"
             >
-              <div v-if="isOpen" class="absolute z-10 mt-2 w-full bg-[#1e1e3a] border border-[#b62667] rounded-md shadow-lg">
+              <div v-if="isOpen" class="absolute z-10 mt-2 w-full bg-[#1e1e3a] border border-[#a6249d] rounded-md shadow-lg">
                 <ul class="py-1">
                   <li
                     v-for="role in roles"
                     :key="role.id"
                     @click="selectRole(role.id)"
-                    class="px-4 py-2 text-sm text-white/80 hover:bg-[#b62667]/20 cursor-pointer transition-colors"
+                    class="px-4 py-2 text-sm text-white/80 hover:bg-[#a6249d]/20 cursor-pointer transition-colors"
                   >
                     {{ role.name }}
                   </li>
@@ -59,7 +59,7 @@
               :class="[
                 'px-3 py-1 text-sm rounded-full transition-colors',
                 filters.skills.includes(skill)
-                  ? 'bg-[#b62667] text-white font-semibold'
+                  ? 'bg-[#a6249d] text-white font-semibold'
                   : 'bg-gray-700/50 hover:bg-gray-600/50 text-white/80'
               ]"
             >
@@ -79,7 +79,7 @@
               type="button"
               :class="[
                 'w-1/2 py-1.5 text-sm font-semibold rounded-md transition-colors',
-                filters.investment === option.value ? 'bg-[#b62667] text-white' : 'text-white/60 hover:text-white'
+                filters.investment === option.value ? 'bg-[#a6249d] text-white' : 'text-white/60 hover:text-white'
               ]"
             >
               {{ option.label }}
@@ -91,7 +91,7 @@
         <section class="py-4 border-t border-gray-800">
            <label class="flex items-center cursor-pointer group w-fit">
               <input type="checkbox" v-model="filters.certificate" class="sr-only peer">
-              <div class="w-5 h-5 bg-gray-700/50 rounded-md flex-shrink-0 flex items-center justify-center ring-1 ring-transparent peer-focus:ring-[#b62667]/50 peer-checked:bg-[#b62667] peer-checked:border-transparent">
+              <div class="w-5 h-5 bg-gray-700/50 rounded-md flex-shrink-0 flex items-center justify-center ring-1 ring-transparent peer-focus:ring-[#a6249d]/50 peer-checked:bg-[#a6249d] peer-checked:border-transparent">
                 <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
               </div>
               <span class="ml-3 text-white/70 group-hover:text-white transition-colors font-medium">Con Certificado</span>

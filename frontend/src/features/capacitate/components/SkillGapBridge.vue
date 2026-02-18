@@ -1,5 +1,5 @@
 <template>
-  <div class="border-2 border-[#b62667] bg-[#121225] rounded-[12px] p-[24px]">
+  <div class="border-2 border-[#a6249d] bg-[#121225] rounded-[12px] p-[24px]">
     <h3 class="text-white/90 text-lg font-semibold mb-4">Análisis de compatibilidad</h3>
     <ul class="space-y-2 mb-6">
       <li v-for="skill in mockSkills" :key="skill.name" class="flex items-center">

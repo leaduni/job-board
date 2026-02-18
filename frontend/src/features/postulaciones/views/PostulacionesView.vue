@@ -112,7 +112,7 @@ onMounted(() => {
         class="flex flex-col items-center justify-center py-20 text-center bg-[#121225]/50 rounded-3xl border border-white/5 shadow-2xl backdrop-blur-sm"
       >
         <div
-          class="w-20 h-20 bg-gradient-to-br from-[#a0218b] to-[#5a124d] rounded-full flex items-center justify-center mb-6 shadow-lg shadow-[#a0218b]/30"
+          class="w-20 h-20 bg-gradient-to-br from-[#d93340] to-[#a6249d] rounded-full flex items-center justify-center mb-6 shadow-lg shadow-[#a6249d]/30"
         >
           <svg
             class="w-10 h-10 text-white"
@@ -138,7 +138,7 @@ onMounted(() => {
         >
           <router-link
             to="/auth/login"
-            class="flex-1 py-3 px-6 rounded-xl bg-gradient-to-r from-[#a0218b] to-[#b62667] text-white font-bold text-center hover:opacity-90 transition-all shadow-lg shadow-[#a0218b]/20"
+            class="flex-1 py-3 px-6 rounded-xl bg-gradient-to-r from-[#d93340] to-[#a6249d] text-white font-bold text-center hover:opacity-90 transition-all shadow-lg shadow-[#a6249d]/20"
           >
             Iniciar Sesión
           </router-link>
@@ -157,7 +157,7 @@ onMounted(() => {
         class="flex flex-col items-center justify-center py-32"
       >
         <div
-          class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#b62667]"
+          class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#d93340]"
         ></div>
         <p class="mt-4 text-white/50 animate-pulse">
           Cargando tus postulaciones...
@@ -223,7 +223,7 @@ onMounted(() => {
             class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 bg-[#121225] p-4 rounded-xl border border-white/5"
           >
             <h2 class="text-white font-bold text-lg">
-              <span class="text-[#b62667]">{{
+              <span class="text-[#d93340]">{{
                 postulacionesFiltradas.length
               }}</span>
               Solicitudes activas

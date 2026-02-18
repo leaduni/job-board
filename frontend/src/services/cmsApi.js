@@ -16,6 +16,11 @@ export const cmsApi = {
     return data;
   },
 
+  async createCompany(companyData) {
+    const { data } = await api.post("/companies", companyData);
+    return data;
+  },
+
   async getProjectById(id) {
     const { data } = await api.get(`/projects/${id}`);
     return data;
@@ -23,6 +28,11 @@ export const cmsApi = {
 
   async getCourses(params = {}) {
     const { data } = await api.get("/courses", { params });
+    return data;
+  },
+
+  async getProveedores() {
+    const { data } = await api.get("/proveedores");
     return data;
   },
 };

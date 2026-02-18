@@ -42,14 +42,14 @@ onUnmounted(() => {
     @click.self="handleClose"
   >
     <div
-      class="relative m-4 w-full max-w-md overflow-hidden rounded-lg border-2 border-[#b62667] bg-[#121225] p-8 shadow-2xl"
+      class="relative m-4 w-full max-w-md overflow-hidden rounded-lg border-2 border-[#a6249d] bg-[#121225] p-8 shadow-2xl"
     >
       <div class="mb-6 text-center">
         <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center">
           <!-- Animated External Link Icon -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-12 w-12 animate-pulse text-[#b62667]"
+            class="h-12 w-12 animate-pulse text-[#d93340]"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -75,7 +75,7 @@ onUnmounted(() => {
       <div class="flex flex-col gap-4">
         <button
           @click="handleConfirm"
-          class="w-full rounded-md bg-gradient-to-r from-[#b62667] to-[#8a1c4e] px-6 py-3 text-base font-bold text-white shadow-lg transition-transform duration-150 ease-in-out hover:scale-105"
+          class="w-full rounded-md bg-gradient-to-r from-[#d93340] to-[#a6249d] px-6 py-3 text-base font-bold text-white shadow-lg transition-transform duration-150 ease-in-out hover:scale-105"
         >
           Continuar postulación
         </button>

@@ -7,15 +7,16 @@ module.exports = {
     extend: {
       colors: {
         lead: {
-          900: "#09092a", // fondo oscuro profundo
-          800: "#36042f",
-          700: "#3a1e6a",
-          600: "#b62667",
-          500: "#a0218b",
-          pink: "#ff86ff"
+          900: "#09092a",
+          800: "#120a22",
+          700: "#1A0B2E",
+          600: "#2D1B4E"
         },
         accent: {
-          pink: "#b62667"
+          red: "#d93340",
+          purple: "#a6249d",
+          pink: "#ff6ec7",
+          "purple-hover": "#8d1f88"
         }
       },
       fontFamily: {

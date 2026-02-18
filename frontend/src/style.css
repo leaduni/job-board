@@ -4,17 +4,22 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ===== Variables unificadas ===== */
+/* ===== Variables unificadas (paleta LEAD-webpage) ===== */
 :root{
   --lead-900: #09092a;
-  --lead-700: #3a1e6a;
+  --lead-800: #120a22;
+  --lead-700: #1A0B2E;
+  --lead-600: #2D1B4E;
 
-  --accent-pink: #b62667;
-  --accent-pink-2: #a0218b;
+  --accent-red: #d93340;
+  --accent-purple: #a6249d;
+  --accent-pink: #ff6ec7;
+  --accent-pink-2: #a6249d; /* alias para compatibilidad */
+  --accent-purple-hover: #8d1f88;
 
   /* border / glow */
-  --accent-border-hex: #a0218b;
-  --accent-border-rgb: 160,33,139;
+  --accent-border-hex: #a6249d;
+  --accent-border-rgb: 166,36,157;
   --accent-border-width: 2px;
   --accent-border-strong: rgba(var(--accent-border-rgb), 0.22);
 
@@ -32,6 +37,7 @@
   --radius-md: 10px;
 
   --shadow-card: 0 12px 40px rgba(0,0,0,0.6);
+  --shadow-nav: #181C2F;
 
   --font-heading: "League Spartan", sans-serif;
   --font-body: "Roboto", sans-serif;
@@ -39,10 +45,9 @@
   --nav-height: 72px;
   --container-max: 1240px;
 
-  --nav-bg-1: #201028;
-  --nav-bg-2: #2a1630;
-  --nav-accent-start: #d23b97;
-  --nav-accent-end: #a0218b;
+  --nav-bg: #1A0B2E;
+  --nav-accent-start: #d93340;
+  --nav-accent-end: #a6249d;
 }
 
 /* ===== Base ===== */

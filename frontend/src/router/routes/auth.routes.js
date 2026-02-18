@@ -5,6 +5,11 @@ const authRoutes = [
     component: () => import('@/features/auth/views/LoginView.vue'),
   },
   {
+    path: '/auth/login-empresa',
+    name: 'login-empresa',
+    component: () => import('@/features/auth/views/LoginEmpresaView.vue'),
+  },
+  {
     path: '/auth/register/estudiante',
     name: 'register-estudiante',
     component: () => import('@/features/auth/views/RegisterEstudianteView.vue'),

@@ -85,6 +85,24 @@ export function useAuth() {
   }
 
   /**
+   * Registra una nueva empresa (usuario + registro en CMS)
+   */
+  async function registerEmpresa(payload) {
+    try {
+      const response = await coreApi.post('/api/auth/register-empresa', payload)
+      const { user: userData, token: tokenData } = response.data
+      user.value = userData
+      token.value = tokenData
+      localStorage.setItem(TOKEN_KEY, tokenData)
+      localStorage.setItem(USER_KEY, JSON.stringify(userData))
+      return userData
+    } catch (error) {
+      console.error('Error en registro empresa:', error.response?.data || error.message)
+      throw new Error(error.response?.data?.error || 'No se pudo completar el registro')
+    }
+  }
+
+  /**
    * Cierra la sesión
    */
   function logout() {
@@ -106,6 +124,7 @@ export function useAuth() {
     login,
     requestEmailCode,
     register,
+    registerEmpresa,
     logout
   }
 }
