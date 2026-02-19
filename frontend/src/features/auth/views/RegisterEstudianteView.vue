@@ -353,6 +353,8 @@ const handleRegister = async () => {
     await register({
       email: form.user_email,
       password: form.password,
+      first_name: form.nombres,
+      last_name: form.apellidos,
       code: form.verificationCode,
       role: "user",
     });
