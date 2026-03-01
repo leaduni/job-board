@@ -51,6 +51,67 @@
           <span v-else>Enviar instrucciones</span>
         </button>
       </form>
+      <!-- Inputs para código y nueva contraseña -->
+      <form
+        v-if="successMsg"
+        @submit.prevent="handleResetPassword"
+        class="space-y-5 mt-6"
+      >
+        <div class="space-y-1.5">
+          <label
+            for="code"
+            class="block text-xs font-bold text-white/70 uppercase tracking-wider ml-1"
+            >Código de verificación</label
+          >
+          <input
+            id="code"
+            v-model="code"
+            type="text"
+            maxlength="4"
+            required
+            class="block w-full pr-4 py-3 bg-[#0a0a1a]/50 border border-white/10 rounded-xl text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-[#a6249d]/50 focus:border-[#a6249d] transition-all duration-200"
+            placeholder="1234"
+          />
+        </div>
+        <div class="space-y-1.5">
+          <label
+            for="newPassword"
+            class="block text-xs font-bold text-white/70 uppercase tracking-wider ml-1"
+            >Nueva contraseña</label
+          >
+          <input
+            id="newPassword"
+            v-model="newPassword"
+            type="password"
+            required
+            class="block w-full pr-4 py-3 bg-[#0a0a1a]/50 border border-white/10 rounded-xl text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-[#a6249d]/50 focus:border-[#a6249d] transition-all duration-200"
+            placeholder="••••••••"
+          />
+        </div>
+        <div class="space-y-1.5">
+          <label
+            for="confirmPassword"
+            class="block text-xs font-bold text-white/70 uppercase tracking-wider ml-1"
+            >Confirmar contraseña</label
+          >
+          <input
+            id="confirmPassword"
+            v-model="confirmPassword"
+            type="password"
+            required
+            class="block w-full pr-4 py-3 bg-[#0a0a1a]/50 border border-white/10 rounded-xl text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-[#a6249d]/50 focus:border-[#a6249d] transition-all duration-200"
+            placeholder="••••••••"
+          />
+        </div>
+        <button
+          type="submit"
+          :disabled="loadingReset"
+          class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl text-sm font-bold text-white bg-gradient-to-r from-[#d93340] to-[#a6249d] hover:from-[#a6249d] hover:to-[#d93340] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#a6249d] shadow-lg shadow-[#a6249d]/30 hover:shadow-[#a6249d]/50 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <span v-if="loadingReset">Restableciendo...</span>
+          <span v-else>Restablecer contraseña</span>
+        </button>
+      </form>
       <div
         class="text-sm text-center text-white/50 pt-2 border-t border-white/5"
       >
@@ -68,12 +129,19 @@
 <script setup>
 import { ref } from "vue";
 import { useAuth } from "@/composables/useAuth";
+import { coreApi } from "@/services/coreApi";
 
 const { requestEmailCode } = useAuth();
 const email = ref("");
 const loading = ref(false);
 const errorMsg = ref("");
 const successMsg = ref("");
+
+// Para el segundo formulario
+const code = ref("");
+const newPassword = ref("");
+const confirmPassword = ref("");
+const loadingReset = ref(false);
 
 const handleForgotPassword = async () => {
   errorMsg.value = "";
@@ -86,6 +154,44 @@ const handleForgotPassword = async () => {
     errorMsg.value = error.message || "No se pudo enviar el correo.";
   } finally {
     loading.value = false;
+  }
+};
+
+const handleResetPassword = async () => {
+  errorMsg.value = "";
+  if (
+    !email.value ||
+    !code.value ||
+    !newPassword.value ||
+    !confirmPassword.value
+  ) {
+    errorMsg.value = "Por favor, rellena todos los campos.";
+    return;
+  }
+  if (newPassword.value !== confirmPassword.value) {
+    errorMsg.value = "Las contraseñas no coinciden.";
+    return;
+  }
+  loadingReset.value = true;
+  try {
+    const body = {
+      email: email.value,
+      code: code.value,
+      newPassword: newPassword.value,
+    };
+    const res = await coreApi.post("/api/auth/reset-password", body);
+    if (res.data?.ok) {
+      successMsg.value =
+        "Contraseña restablecida correctamente. Puedes iniciar sesión.";
+    } else {
+      errorMsg.value =
+        res.data?.message || "No se pudo restablecer la contraseña.";
+    }
+  } catch (error) {
+    errorMsg.value =
+      error.response?.data?.message || "No se pudo restablecer la contraseña.";
+  } finally {
+    loadingReset.value = false;
   }
 };
 </script>
