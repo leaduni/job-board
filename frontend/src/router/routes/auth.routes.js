@@ -19,6 +19,16 @@ const authRoutes = [
     name: 'register-empresa',
     component: () => import('@/features/auth/views/RegisterEmpresaView.vue'),
   },
+  {
+    path: '/auth/forgot-password',
+    name: 'forgot-password',
+    component: () => import('@/features/auth/views/ForgotPasswordView.vue'),
+  },
+  {
+    path: '/auth/reset-password',
+    name: 'reset-password',
+    component: () => import('@/features/auth/views/ResetPasswordView.vue'),
+  },
 ];
 
 export default authRoutes;
