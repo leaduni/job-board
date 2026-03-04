@@ -35,7 +35,7 @@
           <!-- Columna principal -->
           <div class="flex flex-col gap-[28px]">
             <OfferMainContent :oferta="oferta" />
-            <SkillGapBridge />
+            <SkillGapBridge :oferta="oferta" />
           </div>
 
           <!-- Sidebar -->
