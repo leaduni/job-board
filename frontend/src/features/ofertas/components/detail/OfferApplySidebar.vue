@@ -1,6 +1,8 @@
 <template>
   <aside class="flex flex-col gap-[18px] text-white/[0.95] sticky top-[80px]">
-    <div class="p-[18px] bg-gradient-to-b from-[#17102C]/80 to-[#120D26]/90 rounded-[12px] border-2 border-[#a6249d] shadow-[0_12px_36px_rgba(6,6,28,0.6)]">
+    <div
+      class="p-[18px] bg-gradient-to-b from-[#17102C]/80 to-[#120D26]/90 rounded-[12px] border-2 border-[#a6249d] shadow-[0_12px_36px_rgba(6,6,28,0.6)]"
+    >
       <h3 class="mb-[12px] font-bold">¿Te interesa este puesto?</h3>
 
       <button
@@ -8,12 +10,22 @@
         :disabled="yaPostulado || postulando"
         @click="$emit('postular')"
       >
-        {{ yaPostulado ? 'Ya postulado' : postulando ? 'Postulando...' : 'Postular a esta oferta' }}
+        {{
+          yaPostulado
+            ? "Ya postulado"
+            : postulando
+              ? "Postulando..."
+              : "Postular a esta oferta"
+        }}
       </button>
 
       <div class="flex gap-[10px]">
-        <button class="flex-1 w-full py-[10px] px-[12px] rounded-[9px] bg-white/[0.04] border border-white/[0.08] text-[rgba(255,255,255,0.95)] text-[13px] cursor-pointer hover:bg-white/[0.08]" @click="$emit('guardar')">Guardar</button>
-        <button class="flex-1 w-full py-[10px] px-[12px] rounded-[9px] bg-white/[0.04] border border-white/[0.08] text-[rgba(255,255,255,0.95)] text-[13px] cursor-pointer hover:bg-white/[0.08]" @click="$emit('compartir')">Compartir</button>
+        <button
+          class="flex-1 w-full py-[10px] px-[12px] rounded-[9px] bg-white/[0.04] border border-white/[0.08] text-[rgba(255,255,255,0.95)] text-[13px] cursor-pointer hover:bg-white/[0.08]"
+          @click="$emit('compartir')"
+        >
+          Compartir
+        </button>
       </div>
 
       <p v-if="mensaje" class="text-white/[0.45] text-[13px]">{{ mensaje }}</p>
@@ -23,36 +35,15 @@
   </aside>
 </template>
 
-
 <script setup>
-import { computed } from 'vue';
+import { computed } from "vue";
 
 const props = defineProps({
   oferta: { type: Object, required: true },
   yaPostulado: { type: Boolean, default: false },
   postulando: { type: Boolean, default: false },
-  mensaje: { type: String, default: '' },
+  mensaje: { type: String, default: "" },
 });
 
-const emit = defineEmits(['postular', 'guardar', 'compartir']);
-
-const disabled = computed(() => props.postulando || props.yaPostulado);
-
-const textoBoton = computed(() => {
-  if (props.yaPostulado) return 'Ya postulado';
-  if (props.postulando) return 'Postulando...';
-  return 'Postular a esta oferta';
-});
-
-function onPostular() {
-  emit('postular');
-}
-
-function onGuardar() {
-  emit('guardar');
-}
-
-function onCompartir() {
-  emit('compartir');
-}
+const emit = defineEmits(["postular", "guardar", "compartir"]);
 </script>

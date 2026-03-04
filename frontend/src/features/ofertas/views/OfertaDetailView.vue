@@ -45,7 +45,6 @@
             :postulando="postulando"
             :mensaje="mensaje"
             @postular="postular"
-            @guardar="guardarOferta"
             @compartir="compartirOferta"
           >
             <!-- Summary debajo del CTA -->
@@ -121,11 +120,6 @@ onMounted(async () => {
     loading.value = false;
   }
 });
-
-function guardarOferta() {
-  console.log("Guardar oferta", oferta.value?.id);
-  // futuro
-}
 
 function compartirOferta() {
   navigator.clipboard.writeText(window.location.href);
