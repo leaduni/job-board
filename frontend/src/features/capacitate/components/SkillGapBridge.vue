@@ -109,7 +109,7 @@
             >Tienes esta skill</span
           >
           <span v-else class="ml-auto text-yellow-400/70 text-xs"
-            >Te falta</span
+            >Pendiente</span
           >
         </li>
       </ul>
@@ -138,7 +138,7 @@
               Te faltan {{ missingSkills.length }} skill{{
                 missingSkills.length > 1 ? "s" : ""
               }}
-              requerida{{ missingSkills.length > 1 ? "s" : "" }}
+              requerido{{ missingSkills.length > 1 ? "s" : "" }}
             </p>
             <p class="text-yellow-200/70 text-xs mb-3">
               Agrega tus skills en tu perfil para mejorar tu compatibilidad con

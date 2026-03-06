@@ -43,6 +43,7 @@ const profileData = reactive({
   departamento: "",
   distrito: "",
   carrera: "",
+  otra_carrera: "",
   anio_egreso: null,
   sobre_mi: "",
   linkedin_url: "",
@@ -590,21 +591,28 @@ onMounted(() => {
           <div class="card-content">
             <ul class="info-list">
               <li>
-                <span>Carrera</span
-                ><strong v-if="!editingCards.academic">{{
-                  profileData.carrera || "No definida"
-                }}</strong
-                ><select
-                  v-else
-                  v-model="profileData.carrera"
-                  class="edit-input"
-                >
-                  <option value="">Seleccionar carrera</option>
-                  <option v-for="c in carrerasOptions" :key="c" :value="c">
-                    {{ c }}
-                  </option>
-                </select>
+              <li>
+                <span>Carrera</span>
+                <strong v-if="!editingCards.academic">{{ profileData.carrera || "No definida" }}</strong>
+                
+                <div v-else class="flex flex-col gap-2 w-1/2"> <select
+                    v-model="profileData.carrera"
+                    class="edit-input !w-full" 
+                  >
+                    <option value="">Seleccionar carrera</option>
+                    <option v-for="c in carrerasOptions" :key="c" :value="c">{{ c }}</option>
+                    <option value="Otra">Otra (Especificar)</option> </select>
+
+                  <input 
+                    v-if="profileData.carrera === 'Otra'"
+                    v-model="profileData.otra_carrera"
+                    type="text"
+                    placeholder="Escribe tu carrera aquí..."
+                    class="edit-input !w-full mt-2"
+                  />
+                </div>
               </li>
+
               <li>
                 <span>Año Egreso</span
                 ><strong v-if="!editingCards.academic">{{
