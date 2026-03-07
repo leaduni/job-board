@@ -86,7 +86,14 @@ async function fetchProfile() {
     }
 
     profileData.anio_egreso = candidate.end_year ?? null;
-    profileData.carrera = candidate.carrera || "";
+    const rawCarrera = candidate.carrera || "";
+    if (rawCarrera && !CARRERAS_UNI.includes(rawCarrera)) {
+      profileData.carrera = "Otra";
+      profileData.otra_carrera = rawCarrera;
+    } else {
+      profileData.carrera = rawCarrera;
+      profileData.otra_carrera = "";
+    }
     profileData.sobre_mi = candidate.bio || "";
     profileData.linkedin_url = candidate.linkedin_url || "";
     profileData.github_url = candidate.github_url || "";
@@ -310,7 +317,10 @@ async function updateCandidate(cardKey) {
         return;
       }
       payload.end_year = anio;
-      payload.carrera = profileData.carrera?.trim() || null;
+      payload.carrera =
+        profileData.carrera === "Otra"
+          ? profileData.otra_carrera?.trim() || null
+          : profileData.carrera?.trim() || null;
     } else if (cardKey === "about") {
       payload.bio = profileData.sobre_mi;
     } else if (cardKey === "links") {
@@ -431,7 +441,13 @@ onMounted(() => {
             >
               {{ fullName }}
             </h1>
-            <p class="text-lg text-white/80">{{ profileData.carrera }}</p>
+            <p class="text-lg text-white/80">
+              {{
+                profileData.carrera === "Otra"
+                  ? profileData.otra_carrera
+                  : profileData.carrera
+              }}
+            </p>
           </div>
         </div>
 
@@ -592,19 +608,25 @@ onMounted(() => {
             <ul class="info-list">
               <li>
                 <span>Carrera</span>
-                <strong v-if="!editingCards.academic">{{ profileData.carrera || "No definida" }}</strong>
-                
-                <div v-else class="flex flex-col gap-2 w-1/2"> 
+                <strong v-if="!editingCards.academic">{{
+                  profileData.carrera === "Otra"
+                    ? profileData.otra_carrera || "No definida"
+                    : profileData.carrera || "No definida"
+                }}</strong>
+
+                <div v-else class="flex flex-col gap-2 w-1/2">
                   <select
                     v-model="profileData.carrera"
-                    class="edit-input !w-full" 
+                    class="edit-input !w-full"
                   >
                     <option value="">Seleccionar carrera</option>
-                    <option v-for="c in carrerasOptions" :key="c" :value="c">{{ c }}</option>
+                    <option v-for="c in carrerasOptions" :key="c" :value="c">
+                      {{ c }}
+                    </option>
                     <option value="Otra">Otra (Especificar)</option>
                   </select>
 
-                  <input 
+                  <input
                     v-if="profileData.carrera === 'Otra'"
                     v-model="profileData.otra_carrera"
                     type="text"
