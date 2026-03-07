@@ -109,7 +109,7 @@
             >Tienes esta skill</span
           >
           <span v-else class="ml-auto text-yellow-400/70 text-xs"
-            >Pendiente</span
+            >Por completar</span
           >
         </li>
       </ul>

@@ -591,17 +591,18 @@ onMounted(() => {
           <div class="card-content">
             <ul class="info-list">
               <li>
-              <li>
                 <span>Carrera</span>
                 <strong v-if="!editingCards.academic">{{ profileData.carrera || "No definida" }}</strong>
                 
-                <div v-else class="flex flex-col gap-2 w-1/2"> <select
+                <div v-else class="flex flex-col gap-2 w-1/2"> 
+                  <select
                     v-model="profileData.carrera"
                     class="edit-input !w-full" 
                   >
                     <option value="">Seleccionar carrera</option>
                     <option v-for="c in carrerasOptions" :key="c" :value="c">{{ c }}</option>
-                    <option value="Otra">Otra (Especificar)</option> </select>
+                    <option value="Otra">Otra (Especificar)</option>
+                  </select>
 
                   <input 
                     v-if="profileData.carrera === 'Otra'"
@@ -614,7 +615,7 @@ onMounted(() => {
               </li>
 
               <li>
-                <span>Año Egreso</span
+                <span>Año Egreso</span>
                 ><strong v-if="!editingCards.academic">{{
                   profileData.anio_egreso || "N/A"
                 }}</strong
