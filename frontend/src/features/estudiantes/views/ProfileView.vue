@@ -21,7 +21,7 @@ import {
 } from "@/services/skillsApi";
 
 const router = useRouter();
-const { logout } = useAuth();
+const { logout, isAuthenticated } = useAuth();
 
 // --- NOTIFICATION STATE ---
 const notification = reactive({
@@ -356,7 +356,6 @@ async function updateCandidate(cardKey) {
 // --- LOGOUT ---
 const handleLogout = () => {
   logout();
-  router.push("/auth/login");
 };
 
 // --- LOGIC (Existing editing logic) ---
@@ -402,6 +401,10 @@ const carrerasOptions = computed(() => {
 });
 
 onMounted(() => {
+  if (!isAuthenticated.value) {
+    router.replace("/");
+    return;
+  }
   fetchProfile();
   fetchMySkills();
 

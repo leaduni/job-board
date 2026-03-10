@@ -73,7 +73,13 @@ const authLink = computed(() => {
 })
 
 const goBack = () => {
-  router.back()
+  // Si llegamos a login por cerrar sesión, el historial puede tener /perfil.
+  // Ir a inicio evita que "Volver" nos regrese al perfil sin sesión.
+  if (route.path === '/auth/login' || route.path === '/auth/login/empresa') {
+    router.replace('/')
+  } else {
+    router.back()
+  }
 }
 
 function handleScroll() {

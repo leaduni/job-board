@@ -125,6 +125,8 @@ export function useAuth() {
 
   /**
    * Cierra la sesión
+   * Usa replace para que "Volver" desde login lleve a la página anterior al perfil,
+   * no de vuelta al perfil (donde el usuario ya no está logueado).
    */
   function logout() {
     user.value = null;
@@ -132,9 +134,7 @@ export function useAuth() {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
 
-    // Redirigir a login si es posible (si se llama desde componente)
-    // O dejar que la UI reaccione al cambio de estado
-    globalThis.location.href = "/auth/login";
+    globalThis.location.replace("/auth/login");
   }
 
   return {
