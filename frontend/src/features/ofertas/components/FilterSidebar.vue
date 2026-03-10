@@ -52,6 +52,26 @@
       </ul>
     </section>
     
+    <!-- Afinidad (solo si logueado y tiene skills) -->
+    <section v-if="showAffinity" class="py-4 border-b border-gray-800">
+      <h3 class="text-white font-bold text-sm tracking-wider mb-3 font-['League_Spartan',_sans-serif]">AFINIDAD CON TU PERFIL</h3>
+      <p class="text-gray-400 text-xs mb-3">Ofertas que coinciden con tus skills</p>
+      <ul class="space-y-2 mb-3">
+        <li v-for="opt in affinityOptions" :key="opt.value" class="flex items-center gap-3">
+          <label class="flex items-center gap-3 cursor-pointer group flex-1">
+            <input type="radio" :value="opt.value" v-model="selectedAffinity"
+              class="w-4 h-4 accent-[#a6249d] focus:ring-[#a6249d]" />
+            <span class="text-gray-300 group-hover:text-white transition-colors text-xs">{{ opt.label }}</span>
+          </label>
+        </li>
+      </ul>
+      <label class="flex items-center gap-3 cursor-pointer group">
+        <input type="checkbox" v-model="sortByAffinity"
+          class="w-4 h-4 accent-[#a6249d] rounded" />
+        <span class="text-gray-300 group-hover:text-white transition-colors text-xs">Ordenar por afinidad (mayor primero)</span>
+      </label>
+    </section>
+
     <!-- Nivel de Experiencia -->
     <section class="py-4">
       <h3 class="text-white font-bold text-sm tracking-wider mb-3 font-['League_Spartan',_sans-serif]">NIVEL DE EXPERIENCIA</h3>
@@ -89,6 +109,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  showAffinity: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(['filter-change', 'close']);
@@ -118,12 +142,23 @@ const nivelesExperiencia = [
 const selectedModalidades = ref([]);
 const selectedTiposContrato = ref([]);
 const selectedNivelesExperiencia = ref([]);
+const selectedAffinity = ref('');
+const sortByAffinity = ref(false);
 
+const affinityOptions = [
+  { label: 'Todas', value: '' },
+  { label: 'Al menos 1 skill', value: '1' },
+  { label: 'Al menos 2 skills', value: '2' },
+  { label: 'Al menos 3 skills', value: '3' },
+  { label: 'Todas las skills', value: 'all' },
+];
 
 const clearAllFilters = () => {
   selectedModalidades.value = [];
   selectedTiposContrato.value = [];
   selectedNivelesExperiencia.value = [];
+  selectedAffinity.value = '';
+  sortByAffinity.value = false;
 };
 
 onMounted(() => {
@@ -131,13 +166,17 @@ onMounted(() => {
   if (init.modalidades?.length) selectedModalidades.value = [...init.modalidades];
   if (init.tiposContrato?.length) selectedTiposContrato.value = [...init.tiposContrato];
   if (init.nivelesExperiencia?.length) selectedNivelesExperiencia.value = [...init.nivelesExperiencia];
+  if (init.affinityMin != null) selectedAffinity.value = init.affinityMin;
+  if (init.sortByAffinity != null) sortByAffinity.value = init.sortByAffinity;
 });
 
-watch([selectedModalidades, selectedTiposContrato, selectedNivelesExperiencia], () => {
+watch([selectedModalidades, selectedTiposContrato, selectedNivelesExperiencia, selectedAffinity, sortByAffinity], () => {
   emit('filter-change', {
     modalidades: selectedModalidades.value,
     tiposContrato: selectedTiposContrato.value,
     nivelesExperiencia: selectedNivelesExperiencia.value,
+    affinityMin: selectedAffinity.value,
+    sortByAffinity: sortByAffinity.value,
   });
 }, { deep: true });
 </script>

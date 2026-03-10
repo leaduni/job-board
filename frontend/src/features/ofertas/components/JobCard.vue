@@ -36,8 +36,15 @@
       >
     </div>
 
-    <!-- Tags: modalidad y nivel_experiencia al costado, mismo color y alineados -->
+    <!-- Tags: afinidad, modalidad y nivel_experiencia -->
     <div class="flex gap-1.5 sm:gap-2 flex-wrap items-center">
+      <span
+        v-if="affinity && affinity.total > 0"
+        class="inline-flex items-center justify-center px-2 sm:px-[10px] py-1 sm:py-[4px] rounded-full bg-[#a6249d]/20 border border-[#a6249d]/40 text-[#ff6ec7] text-[10px] sm:text-[11px] whitespace-nowrap leading-none font-medium"
+        :title="`${affinity.matched}/${affinity.total} skills coincidentes`"
+      >
+        {{ affinity.matched }}/{{ affinity.total }} skills
+      </span>
       <span
         v-if="oferta.modalidad"
         class="inline-flex items-center justify-center px-2 sm:px-[10px] py-1 sm:py-[4px] rounded-full bg-white/5 border border-white/10 text-white/60 text-[10px] sm:text-[11px] whitespace-nowrap leading-none"
@@ -93,6 +100,10 @@ const props = defineProps({
   oferta: {
     type: Object,
     required: true,
+  },
+  affinity: {
+    type: Object,
+    default: null,
   },
   requireAuth: {
     type: Boolean,

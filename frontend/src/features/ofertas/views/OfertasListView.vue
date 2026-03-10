@@ -165,7 +165,10 @@
               modalidades: filters.modalidades,
               tiposContrato: filters.tiposContrato,
               nivelesExperiencia: filters.nivelesExperiencia,
+              affinityMin: filters.affinityMin,
+              sortByAffinity: filters.sortByAffinity,
             }"
+            :show-affinity="showAffinitySection"
             :show-close="showFiltersMobile"
             @filter-change="handleSidebarFilter"
             @close="showFiltersMobile = false"
@@ -235,6 +238,7 @@
               v-for="oferta in ofertas"
               :key="oferta.id"
               :oferta="oferta"
+              :affinity="getAffinityForOffer(oferta)"
               :require-auth="!isAuthenticated"
               @auth-required="showLoginModal = true"
             />
@@ -268,6 +272,8 @@ import { ref, onMounted, computed, watch, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { listarOfertas } from "../services/ofertas.service";
 import { useAuth } from "@/composables/useAuth";
+import { getMySkills } from "@/services/skillsApi";
+import { filterByAffinity, sortByAffinity, computeAffinity } from "@/composables/useAffinity";
 
 import JobCard from "../components/JobCard.vue";
 import FilterSidebar from "../components/FilterSidebar.vue";
@@ -281,6 +287,7 @@ const { isAuthenticated } = useAuth();
 
 // Estado
 const ofertas = ref([]);
+const mySkills = ref([]);
 const loading = ref(true);
 const showLoginModal = ref(false);
 
@@ -330,6 +337,8 @@ const filters = ref({
   modalidades: [],
   tiposContrato: initialFromUrl.tiposContrato,
   nivelesExperiencia: [],
+  affinityMin: "",
+  sortByAffinity: false,
 });
 
 // Helpers para texto "Mostrando X-Y de Z"
@@ -345,13 +354,25 @@ const endItem = computed(() =>
 
 // Drawer de filtros en móvil
 const showFiltersMobile = ref(false);
+const showAffinitySection = computed(
+  () => isAuthenticated.value && mySkills.value.length > 0,
+);
+
+const hasAffinityActive = computed(
+  () =>
+    showAffinitySection.value &&
+    (filters.value.affinityMin || filters.value.sortByAffinity),
+);
+
 const filterCount = computed(() => {
   const f = filters.value;
-  return (
+  let count =
     (f.modalidades?.length || 0) +
     (f.tiposContrato?.length || 0) +
-    (f.nivelesExperiencia?.length || 0)
-  );
+    (f.nivelesExperiencia?.length || 0);
+  if (f.affinityMin) count += 1;
+  if (f.sortByAffinity) count += 1;
+  return count;
 });
 
 // Debounce para búsqueda
@@ -380,6 +401,8 @@ const handleSidebarFilter = (newFilters) => {
   filters.value.modalidades = newFilters.modalidades;
   filters.value.tiposContrato = newFilters.tiposContrato;
   filters.value.nivelesExperiencia = newFilters.nivelesExperiencia;
+  filters.value.affinityMin = newFilters.affinityMin || "";
+  filters.value.sortByAffinity = newFilters.sortByAffinity || false;
 
   pagination.value.page = 1; // Reset página al filtrar
   fetchOfertas();
@@ -394,60 +417,71 @@ const changePage = (newPage) => {
 };
 
 // Lógica principal de fetch
+const AFFINITY_BATCH_SIZE = 150;
+
 async function fetchOfertas() {
   loading.value = true;
   try {
     const params = {
-      limit: pagination.value.limit,
-      page: pagination.value.page,
+      limit: hasAffinityActive.value ? AFFINITY_BATCH_SIZE : pagination.value.limit,
+      page: hasAffinityActive.value ? 1 : pagination.value.page,
       sort: filters.value.sort,
     };
 
     // Construcción de query params para Payload CMS (MongoDB syntax)
-
-    // 1. Búsqueda por título
     if (filters.value.search) {
       params["where[titulo][like]"] = filters.value.search;
     }
-
-    // 2. Filtros OR (Payload 'in' operator)
     if (filters.value.modalidades.length > 0) {
-      // where[modalidad][in][0]=remoto&where[modalidad][in][1]=hibrido
       filters.value.modalidades.forEach((val, index) => {
         params[`where[modalidad][in][${index}]`] = val;
       });
     }
-
     if (filters.value.tiposContrato.length > 0) {
       filters.value.tiposContrato.forEach((val, index) => {
         params[`where[tipo_contrato][in][${index}]`] = val;
       });
     }
-
     if (filters.value.nivelesExperiencia.length > 0) {
       filters.value.nivelesExperiencia.forEach((val, index) => {
         params[`where[nivel_experiencia][in][${index}]`] = val;
       });
     }
 
-    // Solo ofertas activas (Opcional, pero recomendado)
-    // params['where[estado][equals]'] = 'activa'
-
     const data = await listarOfertas(params);
+    let docs = data.docs || (Array.isArray(data) ? data : []);
 
-    if (data.docs) {
-      ofertas.value = data.docs;
+    if (hasAffinityActive.value && docs.length > 0) {
+      let filtered = filterByAffinity(docs, mySkills.value, filters.value.affinityMin);
+      if (filters.value.sortByAffinity) {
+        filtered = sortByAffinity(filtered, mySkills.value);
+      }
+      const limit = pagination.value.limit;
+      const totalDocs = filtered.length;
+      const totalPages = Math.max(1, Math.ceil(totalDocs / limit));
+      const page = Math.min(pagination.value.page, totalPages) || 1;
+      const start = (page - 1) * limit;
+      ofertas.value = filtered.slice(start, start + limit);
       pagination.value = {
-        page: data.page,
-        limit: data.limit,
-        totalPages: data.totalPages,
-        totalDocs: data.totalDocs,
-        hasPrevPage: data.hasPrevPage,
-        hasNextPage: data.hasNextPage,
+        page,
+        limit,
+        totalPages,
+        totalDocs,
+        hasPrevPage: page > 1,
+        hasNextPage: page < totalPages,
       };
     } else {
-      // Fallback si la respuesta no es paginada
-      ofertas.value = Array.isArray(data) ? data : [];
+      ofertas.value = docs;
+      if (data.docs) {
+        pagination.value = {
+          page: data.page,
+          limit: data.limit,
+          totalPages: data.totalPages,
+          totalDocs: data.totalDocs,
+          hasPrevPage: data.hasPrevPage,
+          hasNextPage: data.hasNextPage,
+        };
+      }
     }
   } catch (error) {
     console.error("Error fetching ofertas:", error);
@@ -470,9 +504,47 @@ onUnmounted(() => {
   document.body.style.overflow = "";
 });
 
+function getAffinityForOffer(oferta) {
+  if (!showAffinitySection.value) return null;
+  const { matched, total } = computeAffinity(oferta, mySkills.value);
+  if (total === 0) return null;
+  return { matched, total };
+}
+
+async function loadMySkills() {
+  if (!isAuthenticated.value) {
+    mySkills.value = [];
+    return;
+  }
+  try {
+    mySkills.value = await getMySkills();
+  } catch (err) {
+    console.error("Error fetching user skills:", err);
+    mySkills.value = [];
+  }
+}
+
+watch(isAuthenticated, () => loadMySkills());
+
+// Si mySkills carga después de que el usuario activó filtro afinidad, refetch
+watch(
+  () => mySkills.value.length,
+  (newLen, oldLen) => {
+    if (
+      oldLen === 0 &&
+      newLen > 0 &&
+      (filters.value.affinityMin || filters.value.sortByAffinity)
+    ) {
+      pagination.value.page = 1;
+      fetchOfertas();
+    }
+  },
+);
+
 // Inicialización
 onMounted(() => {
   window.scrollTo(0, 0);
+  loadMySkills();
   fetchOfertas();
 });
 </script>

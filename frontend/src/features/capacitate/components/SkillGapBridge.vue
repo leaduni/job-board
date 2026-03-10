@@ -141,9 +141,22 @@
               requerido{{ missingSkills.length > 1 ? "s" : "" }}
             </p>
             <p class="text-yellow-200/70 text-xs mb-3">
-              Agrega tus skills en tu perfil para mejorar tu compatibilidad con
-              las ofertas.
+              Agrega tus skills en tu perfil o aprende las que te faltan.
             </p>
+            <div class="flex flex-wrap gap-2 mb-2">
+              <router-link
+                v-for="skill in missingSkills"
+                :key="skill.name"
+                :to="getCapacitateUrl(skill.name)"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#a6249d]/30 border border-[#a6249d]/50 text-white text-xs font-semibold hover:bg-[#a6249d]/50 transition-colors"
+              >
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                Aprende {{ skill.name }} ahora
+              </router-link>
+            </div>
             <router-link
               to="/perfil"
               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-yellow-500/20 border border-yellow-500/30 text-yellow-200 text-xs font-semibold hover:bg-yellow-500/30 transition-colors"
@@ -278,6 +291,11 @@ async function fetchMySkills() {
   } finally {
     loading.value = false;
   }
+}
+
+function getCapacitateUrl(skillName) {
+  const q = encodeURIComponent(skillName.trim());
+  return `/capacitate?search=${q}`;
 }
 
 onMounted(() => {

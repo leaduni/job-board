@@ -3,7 +3,10 @@ import CourseCard from '@/features/capacitate/components/CourseCard.vue';
 import CapacitateFilterSidebar from '@/features/capacitate/components/CapacitateFilterSidebar.vue';
 import SearchBar from '@/features/ofertas/components/SearchBar.vue';
 import { ref, onMounted, watch, computed, onUnmounted } from 'vue';
+import { useRoute } from 'vue-router';
 import { cmsApi } from '@/services/cmsApi';
+
+const route = useRoute();
 
 // Estado
 const courses = ref([]);
@@ -140,7 +143,13 @@ watch(showFiltersMobile, (open) => {
 });
 onUnmounted(() => { document.body.style.overflow = ''; });
 
-onMounted(() => fetchCourses());
+onMounted(() => {
+  const search = route.query.search;
+  if (search && typeof search === 'string') {
+    filters.value.search = search.trim();
+  }
+  fetchCourses();
+});
 
 const nextPage = () => { if (pagination.value.hasNextPage) fetchCourses(pagination.value.page + 1); };
 const prevPage = () => { if (pagination.value.hasPrevPage) fetchCourses(pagination.value.page - 1); };
