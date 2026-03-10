@@ -28,7 +28,7 @@
       <div class="bg-white/[0.03] rounded-xl p-[18px] border border-white/5">
         <h3 class="text-[15px] sm:text-base text-[#ff6ec7] mb-[12px] font-bold tracking-wide">Carreras Afines</h3>
 
-        <div class="text-[rgba(255,255,255,0.88)] text-[14px] sm:text-[15px] leading-[1.75]" v-if="carrerasTexto">
+        <div class="text-[rgba(255,255,255,0.88)] text-[14px] sm:text-[15px] leading-[1.75] whitespace-pre-line" v-if="carrerasTexto">
           {{ carrerasTexto }}
         </div>
 
@@ -59,6 +59,29 @@ function extractTextFromRichText(richText) {
   }).join('\n\n');
 }
 
+// Requisitos: separa por punto seguido de mayúscula (nueva oración) o por párrafos.
+// NO separa por comas, ya que se usan dentro de un mismo requisito (ej: "7mo, 8vo o 9no ciclo").
+function formatRequisitosWithHyphens(text) {
+  if (!text || typeof text !== 'string') return '';
+  const items = text
+    .split(/(?:\.\s*(?=[A-ZÁÉÍÓÚ])|\n\n+)/)
+    .map(s => s.trim().replace(/\.$/, ''))
+    .filter(Boolean);
+  if (items.length === 0) return '';
+  return items.map(item => `- ${item}`).join('\n');
+}
+
+// Carreras: separa por comas, cada carrera es un ítem distinto
+function formatCarrerasWithHyphens(text) {
+  if (!text || typeof text !== 'string') return '';
+  const items = text
+    .split(/[,;\n]+/)
+    .map(s => s.trim())
+    .filter(Boolean);
+  if (items.length === 0) return '';
+  return items.map(item => `- ${item}`).join('\n');
+}
+
 // Extrae texto de la descripción
 const descripcionTexto = computed(() => {
   if (typeof props.oferta?.descripcion === 'string') {
@@ -67,17 +90,20 @@ const descripcionTexto = computed(() => {
   return extractTextFromRichText(props.oferta?.descripcion) || 'Sin descripción disponible.';
 });
 
-// Requisitos raw
+// Requisitos formateados con guiones para mejor legibilidad
 const requisitosTexto = computed(() => {
+  let raw = '';
   if (typeof props.oferta?.requisitos === 'string') {
-    return props.oferta.requisitos;
+    raw = props.oferta.requisitos;
+  } else {
+    raw = extractTextFromRichText(props.oferta?.requisitos) || '';
   }
-  return extractTextFromRichText(props.oferta?.requisitos);
+  return formatRequisitosWithHyphens(raw);
 });
 
-// Carreras (en API viene como string simple "carreras_afines")
+// Carreras afines formateadas con guiones para mejor legibilidad
 const carrerasTexto = computed(() => {
-  return props.oferta?.carreras_afines || '';
+  return formatCarrerasWithHyphens(props.oferta?.carreras_afines || '');
 });
 
 </script>

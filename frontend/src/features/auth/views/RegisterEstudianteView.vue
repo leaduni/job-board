@@ -75,7 +75,7 @@
               v-model="form.nombres"
               type="text"
               required
-              class="input-field"
+              class="input-field pl-4"
               placeholder="Ej. Juan"
             />
           </div>
@@ -90,7 +90,7 @@
               v-model="form.apellidos"
               type="text"
               required
-              class="input-field"
+              class="input-field pl-4"
               placeholder="Ej. Pérez"
             />
           </div>
