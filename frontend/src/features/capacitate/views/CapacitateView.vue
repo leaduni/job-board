@@ -144,6 +144,7 @@ watch(showFiltersMobile, (open) => {
 onUnmounted(() => { document.body.style.overflow = ''; });
 
 onMounted(() => {
+  window.scrollTo(0, 0);
   const search = route.query.search;
   if (search && typeof search === 'string') {
     filters.value.search = search.trim();

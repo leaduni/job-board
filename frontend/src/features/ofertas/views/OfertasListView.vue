@@ -63,6 +63,13 @@
                   <option value="-titulo" class="bg-[#0a0a14] text-white">
                     Z → A
                   </option>
+                  <option
+                    v-if="showAffinitySection"
+                    value="affinity"
+                    class="bg-[#0a0a14] text-white"
+                  >
+                    Por afinidad
+                  </option>
                 </select>
                 <div
                   class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400"
@@ -166,7 +173,6 @@
               tiposContrato: filters.tiposContrato,
               nivelesExperiencia: filters.nivelesExperiencia,
               affinityMin: filters.affinityMin,
-              sortByAffinity: filters.sortByAffinity,
             }"
             :show-affinity="showAffinitySection"
             :show-close="showFiltersMobile"
@@ -338,7 +344,6 @@ const filters = ref({
   tiposContrato: initialFromUrl.tiposContrato,
   nivelesExperiencia: [],
   affinityMin: "",
-  sortByAffinity: false,
 });
 
 // Helpers para texto "Mostrando X-Y de Z"
@@ -361,7 +366,7 @@ const showAffinitySection = computed(
 const hasAffinityActive = computed(
   () =>
     showAffinitySection.value &&
-    (filters.value.affinityMin || filters.value.sortByAffinity),
+    (filters.value.affinityMin || filters.value.sort === "affinity"),
 );
 
 const filterCount = computed(() => {
@@ -371,7 +376,7 @@ const filterCount = computed(() => {
     (f.tiposContrato?.length || 0) +
     (f.nivelesExperiencia?.length || 0);
   if (f.affinityMin) count += 1;
-  if (f.sortByAffinity) count += 1;
+  if (f.sort === "affinity") count += 1;
   return count;
 });
 
@@ -402,7 +407,6 @@ const handleSidebarFilter = (newFilters) => {
   filters.value.tiposContrato = newFilters.tiposContrato;
   filters.value.nivelesExperiencia = newFilters.nivelesExperiencia;
   filters.value.affinityMin = newFilters.affinityMin || "";
-  filters.value.sortByAffinity = newFilters.sortByAffinity || false;
 
   pagination.value.page = 1; // Reset página al filtrar
   fetchOfertas();
@@ -422,10 +426,11 @@ const AFFINITY_BATCH_SIZE = 150;
 async function fetchOfertas() {
   loading.value = true;
   try {
+    const sortForApi = filters.value.sort === "affinity" ? "-createdAt" : filters.value.sort;
     const params = {
       limit: hasAffinityActive.value ? AFFINITY_BATCH_SIZE : pagination.value.limit,
       page: hasAffinityActive.value ? 1 : pagination.value.page,
-      sort: filters.value.sort,
+      sort: sortForApi,
     };
 
     // Construcción de query params para Payload CMS (MongoDB syntax)
@@ -453,7 +458,7 @@ async function fetchOfertas() {
 
     if (hasAffinityActive.value && docs.length > 0) {
       let filtered = filterByAffinity(docs, mySkills.value, filters.value.affinityMin);
-      if (filters.value.sortByAffinity) {
+      if (filters.value.sort === "affinity") {
         filtered = sortByAffinity(filtered, mySkills.value);
       }
       const limit = pagination.value.limit;
@@ -533,7 +538,7 @@ watch(
     if (
       oldLen === 0 &&
       newLen > 0 &&
-      (filters.value.affinityMin || filters.value.sortByAffinity)
+      (filters.value.affinityMin || filters.value.sort === "affinity")
     ) {
       pagination.value.page = 1;
       fetchOfertas();
