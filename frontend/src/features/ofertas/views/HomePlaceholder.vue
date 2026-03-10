@@ -175,45 +175,14 @@
 
         <div
           v-else
-          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-7"
         >
-          <div
+          <JobCard
             v-for="job in featuredJobs"
             :key="job.id"
-            class="flex flex-col bg-[#1A0B2E]/90 backdrop-blur-lg rounded-2xl border border-[#a6249d]/30 hover:border-[#a6249d]/50 shadow-lg transition-all duration-300 p-6 group cursor-pointer"
-            @click="$router.push(`/ofertas/${job.id}`)"
-          >
-            <div class="flex items-start justify-between mb-4">
-              <div
-                class="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center text-white/80 font-bold text-xl uppercase"
-              >
-                {{ job.company?.nombre_comercial?.[0] || "E" }}
-              </div>
-              <span
-                class="inline-flex items-center rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-medium text-emerald-400 border border-emerald-500/30 capitalize"
-              >
-                {{ job.modalidad }}
-              </span>
-            </div>
-            <h3
-              class="text-lg font-bold text-white mb-1 line-clamp-2 min-h-[56px] group-hover:text-[#ff6ec7] transition-colors"
-              :title="job.titulo"
-            >
-              {{ job.titulo }}
-            </h3>
-            <p class="text-sm text-white/60 mb-4 truncate">
-              {{ job.company?.nombre_comercial || "Empresa Confidencial" }}
-            </p>
-
-            <div
-              class="mt-auto pt-4 border-t border-white/10 flex items-center justify-between"
-            >
-              <span class="text-sm font-medium text-white/90 capitalize">{{
-                job.tipo_contrato?.replace(/_/g, " ")
-              }}</span>
-              <span class="text-xs text-[#ff6ec7]">Reciente</span>
-            </div>
-          </div>
+            :oferta="job"
+            :require-auth="false"
+          />
         </div>
 
         <div class="mt-10 text-center md:hidden">
@@ -332,6 +301,7 @@
 import { ref, onMounted, h } from "vue";
 import { useRouter } from "vue-router";
 import { listarOfertas } from "@/features/ofertas/services/ofertas.service";
+import JobCard from "@/features/ofertas/components/JobCard.vue";
 
 const router = useRouter();
 const loading = ref(true);
@@ -422,10 +392,11 @@ const categories = [
 
 onMounted(async () => {
   try {
-    // Obtener las 3 ofertas más recientes
+    // Obtener las 3 ofertas más recientes (depth 2 para company + logo)
     const data = await listarOfertas({
       limit: 3,
       sort: "-createdAt",
+      depth: 2,
     });
 
     // Mapear respuesta si viene paginada o directa
